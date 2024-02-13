@@ -1,23 +1,26 @@
 import React from 'react'
-import { useMap } from 'react-leaflet'
-
+import { useState } from 'react'
+import { useMap} from 'react-leaflet'
 import { Stakeholder } from 'types'
 import ExternalLinkSvg from 'assets/external_link.svg'
 
 interface InfoPanelControlProps {
   stakeholder: Stakeholder | null
   onClose: () => void
+  onClick: (e:React.MouseEvent<HTMLDivElement>) => void
 }
 
-const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClose }) => {
+const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClose, onClick }) => {
   const map = useMap()
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
+    map.dragging.disable()
   }
 
   const enableZoom = () => {
     map.scrollWheelZoom.enable()
+    map.dragging.enable()
   }
 
   const extractDriveFileId = (link: string): string | null => {
@@ -26,18 +29,27 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
   }
 
   const driveFileId = stakeholder?.logo ? extractDriveFileId(stakeholder.logo) : null
-
+  if(window.innerWidth < 1280 && stakeholder){
+    map.dragging.disable();
+  }
+  const newClose = function(){
+    if(window.innerWidth < 1280){
+      map.dragging.enable();
+    }
+    onClose();
+  }
   return (
     <div
+      key={"overlay"}
       className={`${
-        stakeholder ? 'w-[400px]' : 'w-0'
+        stakeholder ? 'w-[100%] xl:w-[400px]' : 'w-0'
       } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-white bg-opacity-80 !font-metropolis shadow-md transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
     >
       {stakeholder && (
         <>
-          <span className="absolute w-4 h-4 text-2xl leading-4 text-center transition ease-in-out delay-75 cursor-pointer right-6 top-6 text-black-900 hover:scale-125" onClick={onClose}>
+          <span className="absolute w-4 h-4 text-2xl leading-4 text-center transition ease-in-out delay-75 cursor-pointer right-6 top-6 text-black-900 hover:scale-125" onClick={newClose}>
             &times;
           </span>
 

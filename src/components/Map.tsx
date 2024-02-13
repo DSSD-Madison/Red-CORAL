@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react'
-import { MapContainer, TileLayer } from 'react-leaflet'
+import React, { useState, useRef, useEffect } from 'react'
+import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import { Stakeholder } from 'types'
 import StakeholderLayer from 'components/layers/StakeholderLayer'
 import SearchControl from 'components/controls/SearchControl'
@@ -7,7 +7,7 @@ import InfoPanelControl from 'components/controls/InfoPanelControl'
 import ZoomControl from 'components/controls/ZoomControl'
 import TagControl from './controls/TagControl'
 import LegendControl from './controls/LegendControl'
-import { LatLngBoundsLiteral } from 'leaflet'
+import { LatLngBoundsLiteral} from 'leaflet'
 
 interface MapProps {
   apiKey: string
@@ -23,7 +23,14 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
   ]
   const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(null)
   const markersLayer = useRef(null)
+  const draggable = useRef(null);
+  const handleTierGaterClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    console.log(draggable.current);
+    e.stopPropagation();
+    e.preventDefault();
+  };
 
+  
   return (
     <MapContainer className="w-full h-full" center={[20, 0]} zoom={3} minZoom={3} scrollWheelZoom={true} zoomControl={false} maxBounds={maxBounds}>
       <TileLayer
@@ -39,7 +46,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
       />
       <LegendControl selectedStakeholder={selectedStakeholder} />
 
-      <InfoPanelControl stakeholder={selectedStakeholder} onClose={() => setSelectedStakeholder(null)} />
+      <InfoPanelControl stakeholder={selectedStakeholder} onClick={handleTierGaterClick} onClose={() => setSelectedStakeholder(null)}/>
 
       <SearchControl layerRef={markersLayer} />
       <TagControl stakeholders={stakeholders} layerRef={markersLayer} />

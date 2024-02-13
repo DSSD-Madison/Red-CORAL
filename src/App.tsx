@@ -34,8 +34,10 @@ const App: React.FC = () => {
 
   return (
     <div className="relative h-full">
-      <div className=" header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-5">
-        <img src="att-logo.png" alt="Harvard Logo" className="h-20 drop-shadow invert filter" />
+          {/* <div className=" header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-5"> */}
+
+      <div className=" header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
+        <img src="att-logo.png" alt="Harvard Logo" className="max-w-[40%] h-20 drop-shadow invert filter object-scale-down" />
       </div>
 
       <Map apiKey={stadiaAPIKey} stakeholders={stakeholders} />
