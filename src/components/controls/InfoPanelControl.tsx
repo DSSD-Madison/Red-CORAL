@@ -28,28 +28,28 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
   }
 
   const driveFileId = stakeholder?.logo ? extractDriveFileId(stakeholder.logo) : null
-  if(window.innerWidth < 1280 && stakeholder){
-    map.dragging.disable();
+  if (window.innerWidth < 1280 && stakeholder) {
+    map.dragging.disable()
   }
-  const newClose = function(){
-    if(window.innerWidth < 1280){
-      map.dragging.enable();
+  const newClose = function () {
+    if (window.innerWidth < 1280) {
+      map.dragging.enable()
     }
-    onClose();
+    onClose()
   }
   return (
     <div
-      key={"overlay"}
+      key={'overlay'}
       className={`${
         stakeholder ? 'w-[100%] xl:w-[400px]' : 'w-0'
-      } duration-400 !font-proxima-nova bg-tint-02 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-opacity-80 shadow-md transition-all duration-100`}
+      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-tint-02 bg-opacity-80 !font-proxima-nova shadow-md transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
     >
       {stakeholder && (
         <>
           <span
-            className="text-shade-01 absolute right-6 top-6 h-4 w-4 cursor-pointer text-center text-2xl font-extrabold leading-4 transition delay-75 ease-in-out hover:scale-125"
+            className="absolute right-6 top-6 h-4 w-4 cursor-pointer text-center text-2xl font-extrabold leading-4 text-shade-01 transition delay-75 ease-in-out hover:scale-125"
             onClick={newClose}
           >
             &times;
@@ -62,7 +62,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
                   href={stakeholder.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="!text-shade-02 from-shade-01 to-shade-02 bg-gradient-to-r bg-[length:0_0.1em] bg-[position:0_100%] bg-no-repeat text-2xl font-bold transition-all duration-150 hover:bg-[length:100%_0.1em]"
+                  className="bg-gradient-to-r from-shade-01 to-shade-02 bg-[length:0_0.1em] bg-[position:0_100%] bg-no-repeat text-2xl font-bold !text-shade-02 transition-all duration-150 hover:bg-[length:100%_0.1em]"
                 >
                   {stakeholder.name}
                 </a>
@@ -79,49 +79,48 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
               />
             )}
             <div className="font-merriweather ">
-              <div className="text-shade-01 mb-6 text-sm">{stakeholder.description}</div>
-              <div className="text-shade-01 mb-4 font-bold">
+              <div className="mb-6 text-sm text-shade-01">{stakeholder.description}</div>
+              <div className="mb-4 font-bold text-shade-01">
                 <span className="font-proxima-nova">HEADQUARTERS:</span> <span className="text-sm font-normal">{stakeholder.headquarter}</span>
               </div>
               <div className="mb-4">
-                <span className="font-proxima-nova text-shade-01 font-bold">LOCATIONS SERVED:</span>
+                <span className="font-proxima-nova font-bold text-shade-01">LOCATIONS SERVED:</span>
                 <div className="ml-2 mt-2">
                   {stakeholder.locationsServed?.map((location) => (
                     <span
                       key={location}
-                      className="font-proxima-nova text-shade-02 bg-tint-01 mb-2 mr-2 inline-block rounded-full px-3 py-1 font-semibold"
+                      className="mb-2 mr-2 inline-block rounded-full bg-tint-01 px-3 py-1 font-proxima-nova font-semibold text-shade-02"
                     >
                       {location}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="text-shade-01 mb-4 font-bold">
+              <div className="mb-4 font-bold text-shade-01">
                 <span className="font-proxima-nova">CONTACT:</span> <span className="text-sm font-normal">{stakeholder.contact}</span>
               </div>
               <div className="mb-4">
-                <span className="font-proxima-nova text-shade-01 font-bold">TAGS:</span>
+                <span className="font-proxima-nova font-bold text-shade-01">TAGS:</span>
                 <div className="ml-2 mt-2">
                   {stakeholder.tags?.map((tag) => (
                     <span
                       key={tag}
-                      className="text-shade-02 font-proxima-nova bg-tint-01 mb-2 mr-2 inline-block rounded-full px-3 py-1 font-semibold"
+                      className="mb-2 mr-2 inline-block rounded-full bg-tint-01 px-3 py-1 font-proxima-nova font-semibold text-shade-02"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="mb-4  md:hidden">
+              <div className="mb-4 md:hidden">
                 <div className="ml-2 mt-2">
-                      <LegendControl selectedStakeholder={stakeholder}/>
+                  <LegendControl selectedStakeholder={stakeholder} />
                 </div>
               </div>
             </div>
           </div>
         </>
       )}
-
     </div>
   )
 }
