@@ -39,7 +39,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
         showLocationsServedMarkers={false}
       />
       <div className="hidden md:block">
-      <LegendControl selectedStakeholder={selectedStakeholder} />
+        <LegendControl selectedStakeholder={selectedStakeholder} />
       </div>
       <InfoPanelControl stakeholder={selectedStakeholder}  onClose={() => setSelectedStakeholder(null)}/>
 
