@@ -39,8 +39,9 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
         ref={markersLayer}
         showLocationsServedMarkers={false}
       />
+      <div className="hidden md:block">
       <LegendControl selectedStakeholder={selectedStakeholder} />
-
+      </div>
       <InfoPanelControl stakeholder={selectedStakeholder}  onClose={() => setSelectedStakeholder(null)}/>
 
       <SearchControl layerRef={markersLayer} />

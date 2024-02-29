@@ -1,6 +1,7 @@
-import L from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
+
 import Control from 'react-leaflet-custom-control'
+import L from 'leaflet'
 import { Stakeholder } from 'types'
 
 interface TagControlProps {
@@ -70,9 +71,9 @@ const TagControl: React.FC<TagControlProps> = ({ layerRef, stakeholders }) => {
 
   return (
     <Control prepend position="topleft">
-      <div className="leaflet-bar relative rounded font-metropolis">
+      <div className="leaflet-bar font-proxima-nova relative rounded">
         <a
-          className="leaflet-control-zoom-in rounded pt-[2px]"
+          className="leaflet-control-zoom-in rounded"
           title={'Tags'}
           role="button"
           onClick={(e) => {
@@ -86,7 +87,7 @@ const TagControl: React.FC<TagControlProps> = ({ layerRef, stakeholders }) => {
         {isDropdownVisible && (
           <div
             ref={dropdownRef}
-            className="absolute left-10 top-0 box-border w-40 rounded border-2 border-black- border-opacity-40 bg-white bg-opacity-90"
+            className="border-shade-01 absolute left-10 top-0 box-border w-40 rounded border-2 border-opacity-40 bg-white bg-opacity-90"
           >
             <div className="flex flex-row justify-between">
               <div className="text-md m-1 font-semibold">Tags</div>
@@ -107,7 +108,7 @@ const TagControl: React.FC<TagControlProps> = ({ layerRef, stakeholders }) => {
             <div className="h-64 overflow-y-auto">
               {tags.map((tag, idx) => (
                 <div key={tag}>
-                  <label className="flex items-center px-1 py-1 hover:bg-black-100">
+                  <label className="hover:bg-tint-02 flex items-center px-1 py-1">
                     <input
                       type="checkbox"
                       value={tag}
@@ -118,7 +119,7 @@ const TagControl: React.FC<TagControlProps> = ({ layerRef, stakeholders }) => {
                     {tag}
                   </label>
                   {/* Render separator below all except for last */}
-                  {idx !== tags.length - 1 && <hr />}
+                  {idx !== tags.length - 1 && <hr className="text-tint-01" />}
                 </div>
               ))}
             </div>
