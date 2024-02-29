@@ -23,7 +23,6 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
   ]
   const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(null)
   const markersLayer = useRef(null)
- 
 
   
   return (
