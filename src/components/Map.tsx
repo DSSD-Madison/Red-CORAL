@@ -24,7 +24,6 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
   const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(null)
   const markersLayer = useRef(null)
 
-  
   return (
     <MapContainer className="w-full h-full" center={[20, 0]} zoom={3} minZoom={3} scrollWheelZoom={true} zoomControl={false} maxBounds={maxBounds}>
       <TileLayer
