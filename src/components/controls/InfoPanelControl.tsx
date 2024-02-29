@@ -83,35 +83,41 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
               <div className="mb-4 font-bold text-shade-01">
                 <span className="font-proxima-nova">HEADQUARTERS:</span> <span className="text-sm font-normal">{stakeholder.headquarter}</span>
               </div>
-              <div className="mb-4">
-                <span className="font-proxima-nova font-bold text-shade-01">LOCATIONS SERVED:</span>
-                <div className="ml-2 mt-2">
-                  {stakeholder.locationsServed?.map((location) => (
-                    <span
-                      key={location}
-                      className="mb-2 mr-2 inline-block rounded-full bg-tint-01 px-3 py-1 font-proxima-nova font-semibold text-shade-02"
-                    >
-                      {location}
-                    </span>
-                  ))}
+              {stakeholder.locationsServed && stakeholder.locationsServed.length > 0 && (
+                <div className="mb-4">
+                  <span className="font-proxima-nova font-bold text-shade-01">LOCATIONS SERVED:</span>
+                  <div className="ml-2 mt-2">
+                    {stakeholder.locationsServed.map((location) => (
+                      <span
+                        key={location}
+                        className="mb-2 mr-2 inline-block rounded-full bg-tint-01 px-3 py-1 font-proxima-nova font-semibold text-shade-02"
+                      >
+                        {location}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="mb-4 font-bold text-shade-01">
-                <span className="font-proxima-nova">CONTACT:</span> <span className="text-sm font-normal">{stakeholder.contact}</span>
-              </div>
-              <div className="mb-4">
-                <span className="font-proxima-nova font-bold text-shade-01">TAGS:</span>
-                <div className="ml-2 mt-2">
-                  {stakeholder.tags?.map((tag) => (
-                    <span
-                      key={tag}
-                      className="mb-2 mr-2 inline-block rounded-full bg-tint-01 px-3 py-1 font-proxima-nova font-semibold text-shade-02"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+              )}
+              {stakeholder.contact !== '' && (
+                <div className="mb-4 font-bold text-shade-01">
+                  <span className="font-proxima-nova">CONTACT:</span> <span className="text-sm font-normal">{stakeholder.contact}</span>
                 </div>
-              </div>
+              )}
+              {stakeholder.tags && stakeholder.tags.length > 0 && (
+                <div className="mb-4">
+                  <span className="font-proxima-nova font-bold text-shade-01">TAGS:</span>
+                  <div className="ml-2 mt-2">
+                    {stakeholder.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="mb-2 mr-2 inline-block rounded-full bg-tint-01 px-3 py-1 font-proxima-nova font-semibold text-shade-02"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="mb-4 md:hidden">
                 <div className="ml-2 mt-2">
                   <LegendControl selectedStakeholder={stakeholder} />
