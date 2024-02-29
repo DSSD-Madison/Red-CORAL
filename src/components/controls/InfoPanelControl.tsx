@@ -1,5 +1,4 @@
 import React from 'react'
-import { useState } from 'react'
 import { useMap} from 'react-leaflet'
 import { Stakeholder } from 'types'
 import ExternalLinkSvg from 'assets/external_link.svg'
@@ -7,10 +6,9 @@ import ExternalLinkSvg from 'assets/external_link.svg'
 interface InfoPanelControlProps {
   stakeholder: Stakeholder | null
   onClose: () => void
-  onClick: (e:React.MouseEvent<HTMLDivElement>) => void
 }
 
-const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClose, onClick }) => {
+const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClose }) => {
   const map = useMap()
 
   const disableZoom = () => {

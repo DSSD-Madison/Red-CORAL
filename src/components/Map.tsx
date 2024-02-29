@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
+import React, { useState, useRef } from 'react'
+import { MapContainer, TileLayer } from 'react-leaflet'
 import { Stakeholder } from 'types'
 import StakeholderLayer from 'components/layers/StakeholderLayer'
 import SearchControl from 'components/controls/SearchControl'
@@ -23,12 +23,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
   ]
   const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(null)
   const markersLayer = useRef(null)
-  const draggable = useRef(null);
-  const handleTierGaterClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    console.log(draggable.current);
-    e.stopPropagation();
-    e.preventDefault();
-  };
+ 
 
   
   return (
@@ -46,7 +41,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
       />
       <LegendControl selectedStakeholder={selectedStakeholder} />
 
-      <InfoPanelControl stakeholder={selectedStakeholder} onClick={handleTierGaterClick} onClose={() => setSelectedStakeholder(null)}/>
+      <InfoPanelControl stakeholder={selectedStakeholder}  onClose={() => setSelectedStakeholder(null)}/>
 
       <SearchControl layerRef={markersLayer} />
       <TagControl stakeholders={stakeholders} layerRef={markersLayer} />
