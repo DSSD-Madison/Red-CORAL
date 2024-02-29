@@ -122,7 +122,6 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
         </>
       )}
 
-
     </div>
   )
 }
