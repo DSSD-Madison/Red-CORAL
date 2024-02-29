@@ -31,12 +31,17 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
   if(window.innerWidth < 1280 && stakeholder){
     map.dragging.disable();
   }
-
+  const newClose = function(){
+    if(window.innerWidth < 1280){
+      map.dragging.enable();
+    }
+    onClose();
+  }
   return (
     <div
       key={"overlay"}
       className={`${
-        stakeholder ? 'w-[400px]' : 'w-0'
+        stakeholder ? 'w-[100%] xl:w-[400px]' : 'w-0'
       } duration-400 !font-proxima-nova bg-tint-02 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-opacity-80 shadow-md transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
@@ -45,7 +50,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
         <>
           <span
             className="text-shade-01 absolute right-6 top-6 h-4 w-4 cursor-pointer text-center text-2xl font-extrabold leading-4 transition delay-75 ease-in-out hover:scale-125"
-            onClick={onClose}
+            onClick={newClose}
           >
             &times;
           </span>
