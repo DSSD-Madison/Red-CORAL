@@ -42,7 +42,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
 
       <SearchControl layerRef={markersLayer} />
       <TagControl stakeholders={stakeholders} layerRef={markersLayer} />
-      <ZoomControl zoomLevel={3} />
+      <ZoomControl zoomLevel={2} />
     </MapContainer>
   )
 }
