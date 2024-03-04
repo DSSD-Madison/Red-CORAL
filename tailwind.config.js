@@ -1,6 +1,7 @@
 import colors from 'tailwindcss/colors'
 
 /** Extended colors/fonts conforming to https://www.hsph.harvard.edu/communications-guide/ */
+/** Screen sizes based on https://www.hsph.harvard.edu/atrocity-prevention-lab/collaborators/ */
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -57,6 +58,9 @@ export default {
     fontFamily: {
       merriweather: ['Merriweather', 'sans-serif'],
       'proxima-nova': ['proxima-nova', 'sans-serif'],
+    },
+    screens: {
+      md: '720px',
     },
   },
   plugins: [],

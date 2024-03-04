@@ -41,7 +41,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
     <div
       key={'overlay'}
       className={`${
-        stakeholder ? 'w-[100%] xl:w-[400px]' : 'w-0'
+        stakeholder ? 'w-[100%] md:w-[400px]' : 'w-0'
       } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-tint-02 bg-opacity-80 !font-proxima-nova shadow-md transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
