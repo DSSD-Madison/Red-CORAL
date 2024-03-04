@@ -118,11 +118,6 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ stakeholder, onClos
                   </div>
                 </div>
               )}
-              <div className="mb-4 md:hidden">
-                <div className="ml-2 mt-2">
-                  <LegendControl selectedStakeholder={stakeholder} />
-                </div>
-              </div>
             </div>
           </div>
         </>
