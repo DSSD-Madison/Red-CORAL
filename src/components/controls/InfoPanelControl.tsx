@@ -2,7 +2,6 @@ import ExternalLinkSvg from 'assets/external_link.svg'
 import React from 'react'
 import { Stakeholder } from 'types'
 import { useMap } from 'react-leaflet'
-import LegendControl from './LegendControl'
 
 interface InfoPanelControlProps {
   stakeholder: Stakeholder | null
