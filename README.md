@@ -1,5 +1,4 @@
 # HHI Map
-### https://dssd-madison.github.io/HHI/
 A map for Harvard Humanitarian Initiative's Signal Program.
 
 Built using [React](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/) along with the [React Leaflet](https://react-leaflet.js.org/) library. Data served with [Google Realtime Database](https://firebase.google.com/docs/database)
