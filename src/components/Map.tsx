@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { MapContainer, TileLayer } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import { Stakeholder } from 'types'
 import StakeholderLayer from 'components/layers/StakeholderLayer'
 import SearchControl from 'components/controls/SearchControl'
@@ -12,6 +12,12 @@ import { LatLngBoundsLiteral } from 'leaflet'
 interface MapProps {
   apiKey: string
   stakeholders: Stakeholder[]
+}
+
+function SetInitialBounds() {
+  const map = useMap()
+  map.setView([-27, -60], 3.5)
+  return null
 }
 
 const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
@@ -43,6 +49,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
       <SearchControl layerRef={markersLayer} />
       <TagControl stakeholders={stakeholders} layerRef={markersLayer} />
       <ZoomControl zoomLevel={2} />
+      <SetInitialBounds />
     </MapContainer>
   )
 }
