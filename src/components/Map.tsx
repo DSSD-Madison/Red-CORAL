@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
-import { Stakeholder } from 'types'
+import { DB } from 'types'
 import StakeholderLayer from 'components/layers/StakeholderLayer'
 import SearchControl from 'components/controls/SearchControl'
 import InfoPanelControl from 'components/controls/InfoPanelControl'
@@ -11,18 +11,18 @@ import { LatLngBoundsLiteral } from 'leaflet'
 
 interface MapProps {
   apiKey: string
-  stakeholders: Stakeholder[]
+  data: DB
 }
 
-const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
+const Map: React.FC<MapProps> = ({ apiKey, data }) => {
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
     [-90, -180],
     // Northeast coordinate
     [90, 180],
   ]
-  const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(null)
-  const markersLayer = useRef(null)
+  // const [selectedStakeholder, setSelectedStakeholder] = useState<DB | null>(null)
+  // const markersLayer = useRef(null)
 
   return (
     <MapContainer className="h-full w-full" center={[20, 0]} zoom={2} minZoom={2} scrollWheelZoom={true} zoomControl={false} maxBounds={maxBounds}>
@@ -30,7 +30,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url={`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
       />
-      <StakeholderLayer
+      {/* <StakeholderLayer
         stakeholders={stakeholders}
         selectedStakeholder={selectedStakeholder}
         setSelectedStakeholder={setSelectedStakeholder}
@@ -41,7 +41,7 @@ const Map: React.FC<MapProps> = ({ apiKey, stakeholders }) => {
       <InfoPanelControl stakeholder={selectedStakeholder} onClose={() => setSelectedStakeholder(null)} />
 
       <SearchControl layerRef={markersLayer} />
-      <TagControl stakeholders={stakeholders} layerRef={markersLayer} />
+      <TagControl stakeholders={stakeholders} layerRef={markersLayer} /> */}
       <ZoomControl zoomLevel={2} />
     </MapContainer>
   )

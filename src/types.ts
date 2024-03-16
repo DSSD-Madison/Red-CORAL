@@ -1,46 +1,34 @@
-import { Input, array, boolean, custom, number, object, optional, string } from 'valibot'
-
 export interface Coordinates {
   lat: number
   lng: number
 }
 
-export interface ServedLocation {
+export interface Incident {
   name: string
-  coordinates: Coordinates
+  description: string
+  year: number
+  countries: string[]
+  typeID: string
+  location: Coordinates[]
 }
 
-const StakeholderSchema = object(
-  {
-    name: string(),
-    contact: string(),
-    website: string(),
-    logo: string(),
-    description: string(),
-    headquarter: string(),
-    locationsServed: optional(array(string())),
-    global: boolean(),
-    tags: array(string()),
-    headquarterCoordinates: object({
-      lat: number(),
-      lng: number(),
-    }),
-    locationsServedCoordinates: optional(
-      array(
-        object({
-          lat: number(),
-          lng: number(),
-        })
-      )
-    ),
-  },
-  [
-    custom((input) => {
-      return !(input.global == false && input.locationsServed == undefined)
-    }, 'If global is false, locationsServed must be defined'),
-  ]
-)
+export interface Category {
+  name: string
+}
 
-export const DataSchema = array(StakeholderSchema)
+export interface Type {
+  name: string
+  categoryID: string
+}
 
-export type Stakeholder = Input<typeof StakeholderSchema>
+export interface DB {
+  Categories: {
+    [key: string]: Category
+  }
+  Types: {
+    [key: string]: Type
+  }
+  Incidents: {
+    [key: string]: Incident
+  }
+}
