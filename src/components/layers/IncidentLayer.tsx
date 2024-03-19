@@ -1,96 +1,69 @@
 import L, { LatLngTuple } from 'leaflet'
 import { useState, useEffect, forwardRef } from 'react'
-import { useMap, Popup, Marker as LeafletMarker, CircleMarker, LayerGroup } from 'react-leaflet'
-import { Stakeholder } from 'types'
+import { useMap, Popup, Marker as LeafletMarker, LayerGroup } from 'react-leaflet'
+import { Incident } from 'types'
 
-interface StakeholderLayerProps {
-  stakeholders: Stakeholder[]
-  selectedStakeholder: Stakeholder | null
-  setSelectedStakeholder: React.Dispatch<React.SetStateAction<Stakeholder | null>>
-  showLocationsServedMarkers: boolean
+interface IncidentLayerProps {
+  incidents: { [key: string]: Incident }
+  selectedIncident: Incident | null
+  setSelectedIncident: React.Dispatch<React.SetStateAction<Incident | null>>
 }
 
-const StakeholderLayer = forwardRef<any, StakeholderLayerProps>(
-  ({ stakeholders, selectedStakeholder, setSelectedStakeholder, showLocationsServedMarkers }, ref) => {
-    const map = useMap()
-    const [isViewAdjusted, setIsViewAdjusted] = useState(true)
+const IncidentLayer = forwardRef<any, IncidentLayerProps>(({ incidents, selectedIncident, setSelectedIncident }, ref) => {
+  const map = useMap()
+  const [isViewAdjusted, setIsViewAdjusted] = useState(true)
 
-    useEffect(() => {
-      const handleZoomEnd = () => {
-        setIsViewAdjusted(true)
-      }
-
-      map.on('zoomend', handleZoomEnd)
-
-      return () => {
-        map.off('zoomend', handleZoomEnd)
-      }
-    }, [map])
-
-    const adjustView = (stakeholder: Stakeholder) => {
-      if (stakeholder.global || !showLocationsServedMarkers) {
-        map.flyTo([stakeholder.headquarterCoordinates.lat, stakeholder.headquarterCoordinates.lng], 5)
-      } else {
-        // If we want to show stakeholder's specific locations
-        const bounds = [
-          stakeholder.headquarterCoordinates,
-          ...(stakeholder.locationsServedCoordinates ? stakeholder.locationsServedCoordinates : []),
-        ].map((coord) => [coord.lat, coord.lng] as LatLngTuple)
-
-        map.flyToBounds(bounds, { padding: [150, 150], duration: 1, easeLinearity: 0.5 })
-      }
-      setIsViewAdjusted(false)
+  useEffect(() => {
+    const handleZoomEnd = () => {
+      setIsViewAdjusted(true)
     }
 
-    return (
-      <>
-        <LayerGroup ref={ref}>
-          {stakeholders.map((stakeholder) => (
-            <LeafletMarker
-              key={stakeholder.name}
-              title={stakeholder.name}
-              position={stakeholder.headquarterCoordinates}
-              icon={L.icon({
-                iconUrl: selectedStakeholder === stakeholder ? 'selected-marker.svg' : 'marker.svg',
-                iconSize: selectedStakeholder === stakeholder ? [40, 40] : [32, 32], // Adjust the sizes as needed
-              })}
-              eventHandlers={{
-                click: () => {
-                  if (selectedStakeholder === stakeholder) {
-                    setSelectedStakeholder(null)
-                  } else {
-                    setSelectedStakeholder(stakeholder)
-                    adjustView(stakeholder)
-                  }
-                },
-              }}
-            />
-          ))}
-        </LayerGroup>
-        <LayerGroup>
-          {isViewAdjusted &&
-            selectedStakeholder &&
-            selectedStakeholder.locationsServed?.map((locationName, index) => {
-              if (selectedStakeholder.locationsServedCoordinates && showLocationsServedMarkers) {
-                return (
-                  <CircleMarker
-                    key={locationName}
-                    center={selectedStakeholder.locationsServedCoordinates[index]}
-                    radius={10}
-                    color="harvard-chan-gray"
-                    weight={1}
-                    opacity={1}
-                    fillOpacity={0.9}
-                  >
-                    <Popup>{locationName}</Popup>
-                  </CircleMarker>
-                )
-              }
-            })}
-        </LayerGroup>
-      </>
-    )
-  }
-)
+    map.on('zoomend', handleZoomEnd)
 
-export default StakeholderLayer
+    return () => {
+      map.off('zoomend', handleZoomEnd)
+    }
+  }, [map])
+
+  const adjustView = (incident: Incident) => {
+    // Incident location can be arbitrary number of coordinates
+    const path = incident.location.map((coords) => [coords.lat, coords.lng] as LatLngTuple)
+    // Leaflet expects rectangular bounds
+    const bounds = L.latLngBounds([
+      [Math.min(...path.map((coords) => coords[0])), Math.min(...path.map((coords) => coords[1]))],
+      [Math.max(...path.map((coords) => coords[0])), Math.max(...path.map((coords) => coords[1]))],
+    ])
+    map.flyToBounds(bounds, { padding: [150, 150], duration: 3, easeLinearity: 0.5 })
+    setIsViewAdjusted(false)
+  }
+  const incidentsList = Object.values(incidents)
+
+  // TODO: Support one incident with multiple locations that all trigger the same popup.
+  return (
+    <LayerGroup ref={ref}>
+      {incidentsList.map((incident) => (
+        <LeafletMarker
+          key={incident.name}
+          title={incident.name}
+          position={incident.location[0]}
+          icon={L.icon({
+            iconUrl: selectedIncident === incident ? 'selected-marker.svg' : 'marker.svg',
+            iconSize: selectedIncident === incident ? [40, 40] : [32, 32], // Adjust the sizes as needed
+          })}
+          eventHandlers={{
+            click: () => {
+              if (selectedIncident === incident) {
+                setSelectedIncident(null)
+              } else {
+                setSelectedIncident(incident)
+                adjustView(incident)
+              }
+            },
+          }}
+        />
+      ))}
+    </LayerGroup>
+  )
+})
+
+export default IncidentLayer
