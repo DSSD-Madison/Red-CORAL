@@ -1,7 +1,11 @@
-# HHI Map
-A map for Harvard Humanitarian Initiative's Signal Program.
+# Red CORAL
 
-Built using [React](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/) along with the [React Leaflet](https://react-leaflet.js.org/) library. Data served with [Google Realtime Database](https://firebase.google.com/docs/database)
+Interactive map of organized crime in South America.
 
-### Resources
-HHI Stakeholder Spreadsheet: https://docs.google.com/spreadsheets/u/2/d/1TI0WNrGsTKC_lZPXhcwxK4fHsc2-A88GysVtidI75z0/edit#gid=0
+## Details
+
+See the [Google Drive Folder](https://drive.google.com/drive/folders/1U2VPsuXm2Jfzjbf39y73rK3O6BKxV4Jy) for details. The Architecture document is most relevant.
+
+## Contributing
+
+Assign an issue to yourself, or work on one that has been assigned to you by cloning this repository, creating a new branch, pushing your changes, and creating a pull request into main.
