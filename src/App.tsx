@@ -5,6 +5,8 @@ import 'leaflet/dist/leaflet.css'
 import { initializeApp } from 'firebase/app'
 import { Incident, Category, Type, DB } from 'types'
 import { dummyData } from 'dummyData'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 
 const App: React.FC = () => {
   const app = initializeApp({
@@ -20,6 +22,7 @@ const App: React.FC = () => {
   // init firestore, storage
 
   const stadiaAPIKey = import.meta.env.VITE_STADIA_KEY
+  const [isClicked, setIsClicked] = useState<boolean>(false);
 
   const [data, setData] = useState<DB>({
     Categories: {},
@@ -37,11 +40,33 @@ const App: React.FC = () => {
         console.error(error)
       })
   }, [])
-
+  const handleClick = () => {
+    setIsClicked(true);
+  };
+  function Home() {
+    return (
+        <div className="relative h-full">
+          <Map apiKey={stadiaAPIKey} data={data} />
+        </div>
+    );
+  }
+  function About() {
+    return (
+        <div style={{ padding: 20 }}>
+          <h2>About View</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
+          <button onClick={handleClick}>Click me</button>
+          {isClicked && <p>Button clicked!</p>}
+        </div>
+    );
+  }
   return (
-    <div className="relative h-full">
-      <Map apiKey={stadiaAPIKey} data={data} />
-    </div>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </Router>
   )
 }
 
