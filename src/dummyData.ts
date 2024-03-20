@@ -35,5 +35,13 @@ export const dummyData: DB = {
       typeID: 'type2',
       location: [{ lat: 7.89, lng: 10.11 }],
     },
+    incident3: {
+      name: 'Incident 3',
+      description: 'Description of incident 3',
+      year: 2024,
+      countries: ['Country5', 'Country6'],
+      typeID: 'type1',
+      location: [{ lat: -27, lng: -60 }],
+    },
   },
 }

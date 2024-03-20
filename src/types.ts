@@ -8,7 +8,7 @@ export interface Incident {
   description: string
   year: number
   countries: string[]
-  typeID: string
+  typeID: keyof DB['Types']
   location: Coordinates[]
 }
 
@@ -18,7 +18,7 @@ export interface Category {
 
 export interface Type {
   name: string
-  categoryID: string
+  categoryID: keyof DB['Categories']
 }
 
 export interface DB {
