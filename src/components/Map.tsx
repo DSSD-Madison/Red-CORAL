@@ -17,7 +17,7 @@ interface MapProps {
 function SetInitialBounds() {
   const map = useMap()
   useEffect(() => {
-    map.setView([-27, -60], 3.5)
+    map.setView([-27, -60], 3.5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
   }, [])
   return null
 }
@@ -45,11 +45,11 @@ const Map: React.FC<MapProps> = ({ apiKey, data }: { apiKey: string; data: DB })
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url={`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
+        url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
       />
       <IncidentLayer incidents={data.Incidents} selectedIncident={selectedIncident} setSelectedIncident={setSelectedIncident} ref={markersLayer} />
+      <InfoPanelControl data={data} incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
-      <InfoPanelControl incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
        <SearchControl layerRef={markersLayer} />
       <TagControl stakeholders={stakeholders} layerRef={markersLayer} /> */}
       <ZoomControl zoomLevel={2} />

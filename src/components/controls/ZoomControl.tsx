@@ -9,7 +9,7 @@ interface ZoomControlProps {
 }
 
 function ZoomControl(props: ZoomControlProps) {
-  const { zoomInTitle, zoomResetTitle, zoomOutTitle, zoomLevel } = props
+  const { zoomInTitle, zoomResetTitle, zoomOutTitle } = props
 
   const map = useMap()
 
@@ -43,7 +43,7 @@ function ZoomControl(props: ZoomControlProps) {
           title={zoomResetTitle}
           role="button"
           onClick={(e) => {
-            map.setZoom(zoomLevel)
+            map.setView([-27, -60], 3.5)
             e.preventDefault()
           }} // circle arrow symbol
         >

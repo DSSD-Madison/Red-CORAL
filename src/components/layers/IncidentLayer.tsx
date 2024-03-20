@@ -1,6 +1,6 @@
 import L, { LatLngTuple } from 'leaflet'
-import { useState, useEffect, forwardRef } from 'react'
-import { useMap, Popup, Marker as LeafletMarker, LayerGroup } from 'react-leaflet'
+import { forwardRef } from 'react'
+import { useMap, Marker as LeafletMarker, LayerGroup } from 'react-leaflet'
 import { Incident } from 'types'
 
 interface IncidentLayerProps {
@@ -11,19 +11,6 @@ interface IncidentLayerProps {
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(({ incidents, selectedIncident, setSelectedIncident }, ref) => {
   const map = useMap()
-  const [isViewAdjusted, setIsViewAdjusted] = useState(true)
-
-  useEffect(() => {
-    const handleZoomEnd = () => {
-      setIsViewAdjusted(true)
-    }
-
-    map.on('zoomend', handleZoomEnd)
-
-    return () => {
-      map.off('zoomend', handleZoomEnd)
-    }
-  }, [map])
 
   const adjustView = (incident: Incident) => {
     // Incident location can be arbitrary number of coordinates
@@ -33,35 +20,35 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(({ incidents, selected
       [Math.min(...path.map((coords) => coords[0])), Math.min(...path.map((coords) => coords[1]))],
       [Math.max(...path.map((coords) => coords[0])), Math.max(...path.map((coords) => coords[1]))],
     ])
-    map.flyToBounds(bounds, { padding: [150, 150], duration: 3, easeLinearity: 0.5 })
-    setIsViewAdjusted(false)
+    map.flyToBounds(bounds, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5 })
   }
   const incidentsList = Object.values(incidents)
 
-  // TODO: Support one incident with multiple locations that all trigger the same popup.
   return (
     <LayerGroup ref={ref}>
-      {incidentsList.map((incident) => (
-        <LeafletMarker
-          key={incident.name}
-          title={incident.name}
-          position={incident.location[0]}
-          icon={L.icon({
-            iconUrl: selectedIncident === incident ? 'selected-marker.svg' : 'marker.svg',
-            iconSize: selectedIncident === incident ? [40, 40] : [32, 32], // Adjust the sizes as needed
-          })}
-          eventHandlers={{
-            click: () => {
-              if (selectedIncident === incident) {
-                setSelectedIncident(null)
-              } else {
-                setSelectedIncident(incident)
-                adjustView(incident)
-              }
-            },
-          }}
-        />
-      ))}
+      {incidentsList.map((incident) =>
+        incident.location.map((location, index) => (
+          <LeafletMarker
+            key={incident.name + (index > 0 ? index : '')}
+            title={incident.name}
+            position={location}
+            icon={L.icon({
+              iconUrl: selectedIncident === incident ? 'selected-marker.svg' : 'marker.svg',
+              iconSize: selectedIncident === incident ? [40, 40] : [32, 32],
+            })}
+            eventHandlers={{
+              click: () => {
+                if (selectedIncident === incident) {
+                  setSelectedIncident(null)
+                } else {
+                  setSelectedIncident(incident)
+                  adjustView(incident)
+                }
+              },
+            }}
+          />
+        ))
+      )}
     </LayerGroup>
   )
 })
