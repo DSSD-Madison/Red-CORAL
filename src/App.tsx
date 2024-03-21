@@ -7,6 +7,7 @@ import Map from 'components/Map';
 import 'leaflet/dist/leaflet.css';
 import { Incident, Category, Type, DB } from 'types';
 import { dummyData } from 'dummyData';
+import Admin from "./components/Admin";
 
 const App: React.FC = () => {
     const app = initializeApp({
@@ -24,8 +25,11 @@ const App: React.FC = () => {
     // init firestore, storage
 
     const stadiaAPIKey = import.meta.env.VITE_STADIA_KEY;
-    const [isClicked, setIsClicked] = useState<boolean>(false);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // State variable for sign-in status
 
+    const handleSignInSuccess = () => {
+        setIsLoggedIn(true); // Update the sign-in status to true
+    };
     const [data, setData] = useState<DB>({
         Categories: {},
         Types: {},
@@ -43,10 +47,6 @@ const App: React.FC = () => {
             });
     }, []);
 
-    const handleClick = () => {
-        setIsClicked(true);
-    };
-
     function Home() {
         return (
             <div className="relative h-full">
@@ -55,56 +55,11 @@ const App: React.FC = () => {
         );
     }
 
-    function Admin() {
-        return (
-            <div style={{ padding: 20 }}>
-                <h2>About View</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
-                <button onClick={handleClick}>Click me</button>
-                {isClicked && <p>Button clicked!</p>}
-            </div>
-        );
-    }
-
-    function SignupForm() {
-        const [email, setEmail] = useState('');
-        const [password, setPassword] = useState('');
-
-        const handleSignin = async (e: React.FormEvent) => {
-            e.preventDefault();
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log('User signed in:', userCredential.user);
-                alert('User signed in successfully!');
-                // Redirect or show success message
-            } catch (error) {
-                console.error('Error signing in:', error.message);
-                alert(`Error signing in: ${error.message}`);
-            }
-        };
-
-        return (
-            <form onSubmit={handleSignin}>
-                <label>
-                    Email:
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </label>
-                <label>
-                    Password:
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                </label>
-                <button type="submit">Sign In</button>
-            </form>
-        );
-    }
-
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/signup" element={<SignupForm />} />
+                <Route path="/admin" element={<Admin auth={auth} onSignInSuccess={handleSignInSuccess} />} />
             </Routes>
         </Router>
     );
