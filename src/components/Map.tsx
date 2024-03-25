@@ -12,6 +12,7 @@ import { LatLngBoundsLiteral } from 'leaflet'
 interface MapProps {
   apiKey: string
   data: DB
+  isLoggedIn: boolean
 }
 
 function SetInitialBounds() {
@@ -22,7 +23,7 @@ function SetInitialBounds() {
   return null
 }
 
-const Map: React.FC<MapProps> = ({ apiKey, data }: { apiKey: string; data: DB }) => {
+const Map: React.FC<MapProps> = ({ apiKey, data, isLoggedIn }) => {
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
     [-90, -180],
@@ -31,6 +32,13 @@ const Map: React.FC<MapProps> = ({ apiKey, data }: { apiKey: string; data: DB })
   ]
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
   const markersLayer = useRef(null)
+  const [tmpIncident, setTmpIncident] = useState<Incident | null>(null)
+
+  useEffect(() => {
+    if (tmpIncident) {
+      setSelectedIncident(tmpIncident)
+    }
+  }, [tmpIncident])
 
   return (
     <MapContainer
@@ -42,13 +50,28 @@ const Map: React.FC<MapProps> = ({ apiKey, data }: { apiKey: string; data: DB })
       scrollWheelZoom={true}
       zoomControl={false}
       maxBounds={maxBounds}
+      doubleClickZoom={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
       />
-      <IncidentLayer incidents={data.Incidents} selectedIncident={selectedIncident} setSelectedIncident={setSelectedIncident} ref={markersLayer} />
-      <InfoPanelControl data={data} incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
+      <IncidentLayer
+        data={data}
+        selectedIncident={selectedIncident}
+        setSelectedIncident={setSelectedIncident}
+        ref={markersLayer}
+        tmpIncident={tmpIncident}
+        setTmpIncident={setTmpIncident}
+        isLoggedIn={isLoggedIn}
+      />
+      <InfoPanelControl
+        data={data}
+        incident={selectedIncident}
+        onClose={() => setSelectedIncident(null)}
+        tmpIncident={tmpIncident}
+        setTmpIncident={setTmpIncident}
+      />
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />
       <TagControl stakeholders={stakeholders} layerRef={markersLayer} /> */}

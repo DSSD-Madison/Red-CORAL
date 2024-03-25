@@ -6,9 +6,11 @@ interface InfoPanelControlProps {
   data: DB
   incident: Incident | null
   onClose: () => void
+  tmpIncident: Incident | null
+  setTmpIncident: React.Dispatch<React.SetStateAction<Incident | null>>
 }
 
-const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ data, incident, onClose }) => {
+const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ data, incident, onClose, tmpIncident, setTmpIncident }) => {
   const map = useMap()
 
   const disableZoom = () => {
@@ -54,16 +56,16 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ data, incident, onC
             </div>
             <div className="font-merriweather text-base">
               <div className="mb-4 text-sm text-shade-02">
-                {incident.year}
+                Date: {new Date(incident.timestamp).toDateString()}
                 <br />
-                {data.Types[incident.typeID].name}
+                Tipo de evento: {data.Types[incident.typeID].name}
                 <br />
-                {data.Categories[data.Types[incident.typeID].categoryID].name}
+                Actividad: {data.Categories[data.Types[incident.typeID].categoryID].name}
               </div>
 
               <div className="mb-6 text-shade-01">{incident.description}</div>
 
-              {incident.countries && incident.countries.length > 0 && (
+              {/* {incident.countries && incident.countries.length > 0 && (
                 <div className="mb-4">
                   <span className="font-proxima-nova font-bold text-shade-01">Countries:</span>
                   <div className="ml-2 mt-2">
@@ -77,7 +79,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({ data, incident, onC
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </>

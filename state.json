@@ -1,0 +1,201 @@
+{
+  "Categories": {
+    "FPf25KrsIOsHkiXZUidI": {
+      "name": "Minería",
+      "color": "#fff700"
+    },
+    "L3lzuSA4Vg8Qc8thkeaN": {
+      "name": "Personas",
+      "color": "#000000"
+    },
+    "PdTp2VL8upyYP7kO9YJL": {
+      "name": "Drogas",
+      "color": "#ffffff"
+    },
+    "UiIHei6NMD9tmmHkWHqA": {
+      "color": "#d40000",
+      "name": "Lideres sociales y ambientales / Defensores de derechos humanos"
+    },
+    "dlHOxpgYbSerLAI9R1x0": {
+      "color": "#ffaa00",
+      "name": "Fauna silvestre"
+    },
+    "grm3XpuQzZ4YigC1uSBF": {
+      "name": "Seguridad privada",
+      "color": "#999999"
+    },
+    "qsvtdz5dDH5BnLTMjzSE": {
+      "name": "Pesca illegal",
+      "color": "#00c8ff"
+    },
+    "rXSVC0ZdA05GVXebzzhy": {
+      "color": "#b300ff",
+      "name": "Insumos químicos"
+    },
+    "vmypXdGTgDTOun54gqWZ": {
+      "name": "Armas",
+      "color": "#383838"
+    },
+    "x3jZJ7wepsuD7bjEpDLV": {
+      "color": "#612d00",
+      "name": "Madera"
+    }
+  },
+  "Types": {
+    "2suePoPBKN7cZrbOWgpO": {
+      "categoryID": "FPf25KrsIOsHkiXZUidI",
+      "name": "Incautacion de explosivos"
+    },
+    "3lty19bvjEWensTD3sD3": {
+      "categoryID": "dlHOxpgYbSerLAI9R1x0",
+      "name": "Captura/desmantelamiento de red criminal"
+    },
+    "4iIHx6fZ44aWnCsl16kh": {
+      "categoryID": "qsvtdz5dDH5BnLTMjzSE",
+      "name": "Asalto a transporte de valores"
+    },
+    "B4bdjfMwUQRVDaJ9GRZ9": {
+      "name": "Incautacion de dinero de origen ilegal",
+      "categoryID": "FPf25KrsIOsHkiXZUidI"
+    },
+    "CCUns0oTmunGJn4hHR5f": {
+      "name": "Captura/desmantelamiento de red criminal",
+      "categoryID": "rXSVC0ZdA05GVXebzzhy"
+    },
+    "GhF2n3gIaFCkAOGKKjGK": {
+      "name": "Captura/desmantelamiento de red criminal",
+      "categoryID": "vmypXdGTgDTOun54gqWZ"
+    },
+    "KP8rLTYhkMNurbIhfhze": {
+      "name": "Incautacion de otros insumos",
+      "categoryID": "rXSVC0ZdA05GVXebzzhy"
+    },
+    "LNXMHvF6FeJHS8DJ1KcX": {
+      "name": "Incautacion de dinero de origen ilegal",
+      "categoryID": "vmypXdGTgDTOun54gqWZ"
+    },
+    "M4BuwzFN3g7riWFxdoWG": {
+      "categoryID": "L3lzuSA4Vg8Qc8thkeaN",
+      "name": "Arresto migrantes irregulares/indocumentados"
+    },
+    "QInLxFsCuChjtd4BkemM": {
+      "categoryID": "dlHOxpgYbSerLAI9R1x0",
+      "name": "Recuperacion fauna silvestre"
+    },
+    "RqLC8b8pxryxfrau4hCR": {
+      "name": "Incautacion de oro de origen ilegal/criminal/de contrabando",
+      "categoryID": "FPf25KrsIOsHkiXZUidI"
+    },
+    "S8eUU3Sha4fbc5NzAc5d": {
+      "categoryID": "FPf25KrsIOsHkiXZUidI",
+      "name": "Incautacion/destruccion de maquinaria"
+    },
+    "SkYcOCu2sjYN6bHuiwEl": {
+      "name": "Incautacion de equipos de transporte (avionetas, submarinos, helicopteros...)",
+      "categoryID": "PdTp2VL8upyYP7kO9YJL"
+    },
+    "TToLHVlUyU71ZslByga9": {
+      "name": "Violaciones de derechos humanos por parte de personal de empresa privada",
+      "categoryID": "grm3XpuQzZ4YigC1uSBF"
+    },
+    "TnrVL3DLI25EMz1I4BBu": {
+      "categoryID": "PdTp2VL8upyYP7kO9YJL",
+      "name": "Incautacion de droga en barco pesquero"
+    },
+    "V4UWndsw4VtY1xCEpUKI": {
+      "name": "Destruccion de laboratorios",
+      "categoryID": "PdTp2VL8upyYP7kO9YJL"
+    },
+    "WF9rbRhuVvrZJ64dQ3VW": {
+      "name": "Secuestro/asesinato de minero(s) o de personal de empresa minera",
+      "categoryID": "FPf25KrsIOsHkiXZUidI"
+    },
+    "XQDFq1kVr7SOlfSU8LVJ": {
+      "name": "Asesinado de personal de empresa de seguridad privada",
+      "categoryID": "qsvtdz5dDH5BnLTMjzSE"
+    },
+    "ZGzZuDMAvV9NBZ37x26Q": {
+      "name": "Incautación de mercurio",
+      "categoryID": "rXSVC0ZdA05GVXebzzhy"
+    },
+    "baFU7MaFm4GOLFf0WZoV": {
+      "name": "Arresto traficante de personas/desmantelamiento red criminal",
+      "categoryID": "L3lzuSA4Vg8Qc8thkeaN"
+    },
+    "ddvlhNn2Q3OCWtZyihp6": {
+      "categoryID": "PdTp2VL8upyYP7kO9YJL",
+      "name": "Captura/desmantelamiento de red criminal"
+    },
+    "f0qvbxsXaWCweP2RGCMQ": {
+      "categoryID": "rXSVC0ZdA05GVXebzzhy",
+      "name": "Incautacion de dinero de origen ilegal"
+    },
+    "iqPG3d6QPvzcu7QC4hyE": {
+      "categoryID": "FPf25KrsIOsHkiXZUidI",
+      "name": "Incautacion de otro tipo de mineral"
+    },
+    "kqAvqqu3XhBP2vnC6CFm": {
+      "categoryID": "x3jZJ7wepsuD7bjEpDLV",
+      "name": "Captura/desmantelamiento de red criminaI"
+    },
+    "nJlZ4d16UJP1wzO0Xqha": {
+      "name": "Incautacion de dinero de origen ilegal",
+      "categoryID": "dlHOxpgYbSerLAI9R1x0"
+    },
+    "oGTLk36zXvnIrYEfJfPl": {
+      "categoryID": "PdTp2VL8upyYP7kO9YJL",
+      "name": "Pista de aterrizaje clandestina"
+    },
+    "qjHYwfYevlLeCUqBYMA4": {
+      "name": "Incautacion de dinero de origen ilegal",
+      "categoryID": "PdTp2VL8upyYP7kO9YJL"
+    },
+    "rIA6FIJcr8GnudAXHnD3": {
+      "categoryID": "x3jZJ7wepsuD7bjEpDLV",
+      "name": "Incautación de mercancía ilegal/de contrabando"
+    },
+    "rmdTS7XbXihO0uJoK8kQ": {
+      "name": "Asalto a transporte de valores",
+      "categoryID": "grm3XpuQzZ4YigC1uSBF"
+    },
+    "sCrBPAodiAansqzl3JwO": {
+      "name": "Asesinado de personal de empresa de seguridad privada",
+      "categoryID": "grm3XpuQzZ4YigC1uSBF"
+    },
+    "vOrzgwX9obtnYbz8qSZP": {
+      "categoryID": "FPf25KrsIOsHkiXZUidI",
+      "name": "Captura/desmantelamiento de red criminal"
+    },
+    "y8Rj6aLHwqcvV9EdlD5j": {
+      "name": "Incautacion de dinero de origen ilegal",
+      "categoryID": "x3jZJ7wepsuD7bjEpDLV"
+    },
+    "yH3qoNjHE7jFykBwA8hT": {
+      "name": "Violaciones de derechos humanos por parte de personal de empresa privada",
+      "categoryID": "qsvtdz5dDH5BnLTMjzSE"
+    },
+    "yalZyNeqkgaAYchnUcWx": {
+      "name": "Incautación de armas",
+      "categoryID": "vmypXdGTgDTOun54gqWZ"
+    },
+    "zNpviAAIBUyIG9B2C0VP": {
+      "categoryID": "PdTp2VL8upyYP7kO9YJL",
+      "name": "Incautacion de droga"
+    }
+  },
+  "Incidents": {
+    "DZPYyHgOy4u0LonNV3ZY": {
+      "location": [
+        {
+          "lng": -72.492285,
+          "lat": 3.422073
+        }
+      ],
+      "name": "TEST",
+      "isTest": true,
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "typeID": "2suePoPBKN7cZrbOWgpO",
+      "timestamp": 1711142688130
+    }
+  }
+}
