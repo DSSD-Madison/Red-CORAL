@@ -1,17 +1,15 @@
 import React, { useState } from 'react'
 import { Auth, signInWithEmailAndPassword } from 'firebase/auth' // Import Auth type from firebase/auth
-import { useNavigate } from 'react-router-dom'
 
-interface AdminProps {
+interface LoginProps {
   auth: Auth // Declare auth prop of type Auth
   onSignInSuccess: () => void
 }
 
-const Admin: React.FC<AdminProps> = ({ auth, onSignInSuccess }) => {
+const Login: React.FC<LoginProps> = ({ auth, onSignInSuccess }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
 
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,7 +18,6 @@ const Admin: React.FC<AdminProps> = ({ auth, onSignInSuccess }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       console.log('User signed in:', userCredential.user)
       setError(null)
-      navigate('/')
       onSignInSuccess() // Call the callback function
     } catch (error) {
       //@ts-ignore
@@ -53,4 +50,4 @@ const Admin: React.FC<AdminProps> = ({ auth, onSignInSuccess }) => {
   )
 }
 
-export default Admin
+export default Login

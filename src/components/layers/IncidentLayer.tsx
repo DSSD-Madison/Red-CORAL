@@ -5,37 +5,29 @@ import { DB, Incident } from 'types'
 
 interface IncidentLayerProps {
   data: DB
-  selectedIncident: Incident | null
-  setSelectedIncident: React.Dispatch<React.SetStateAction<Incident | null>>
-  tmpIncident: Incident | null
-  setTmpIncident: React.Dispatch<React.SetStateAction<Incident | null>>
-  isLoggedIn: boolean
+  selectedIncidentID: keyof DB['Incidents'] | null
+  setSelectedIncidentID: React.Dispatch<React.SetStateAction<keyof DB['Incidents'] | null>>
+  isAdmin: boolean
+  location: Incident['location']
+  setLocation: React.Dispatch<React.SetStateAction<Incident['location']>>
+  tmpSelected: boolean
+  setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
-  ({ data, selectedIncident, setSelectedIncident, tmpIncident, setTmpIncident, isLoggedIn }, ref) => {
+  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, location, setLocation, tmpSelected, setTmpSelected }, ref) => {
     const map = useMap()
 
     map.addEventListener('dblclick', (e) => {
-      if (!isLoggedIn) return
-      let newTmpIncident: Incident
-      if (tmpIncident) {
-        newTmpIncident = { ...tmpIncident, location: [...tmpIncident.location, e.latlng] }
-      } else {
-        newTmpIncident = {
-          name: '',
-          description: '',
-          timestamp: Date.now(),
-          typeID: Object.keys(data.Types)[0],
-          location: [e.latlng],
-        }
-      }
-      setTmpIncident(newTmpIncident)
+      if (!isAdmin) return
+      setLocation([...location, e.latlng])
+      setSelectedIncidentID(null)
+      setTmpSelected(true)
     })
 
-    const adjustView = (incident: Incident) => {
+    const adjustView = (location: Incident['location']) => {
       // Incident location can be arbitrary number of coordinates
-      const path = incident.location.map((coords) => [coords.lat, coords.lng] as LatLngTuple)
+      const path = location.map((coords) => [coords.lat, coords.lng] as LatLngTuple)
       // Leaflet expects rectangular bounds
       const bounds = L.latLngBounds([
         [Math.min(...path.map((coords) => coords[0])), Math.min(...path.map((coords) => coords[1]))],
@@ -44,40 +36,94 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
       map.flyToBounds(bounds, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5 })
     }
 
-    const incidentList = Object.values(data?.Incidents || {}).concat(tmpIncident ? [tmpIncident] : [])
+    const incidentList = Object.entries(data?.Incidents || {})
 
     return (
       <LayerGroup ref={ref}>
-        {incidentList.map((incident) =>
-          incident.location.map((location, index) => (
+        {incidentList.map(([id, incident], i) =>
+          incident.location.map((loc, j) => (
             <LeafletMarker
-              key={`incident-${index}-marker`}
+              key={`incident-${i}-marker-${j}`}
               title={incident.name}
-              position={location}
+              position={loc}
               icon={L.icon({
-                iconUrl: selectedIncident === incident ? 'selected-marker.svg' : 'marker.svg',
-                iconSize: selectedIncident === incident ? [40, 40] : [32, 32],
+                iconUrl: selectedIncidentID === id ? 'selected-marker.svg' : 'marker.svg',
+                iconSize: selectedIncidentID === id ? [40, 40] : [32, 32],
               })} //somehow need to set the color here to data.Categories[data.Types[incident.typeID].categoryID].color
               eventHandlers={{
                 click: () => {
-                  if (selectedIncident === incident) {
-                    setSelectedIncident(null)
+                  if (selectedIncidentID === id) {
+                    setSelectedIncidentID(null)
                   } else {
-                    setSelectedIncident(incident)
-                    adjustView(incident)
+                    setSelectedIncidentID(id)
+                    adjustView(incident.location)
                   }
                 },
               }}
             />
           ))
         )}
-        {incidentList.map((incident, i) => {
+        {location.map((loc, index) => (
+          <LeafletMarker
+            key={`tmp-incident-marker-${index}`}
+            title={'tmp'}
+            position={loc}
+            icon={L.icon({
+              iconUrl: tmpSelected ? 'selected-marker.svg' : 'marker.svg',
+              iconSize: tmpSelected ? [40, 40] : [32, 32],
+            })} //somehow need to set the color here to data.Categories[data.Types[incident.typeID].categoryID].color
+            eventHandlers={{
+              click: () => {
+                if (tmpSelected) {
+                  setTmpSelected(false)
+                } else {
+                  setTmpSelected(true)
+                  adjustView(location)
+                }
+              },
+            }}
+          />
+        ))}
+        {incidentList.map(([id, incident], i) => {
           if (incident.location.length > 1) {
             const positions = incident.location.map((coords) => [coords.lat, coords.lng] as LatLngExpression)
-            const opts = incident == selectedIncident ? { color: 'red', opacity: 0.7 } : { color: 'black', opacity: 0.5 }
-            return <Polyline key={`incident-${i}-path`} positions={positions} pathOptions={opts} />
+            const opts = id == selectedIncidentID ? { color: 'red', opacity: 0.7 } : { color: 'black', opacity: 0.5 }
+            return (
+              <Polyline
+                key={`incident-${i}-path`}
+                positions={positions}
+                pathOptions={opts}
+                eventHandlers={{
+                  click: () => {
+                    if (selectedIncidentID === id) {
+                      setSelectedIncidentID(null)
+                    } else {
+                      setSelectedIncidentID(id)
+                      adjustView(incident.location)
+                    }
+                  },
+                }}
+              />
+            )
           }
         })}
+        {location.length > 1 && (
+          <Polyline
+            key={`tmp-incident-path`}
+            positions={location.map((coords) => [coords.lat, coords.lng] as LatLngExpression)}
+            pathOptions={tmpSelected ? { color: 'red', opacity: 0.7 } : { color: 'black', opacity: 0.5 }}
+            eventHandlers={{
+              click: () => {
+                if (tmpSelected) {
+                  setTmpSelected(false)
+                } else {
+                  setTmpSelected(true)
+                  adjustView(location)
+                }
+              },
+            }}
+          />
+        )}
       </LayerGroup>
     )
   }

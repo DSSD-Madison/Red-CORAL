@@ -6,7 +6,7 @@ export interface Coordinates {
 export interface Incident {
   name: string
   description: string
-  timestamp: number
+  dateString: string
   typeID: keyof DB['Types']
   location: Coordinates[]
   isTest?: boolean // if true, should only be visible to admins i.e. not saved into Cloud Storage
