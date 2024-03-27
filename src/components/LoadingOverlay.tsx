@@ -1,0 +1,10 @@
+const LoadingOverlay = ({ isVisible }: { isVisible: Boolean }) => (
+  <div
+    className={`pointer-events-none absolute inset-0 z-[500] flex w-screen items-center justify-center backdrop-blur-sm transition-opacity`}
+    style={{ opacity: isVisible ? '100' : '0' }}
+  >
+    <div className="h-20 w-20 animate-spin rounded-full border-8 border-white" style={{ clipPath: 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' }} />
+  </div>
+)
+
+export default LoadingOverlay
