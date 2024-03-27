@@ -24,6 +24,8 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
     Incidents: {},
   })
 
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
     new Promise<DB>(async (resolve, reject) => {
       try {
@@ -62,21 +64,26 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
       }
     })
       .then(setData)
+      .then(() => setIsLoading(false))
       .catch((error) => {
         console.error(error)
       })
   }, [isAdmin])
 
   async function addIncident(incident: Incident): Promise<boolean> {
+    setIsLoading(true)
     try {
       const ref = await addDoc(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
       data.Incidents[ref.id] = incident
+      setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
+      setIsLoading(false)
       return false
     }
   }
+
   return (
     <div className="relative h-full">
       {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
@@ -84,7 +91,7 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
       </div> */}
       <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} />
       {isAdmin && <p className="absolute right-3 top-1 z-[1000] text-4xl text-red-dark">Admin</p>}
-      <LoadingOverlay isVisible={Object.keys(data.Incidents).length === 0} />
+      <LoadingOverlay isVisible={isLoading} />
     </div>
   )
 }
