@@ -101,8 +101,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident }) => {
         setSelectedIncidentID={setSelectedIncidentID}
         ref={markersLayer}
         isAdmin={isAdmin}
-        location={location}
-        setLocation={setLocation}
+        tmpLocation={location}
+        setTmpLocation={setLocation}
         tmpSelected={tmpSelected}
         setTmpSelected={setTmpSelected}
       />
