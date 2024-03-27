@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import { Incident, Category, Type, DB } from 'types'
 import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore'
 import { getStorage, ref, getBytes } from 'firebase/storage'
+import LoadingOverlay from './LoadingOverlay'
 
 interface HomeProps {
   app: FirebaseApp
@@ -78,11 +79,12 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
   }
   return (
     <div className="relative h-full">
-      {/* <div className=" header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
+      {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
         <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
       </div> */}
       <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} />
       {isAdmin && <p className="absolute right-3 top-1 z-[1000] text-4xl text-red-dark">Admin</p>}
+      <LoadingOverlay isVisible={Object.keys(data.Incidents).length === 0} />
     </div>
   )
 }
