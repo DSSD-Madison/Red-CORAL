@@ -76,7 +76,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   }
 
   async function deleteSelectedIncident() {
-    if (!selectedIncidentID) {
+    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') == false) {
       return
     }
     if (await deleteIncident(selectedIncidentID)) {
