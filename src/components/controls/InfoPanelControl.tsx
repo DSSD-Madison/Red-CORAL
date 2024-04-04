@@ -21,6 +21,7 @@ interface InfoPanelControlProps {
   tmpSelected: boolean
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   isAdmin: boolean
+  deleteSelectedIncident: () => void
 }
 
 const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
@@ -41,6 +42,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   location,
   setLocation,
   tmpSelected,
+  deleteSelectedIncident,
 }) => {
   const map = useMap()
 
@@ -94,6 +96,9 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 </div>
 
                 <div className="mb-6 text-shade-01">{incident.description}</div>
+                <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-redwood-light" onClick={deleteSelectedIncident}>
+                  Borrar
+                </button>
               </div>
             </div>
           )}

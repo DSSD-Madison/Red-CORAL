@@ -4,7 +4,7 @@ import { FirebaseApp } from 'firebase/app'
 import Map from 'components/Map'
 import 'leaflet/dist/leaflet.css'
 import { Incident, Category, Type, DB } from 'types'
-import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
 import { getStorage, ref, getBytes } from 'firebase/storage'
 import LoadingOverlay from './LoadingOverlay'
 
@@ -84,12 +84,26 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
     }
   }
 
+  async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
+    try {
+      setIsLoading(true)
+      await deleteDoc(doc(firestore, `Incidents/${incidentID}`))
+      delete data.Incidents[incidentID]
+      setIsLoading(false)
+      return true
+    } catch (e) {
+      console.error(e)
+      setIsLoading(false)
+      return false
+    }
+  }
+
   return (
     <div className="relative h-full">
       {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
         <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
       </div> */}
-      <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} />
+      <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} deleteIncident={deleteIncident} />
       {isAdmin && <p className="absolute right-3 top-1 z-[1000] text-4xl text-red-dark">Admin</p>}
       <LoadingOverlay isVisible={isLoading} />
     </div>

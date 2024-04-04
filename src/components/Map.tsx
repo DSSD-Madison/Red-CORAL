@@ -14,6 +14,7 @@ interface MapProps {
   data: DB
   isAdmin: boolean
   addIncident: (incident: Incident) => Promise<boolean>
+  deleteIncident: (incidentID: keyof DB['Incidents']) => Promise<boolean>
 }
 
 function SetInitialBounds() {
@@ -24,7 +25,7 @@ function SetInitialBounds() {
   return null
 }
 
-const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident }) => {
+const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteIncident }) => {
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
     [-90, -180],
@@ -72,6 +73,18 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident }) => {
     setLocation([])
     alert('Incidente creado con éxito')
     return true
+  }
+
+  async function deleteSelectedIncident() {
+    if (!selectedIncidentID) {
+      return
+    }
+    if (await deleteIncident(selectedIncidentID)) {
+      setSelectedIncidentID(null)
+      alert('Incidente eliminado con éxito')
+    } else {
+      alert('No se pudo eliminar el incidente')
+    }
   }
 
   function onClose() {
@@ -126,6 +139,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident }) => {
         tmpSelected={tmpSelected}
         setTmpSelected={setTmpSelected}
         isAdmin={isAdmin}
+        deleteSelectedIncident={deleteSelectedIncident}
       />
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />
