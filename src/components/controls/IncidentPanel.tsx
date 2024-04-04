@@ -1,6 +1,5 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
-import { useState } from 'react'
 
 interface InfoPanelControlProps {
   data: DB
@@ -46,8 +45,6 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   deleteSelectedIncident,
 }) => {
   const map = useMap()
-
-  // const [incidentCopy, setIncidentCopy] = useState<Incident | null>(incidentID ? data.Incidents[incidentID] : null)
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -102,7 +99,6 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
                   Borrar
                 </button>
-                {/* <button className="hover:bg mr-1 rounded-sm border-0 bg-orange-light pb-1 pl-2 pr-2 pt-1 hover:bg-orange">Editar</button> */}
               </div>
             </div>
           )}
