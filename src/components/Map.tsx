@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import { DB, Incident } from 'types'
 // import SearchControl from 'components/controls/SearchControl'
-import InfoPanelControl from 'components/controls/InfoPanelControl'
+import IncidentPanel from 'components/controls/IncidentPanel'
 import ZoomControl from 'components/controls/ZoomControl'
 // import TagControl from './controls/TagControl'
 // import LegendControl from './controls/LegendControl'
@@ -119,7 +119,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
         tmpSelected={tmpSelected}
         setTmpSelected={setTmpSelected}
       />
-      <InfoPanelControl
+      <IncidentPanel
         data={data}
         incidentID={selectedIncidentID}
         onClose={onClose}

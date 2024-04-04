@@ -1,5 +1,6 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
+import { useState } from 'react'
 
 interface InfoPanelControlProps {
   data: DB
@@ -45,6 +46,8 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   deleteSelectedIncident,
 }) => {
   const map = useMap()
+
+  // const [incidentCopy, setIncidentCopy] = useState<Incident | null>(incidentID ? data.Incidents[incidentID] : null)
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -96,9 +99,10 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 </div>
 
                 <div className="mb-6 text-shade-01">{incident.description}</div>
-                <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-redwood-light" onClick={deleteSelectedIncident}>
+                <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
                   Borrar
                 </button>
+                {/* <button className="hover:bg mr-1 rounded-sm border-0 bg-orange-light pb-1 pl-2 pr-2 pt-1 hover:bg-orange">Editar</button> */}
               </div>
             </div>
           )}
@@ -127,7 +131,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     }}
                     className="w-full"
                   >
-                    <option value="">--Please choose an option--</option>
+                    <option value="">--Por favor elige una actividad--</option>
                     {Object.entries(data.Categories).map(([id, category]) => (
                       <option key={id} value={id}>
                         {category.name}
@@ -138,7 +142,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   Tipo de evento:
                   <br />
                   <select value={typeID} onChange={(e) => setTypeID(e.target.value)} className="w-full">
-                    <option value="">--Please choose an option--</option>
+                    <option value="">--Por favor elige un tipo de evento--</option>
                     {Object.entries(data.Types).map(
                       ([id, type]) =>
                         type.categoryID == catID && (
