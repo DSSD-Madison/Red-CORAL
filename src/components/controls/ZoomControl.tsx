@@ -1,15 +1,17 @@
 import { useMap } from 'react-leaflet'
 import Control from 'react-leaflet-custom-control'
+import { MarkerFilters } from 'types'
 
 interface ZoomControlProps {
   zoomInTitle?: string
   zoomOutTitle?: string
   zoomResetTitle?: string
   zoomLevel: number
+  setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
 }
 
 function ZoomControl(props: ZoomControlProps) {
-  const { zoomInTitle, zoomResetTitle, zoomOutTitle } = props
+  const { zoomInTitle, zoomResetTitle, zoomOutTitle, setFilters } = props
 
   const map = useMap()
 
@@ -44,6 +46,12 @@ function ZoomControl(props: ZoomControlProps) {
           role="button"
           onClick={(e) => {
             map.setView([-27, -60], 3.5)
+            setFilters({
+              hideCategories: [],
+              hideTypes: [],
+              startYear: null,
+              endYear: null,
+            })
             e.preventDefault()
           }} // circle arrow symbol
         >
@@ -55,9 +63,9 @@ function ZoomControl(props: ZoomControlProps) {
 }
 
 ZoomControl.defaultProps = {
-  zoomInTitle: 'Zoom in',
-  zoomOutTitle: 'Zoom out',
-  zoomResetTitle: 'Reset zoom',
+  zoomInTitle: 'Acercar',
+  zoomOutTitle: 'Alejar',
+  zoomResetTitle: 'Restablecer',
 }
 
 export default ZoomControl

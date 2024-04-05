@@ -65,7 +65,7 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
             className="leaflet-bar absolute -bottom-0.5 left-10 box-content h-24 w-[calc(100vw-4.25rem)] rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
           >
             <label className="block text-center text-xl font-semibold" htmlFor="year">
-              Year
+              Año
             </label>
             <div className="flex w-full items-center justify-center gap-2 p-2">
               <button
@@ -80,10 +80,12 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
                 min={minYear}
                 max={maxYear}
                 value={filters.startYear || minYear}
+                onMouseEnter={() => (filters.endYear == null ? handleRangeUpdate(minYear) : null)}
                 onChange={(e) => handleRangeUpdate(parseInt(e.target.value))}
                 className="flex-grow"
               />
               {maxYear}
+              <span className="text-lg font-semibold">{filters.startYear || minYear}</span>
             </div>
           </div>
         )}

@@ -154,7 +154,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
        <SearchControl layerRef={markersLayer} />*/}
       <CategoryControl data={data} filters={filters} setFilters={setFilters} />
       <YearControl data={data} filters={filters} setFilters={setFilters} />
-      <ZoomControl zoomLevel={2} />
+      <ZoomControl zoomLevel={2} setFilters={setFilters} />
       <SetInitialBounds />
     </MapContainer>
   )
