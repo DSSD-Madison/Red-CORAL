@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import { DB, Incident } from 'types'
+import { DB, Incident, MarkerFilters } from 'types'
 // import SearchControl from 'components/controls/SearchControl'
 import IncidentPanel from 'components/controls/IncidentPanel'
 import ZoomControl from 'components/controls/ZoomControl'
@@ -33,6 +33,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     [90, 180],
   ]
   const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
+  const [filters, setFilters] = useState<MarkerFilters>({})
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
   const [name, setName] = useState<Incident['name']>('')
@@ -118,6 +119,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
         setTmpLocation={setLocation}
         tmpSelected={tmpSelected}
         setTmpSelected={setTmpSelected}
+        filters={filters}
       />
       <IncidentPanel
         data={data}

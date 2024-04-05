@@ -33,3 +33,10 @@ export interface DB {
     [key: string]: Incident
   }
 }
+
+export interface MarkerFilters {
+  showCategories?: [keyof DB['Categories']]
+  showTypes?: [keyof DB['Types']]
+  startYear?: number
+  endYear?: number
+}
