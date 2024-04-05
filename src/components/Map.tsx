@@ -9,6 +9,7 @@ import ZoomControl from 'components/controls/ZoomControl'
 import IncidentLayer from './layers/IncidentLayer'
 import { LatLngBoundsLiteral } from 'leaflet'
 import CategoryControl from './controls/CategoryControl'
+import YearControl from './controls/YearControl'
 
 interface MapProps {
   apiKey: string
@@ -37,6 +38,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
     hideTypes: [],
+    startYear: null,
+    endYear: null,
   })
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
@@ -150,6 +153,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />*/}
       <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+      <YearControl data={data} filters={filters} setFilters={setFilters} />
       <ZoomControl zoomLevel={2} />
       <SetInitialBounds />
     </MapContainer>

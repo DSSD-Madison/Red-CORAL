@@ -3,13 +3,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import Control from 'react-leaflet-custom-control'
 import { DB, MarkerFilters } from 'types'
 
-interface TagControlProps {
+interface YearControlProps {
   data: DB
   filters: MarkerFilters
   setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
 }
 
-const CategoryControl: React.FC<TagControlProps> = ({ data, filters, setFilters }) => {
+const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) => {
   const [isDropdownVisible, setDropdownVisible] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
