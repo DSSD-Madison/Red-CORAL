@@ -89,11 +89,14 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
               </div>
               <div className="font-merriweather text-base">
                 <div className="mb-4 text-sm text-shade-02">
-                  Fecha: {incident.dateString}
+                  {incident.dateString && (
+                    <>
+                      Fecha: {incident.dateString} <br />
+                    </>
+                  )}
+                  Actividad: {data.Categories[data.Types[incident.typeID].categoryID].name}
                   <br />
                   Tipo de evento: {data.Types[incident.typeID].name}
-                  <br />
-                  Actividad: {data.Categories[data.Types[incident.typeID].categoryID].name}
                 </div>
 
                 <div className="mb-6 text-shade-01">{incident.description}</div>

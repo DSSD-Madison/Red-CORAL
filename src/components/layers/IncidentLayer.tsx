@@ -38,8 +38,8 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     }
 
     const incidentList = Object.entries(data?.Incidents || {}).filter(([_, incident]) => {
-      if (filters.showCategories && !filters.showCategories.includes(incident.typeID)) return false
-      if (filters.showTypes && !filters.showTypes.includes(incident.typeID)) return false
+      if (filters.hideCategories.includes(data.Types[incident.typeID].categoryID)) return false
+      if (filters.hideTypes.includes(incident.typeID)) return false
       if (filters.startYear && new Date(incident.dateString).getFullYear() < filters.startYear) return false
       if (filters.endYear && new Date(incident.dateString).getFullYear() > filters.endYear) return false
       return true

@@ -35,8 +35,8 @@ export interface DB {
 }
 
 export interface MarkerFilters {
-  showCategories?: [keyof DB['Categories']]
-  showTypes?: [keyof DB['Types']]
+  hideCategories: (keyof DB['Categories'])[]
+  hideTypes: (keyof DB['Types'])[]
   startYear?: number
   endYear?: number
 }
