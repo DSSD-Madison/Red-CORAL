@@ -42,6 +42,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   location,
   setLocation,
   tmpSelected,
+  isAdmin,
   deleteSelectedIncident,
 }) => {
   const map = useMap()
@@ -96,9 +97,11 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 </div>
 
                 <div className="mb-6 text-shade-01">{incident.description}</div>
-                <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
-                  Borrar
-                </button>
+                {isAdmin && (
+                  <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
+                    Borrar
+                  </button>
+                )}
               </div>
             </div>
           )}
