@@ -71,10 +71,7 @@ const CategoryControl: React.FC<TagControlProps> = ({ data, filters, setFilters 
           &#x2630;
         </a>
         {isDropdownVisible && (
-          <div
-            ref={dropdownRef}
-            className="absolute left-10 top-0 box-border w-60 rounded border-2 border-shade-01 border-opacity-40 bg-white bg-opacity-90"
-          >
+          <div ref={dropdownRef} className="leaflet-bar absolute -top-0.5 left-10 box-content w-60 rounded bg-tint-02/60 shadow-lg">
             <div className="flex flex-row justify-between">
               <div className="text-md m-1 font-semibold">Actividades</div>
               <div className="mx-1 flex flex-row justify-center align-middle">

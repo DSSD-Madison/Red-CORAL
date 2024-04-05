@@ -69,7 +69,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
       key={'overlay'}
       className={`${
         incident || tmpSelected ? 'w-[100%] md:w-[400px]' : 'w-0'
-      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-tint-02 bg-opacity-60 !font-proxima-nova shadow-lg backdrop-blur-sm transition-all duration-100`}
+      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto rounded-e-xl bg-tint-02/60 !font-proxima-nova shadow-lg backdrop-blur-sm transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
     >
