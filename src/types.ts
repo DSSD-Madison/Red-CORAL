@@ -33,3 +33,10 @@ export interface DB {
     [key: string]: Incident
   }
 }
+
+export interface MarkerFilters {
+  hideCategories: (keyof DB['Categories'])[]
+  hideTypes: (keyof DB['Types'])[]
+  startYear: number | null
+  endYear: number | null
+}

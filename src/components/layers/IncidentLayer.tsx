@@ -1,7 +1,7 @@
 import L, { LatLngExpression, LatLngTuple } from 'leaflet'
 import { forwardRef } from 'react'
 import { useMap, Marker as LeafletMarker, LayerGroup, Polyline } from 'react-leaflet'
-import { DB, Incident } from 'types'
+import { DB, Incident, MarkerFilters } from 'types'
 
 interface IncidentLayerProps {
   data: DB
@@ -12,10 +12,11 @@ interface IncidentLayerProps {
   setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location']>>
   tmpSelected: boolean
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
+  filters: MarkerFilters
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
-  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, setTmpSelected }, ref) => {
+  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, setTmpSelected, filters }, ref) => {
     const map = useMap()
 
     map.addEventListener('dblclick', (e) => {
@@ -36,8 +37,16 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
       map.flyToBounds(bounds, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5 })
     }
 
-    const incidentList = Object.entries(data?.Incidents || {})
+    const incidentList = Object.entries(data?.Incidents || {}).filter(([_, incident]) => {
+      if (filters.hideCategories.includes(data.Types[incident.typeID].categoryID)) return false
+      if (filters.hideTypes.includes(incident.typeID)) return false
+      if (filters.startYear && new Date(incident.dateString).getFullYear() < filters.startYear) return false
+      if (filters.endYear && new Date(incident.dateString).getFullYear() > filters.endYear) return false
+      return true
+    })
+
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
+
     return (
       <LayerGroup ref={ref}>
         <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 18 18">
@@ -45,7 +54,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             <path
               d="M8,0C4.688,0,2,2.688,2,6c0,6,6,10,6,10s6-4,6-10C14,2.688,11.312,0,8,0z M8,8C6.344,8,5,6.656,5,5s1.344-3,3-3s3,1.344,3,3 S9.656,8,8,8z"
               stroke="#D6D6D7"
-              stroke-width="1"
+              strokeWidth="1"
               fill="none"
             />
             <path

@@ -69,7 +69,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
       key={'overlay'}
       className={`${
         incident || tmpSelected ? 'w-[100%] md:w-[400px]' : 'w-0'
-      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto bg-tint-02 bg-opacity-60 !font-proxima-nova shadow-lg backdrop-blur-sm transition-all duration-100`}
+      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto rounded-e-xl bg-tint-02/60 !font-proxima-nova shadow-lg backdrop-blur-sm transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
     >
@@ -89,11 +89,14 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
               </div>
               <div className="font-merriweather text-base">
                 <div className="mb-4 text-sm text-shade-02">
-                  Fecha: {incident.dateString}
+                  {incident.dateString && (
+                    <>
+                      Fecha: {incident.dateString} <br />
+                    </>
+                  )}
+                  Actividad: {data.Categories[data.Types[incident.typeID].categoryID].name}
                   <br />
                   Tipo de evento: {data.Types[incident.typeID].name}
-                  <br />
-                  Actividad: {data.Categories[data.Types[incident.typeID].categoryID].name}
                 </div>
 
                 <div className="mb-6 text-shade-01">{incident.description}</div>
