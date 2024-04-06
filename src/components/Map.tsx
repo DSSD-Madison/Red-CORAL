@@ -43,14 +43,14 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   })
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
-  const [name, setName] = useState<Incident['name']>('')
-  const [description, setDescription] = useState<Incident['description']>('')
-  const [dateString, setDateString] = useState<Incident['dateString']>('')
-  const [typeID, setTypeID] = useState<keyof DB['Types']>('')
-  const [catID, setCatID] = useState<keyof DB['Categories']>('')
-  const [location, setLocation] = useState<Incident['location']>([])
+  const [location, setLocation] = useState<Incident['location'] | null>(null)
 
-  async function submitIncident(): Promise<boolean> {
+  async function submitIncident(
+    name: Incident['name'],
+    dateString: Incident['dateString'],
+    typeID: Incident['typeID'],
+    description: Incident['description']
+  ): Promise<boolean> {
     if (!name) {
       alert('Please enter a name for the incident')
       return false
@@ -59,13 +59,14 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       alert('Please enter a date for the incident')
       return false
     }
-    if (location.length == 0) {
-      alert('There is no location for the incident, please double click on the map to add a location')
-      return false
-    }
 
     if (!Object.keys(data.Types).some((id) => id == typeID)) {
       alert('Tipo de evento no válido, algo salió mal')
+      return false
+    }
+
+    if (!location) {
+      alert('Por favor, selecciona una lugar en el mapa')
       return false
     }
 
@@ -73,12 +74,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       alert('No se pudo crear el incidente')
       return false
     }
-    setName('')
-    setDescription('')
-    setDateString('')
-    setTypeID('')
-    setCatID('')
-    setLocation([])
+    setLocation(null)
     alert('Incidente creado con éxito')
     return true
   }
@@ -133,17 +129,6 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
         incidentID={selectedIncidentID}
         onClose={onClose}
         submitIncident={submitIncident}
-        name={name}
-        setName={setName}
-        description={description}
-        setDescription={setDescription}
-        dateString={dateString}
-        setDateString={setDateString}
-        typeID={typeID}
-        setTypeID={setTypeID}
-        catID={catID}
-        setCatID={setCatID}
-        location={location}
         setLocation={setLocation}
         tmpSelected={tmpSelected}
         setTmpSelected={setTmpSelected}

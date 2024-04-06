@@ -8,8 +8,7 @@ export interface Incident {
   description: string
   dateString: string
   typeID: keyof DB['Types']
-  location: Coordinates[]
-  isTest?: boolean // if true, should only be visible to admins i.e. not saved into Cloud Storage
+  location: Coordinates
 }
 
 export interface Category {

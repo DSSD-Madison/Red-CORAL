@@ -1,23 +1,18 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
+import { useState } from 'react'
 
 interface InfoPanelControlProps {
   data: DB
   incidentID: keyof DB['Incidents'] | null
   onClose: () => void
-  submitIncident: () => Promise<boolean>
-  name: Incident['name']
-  setName: React.Dispatch<React.SetStateAction<Incident['name']>>
-  description: Incident['description']
-  setDescription: React.Dispatch<React.SetStateAction<Incident['description']>>
-  dateString: Incident['dateString']
-  setDateString: React.Dispatch<React.SetStateAction<Incident['dateString']>>
-  typeID: keyof DB['Types']
-  setTypeID: React.Dispatch<React.SetStateAction<keyof DB['Types']>>
-  catID: keyof DB['Categories']
-  setCatID: React.Dispatch<React.SetStateAction<keyof DB['Categories']>>
-  location: Incident['location']
-  setLocation: React.Dispatch<React.SetStateAction<Incident['location']>>
+  submitIncident: (
+    name: Incident['name'],
+    dateString: Incident['dateString'],
+    typeID: Incident['typeID'],
+    description: Incident['description']
+  ) => Promise<boolean>
+  setLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
   tmpSelected: boolean
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   isAdmin: boolean
@@ -29,23 +24,17 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   incidentID,
   onClose,
   submitIncident,
-  name,
-  setName,
-  description,
-  setDescription,
-  dateString,
-  setDateString,
-  typeID,
-  setTypeID,
-  catID,
-  setCatID,
-  location,
   setLocation,
   tmpSelected,
   isAdmin,
   deleteSelectedIncident,
 }) => {
   const map = useMap()
+  const [name, setName] = useState<Incident['name']>('')
+  const [description, setDescription] = useState<Incident['description']>('')
+  const [dateString, setDateString] = useState<Incident['dateString']>('')
+  const [typeID, setTypeID] = useState<keyof DB['Types']>('')
+  const [catID, setCatID] = useState<keyof DB['Categories']>('')
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -60,6 +49,17 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const close = () => {
     enableZoom()
     onClose()
+  }
+
+  const submit = async () => {
+    if (await submitIncident(name, dateString, typeID, description)) {
+      setName('')
+      setDescription('')
+      setDateString('')
+      setTypeID('')
+      setCatID('')
+      close()
+    }
   }
 
   const incident = incidentID ? data.Incidents[incidentID] : null
@@ -165,15 +165,12 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
               <button
                 className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-redwood-light"
                 onClick={() => {
-                  setLocation(location.slice(0, -1))
+                  setLocation(null)
                 }}
               >
-                Quitar el último marcador
+                Quitar marcador
               </button>
-              <button
-                className="rounded-sm border-0 bg-green-light pb-1 pl-2 pr-2 pt-1 hover:bg-green"
-                onClick={async () => (await submitIncident()) && close()}
-              >
+              <button className="rounded-sm border-0 bg-green-light pb-1 pl-2 pr-2 pt-1 hover:bg-green" onClick={submit}>
                 Crear
               </button>
             </div>

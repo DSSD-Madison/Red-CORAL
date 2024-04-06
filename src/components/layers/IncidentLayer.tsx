@@ -1,6 +1,6 @@
-import L, { LatLngExpression, LatLngTuple } from 'leaflet'
+import L, { LatLngTuple } from 'leaflet'
 import { forwardRef } from 'react'
-import { useMap, Marker as LeafletMarker, LayerGroup, Polyline } from 'react-leaflet'
+import { useMap, Marker as LeafletMarker, LayerGroup } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 
 interface IncidentLayerProps {
@@ -8,8 +8,8 @@ interface IncidentLayerProps {
   selectedIncidentID: keyof DB['Incidents'] | null
   setSelectedIncidentID: React.Dispatch<React.SetStateAction<keyof DB['Incidents'] | null>>
   isAdmin: boolean
-  tmpLocation: Incident['location']
-  setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location']>>
+  tmpLocation: Incident['location'] | null
+  setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
   tmpSelected: boolean
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   filters: MarkerFilters
@@ -21,14 +21,15 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     map.addEventListener('dblclick', (e) => {
       if (!isAdmin) return
-      setTmpLocation([...tmpLocation, e.latlng])
+      setTmpLocation(e.latlng)
       setSelectedIncidentID(null)
       setTmpSelected(true)
     })
 
-    const adjustView = (location: Incident['location']) => {
+    const adjustView = (location: Incident['location'] | null) => {
+      if (!location) return
       // Incident location can be arbitrary number of coordinate
-      const path = location.map((coords) => [coords.lat, coords.lng] as LatLngTuple)
+      const path = [location].map((coords) => [coords.lat, coords.lng] as LatLngTuple)
       // Leaflet expects rectangular bounds
       const bounds = L.latLngBounds([
         [Math.min(...path.map((coords) => coords[0])), Math.min(...path.map((coords) => coords[1]))],
@@ -63,37 +64,34 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             />
           </symbol>
         </svg>
-        {incidentList.map(([id, incident], i) =>
-          incident.location.map((loc, j) => (
-            <LeafletMarker
-              key={`incident-${i}-marker-${j}`}
-              title={incident.name}
-              position={loc}
-              icon={L.divIcon({
-                iconSize: id == selectedIncidentID ? [40, 40] : [32, 32],
-                className: '',
-                html: `<svg viewBox="-1 -1 18 18" ${id == selectedIncidentID ? 'width="40px" height="40px"' : 'width="32px" height="32px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+        {incidentList.map(([id, incident], i) => (
+          <LeafletMarker
+            key={`incident-${i}-marker`}
+            title={incident.name}
+            position={incident.location}
+            icon={L.divIcon({
+              iconSize: id == selectedIncidentID ? [40, 40] : [32, 32],
+              className: '',
+              html: `<svg viewBox="-1 -1 18 18" ${id == selectedIncidentID ? 'width="40px" height="40px"' : 'width="32px" height="32px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
                         <use href="#marker" />
                       </svg>`,
-              })}
-              eventHandlers={{
-                click: () => {
-                  if (selectedIncidentID === id) {
-                    setSelectedIncidentID(null)
-                  } else {
-                    setSelectedIncidentID(id)
-                    adjustView(incident.location)
-                  }
-                },
-              }}
-            />
-          ))
-        )}
-        {tmpLocation.map((loc, index) => (
+            })}
+            eventHandlers={{
+              click: () => {
+                if (selectedIncidentID === id) {
+                  setSelectedIncidentID(null)
+                } else {
+                  setSelectedIncidentID(id)
+                  adjustView(incident.location)
+                }
+              },
+            }}
+          />
+        ))}
+        {tmpLocation && (
           <LeafletMarker
-            key={`tmp-incident-marker-${index}`}
-            title={'tmp'}
-            position={loc}
+            title={''}
+            position={tmpLocation}
             icon={L.divIcon({
               iconSize: tmpSelected ? [40, 40] : [32, 32],
               className: '',
@@ -112,8 +110,8 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
               },
             }}
           />
-        ))}
-        {incidentList.map(([id, incident], i) => {
+        )}
+        {/* {incidentList.map(([id, incident], i) => {
           if (incident.location.length > 1) {
             const positions = incident.location.map((coords) => [coords.lat, coords.lng] as LatLngExpression)
             const opts = id == selectedIncidentID ? { color: 'red', opacity: 0.7 } : { color: 'black', opacity: 0.5 }
@@ -135,8 +133,8 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
               />
             )
           }
-        })}
-        {tmpLocation.length > 1 && (
+        })} */}
+        {/* {tmpLocation.length > 1 && (
           <Polyline
             key={`tmp-incident-path`}
             positions={tmpLocation.map((coords) => [coords.lat, coords.lng] as LatLngExpression)}
@@ -152,7 +150,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
               },
             }}
           />
-        )}
+        )} */}
       </LayerGroup>
     )
   }
