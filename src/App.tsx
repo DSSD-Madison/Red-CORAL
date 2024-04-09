@@ -5,6 +5,7 @@ import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
 import Login from 'components/Login'
 import Home from 'components/Home'
+import CRUDDash from 'components/CRUDDash'
 
 const App: React.FC = () => {
   const app = initializeApp({
@@ -35,11 +36,21 @@ const App: React.FC = () => {
     )
   }
 
+  function AdminDash() {
+    return (
+      <>
+        {!isLoggedIn && <Login auth={auth} onSignInSuccess={handleSignInSuccess} />}
+        {isLoggedIn && <CRUDDash app={app} />}
+      </>
+    )
+  }
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home app={app} isAdmin={false} />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/dash" element={<AdminDash />} />
       </Routes>
     </Router>
   )
