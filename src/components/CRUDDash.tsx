@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { FirebaseApp } from 'firebase/app'
-import { getFirestore, collection, addDoc, getDocs, doc, where, query, deleteDoc, queryEqual, QuerySnapshot } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, where, query } from 'firebase/firestore'
 import LoadingOverlay from './LoadingOverlay'
 
 interface CrudProps {
@@ -11,169 +10,185 @@ interface CrudProps {
 
 const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   const firestore = getFirestore(app)
-  const storage = getStorage(app, 'gs://red-coral-map.appspot.com')
-  const stadiaAPIKey = import.meta.env.VITE_STADIA_KEY
 
-  const [data, setData] = useState({
-    Categories: {},
-    Types: {},
-    Incidents: {},
-  })
-
-  const [categories, setCategories] = useState<string[]>([])
+  const [entities, setEntities] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [showAddCategory, setShowAddCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState('')
-  const [newCategoryColor, setNewCategoryColor] = useState('')
-  const [isCategoriesShown, setIsCategoriesShown] = useState(false) // State variable to track if categories are shown
-  const [deleteCategoryName, setDeleteCategoryName] = useState('')
+  const [showAddEntity, setShowAddEntity] = useState(false)
+  const [newEntityName, setNewEntityName] = useState('')
+  const [newEntityColor, setNewEntityColor] = useState('')
+  const [isEntitiesShown, setIsEntitiesShown] = useState(false)
+  const [deleteEntityName, setDeleteEntityName] = useState('')
+  const [showDeleteEntity, setShowDeleteEntity] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [entityType, setEntityType] = useState<'Categories' | 'Type'>('Categories') // Initialize with Category
 
-  const showCategories = async () => {
+  const showEntities = async () => {
     setIsLoading(true)
     try {
-      const q = collection(firestore, 'Categories')
+      const q = collection(firestore, entityType)
       const querySnapshot = await getDocs(q)
-      const categoriesArray: string[] = []
+      const entitiesArray: string[] = []
       querySnapshot.forEach((doc) => {
-        const category = doc.data()
-        categoriesArray.push(category.name)
+        const entity = doc.data()
+        entitiesArray.push(entity.name)
       })
-      setCategories(categoriesArray)
+      setEntities(entitiesArray)
     } catch (error) {
-      console.error('Error fetching categories:', error)
+      setErrorMessage('Error fetching ' + entityType.toLowerCase())
+      window.alert(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleAddCategory = () => {
-    setShowAddCategory(true)
+  const handleEntityNameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewEntityName(event.target.value)
   }
 
-  const handleCategoryNameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewCategoryName(event.target.value)
+  const handleEntityColorInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewEntityColor(event.target.value)
   }
 
-  const handleCategoryColorInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewCategoryColor(event.target.value)
-  }
-
-  const handleCategoryColorFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+  const handleEntityColorFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.placeholder = ''
   }
 
-  const handleCategoryColorBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+  const handleEntityColorBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.placeholder = '#000000'
   }
 
-  const handleCategorySubmit = async () => {
-    if (newCategoryName.trim() === '' || newCategoryColor.trim() === '') {
+  const handleAddEntity = async () => {
+    if (newEntityName.trim() === '' || newEntityColor.trim() === '') {
       // Do nothing if either input field is empty
       return
     }
 
     try {
-      await addDoc(collection(firestore, 'Categories'), {
-        name: newCategoryName,
-        color: newCategoryColor,
+      await addDoc(collection(firestore, entityType), {
+        name: newEntityName,
+        color: newEntityColor,
       })
 
       // Clear the input fields and hide them
-      setNewCategoryName('')
-      setNewCategoryColor('')
-      setShowAddCategory(false)
+      setNewEntityName('')
+      setNewEntityColor('')
+      setShowAddEntity(false)
 
-      // Call showCategories to fetch and display the updated categories list
-      await showCategories()
+      // Call showEntities to fetch and display the updated entities list
+      await showEntities()
     } catch (error) {
-      console.error('Error adding category:', error)
+      setErrorMessage('Error adding ' + entityType.toLowerCase())
+      window.alert(errorMessage)
     }
   }
 
-  const toggleCategories = () => {
-    if (isCategoriesShown) {
-      setCategories([]) // Clear categories when hiding
+  const toggleEntities = () => {
+    if (isEntitiesShown) {
+      setEntities([]) // Clear entities when hiding
     } else {
-      showCategories() // Fetch categories when showing
+      showEntities() // Fetch entities when showing
     }
-    setIsCategoriesShown(!isCategoriesShown) // Toggle the state
+    setIsEntitiesShown(!isEntitiesShown) // Toggle the state
   }
 
-  const handleDeleteCategory = async () => {
+  const handleDeleteEntity = async () => {
     try {
-      const q = query(collection(firestore, 'Categories'), where('name', '==', deleteCategoryName))
+      const q = query(collection(firestore, entityType), where('name', '==', deleteEntityName))
       const querySnapshot = await getDocs(q)
       if (!querySnapshot.empty) {
         querySnapshot.forEach(async (doc) => {
           await deleteDoc(doc.ref)
         })
-        await showCategories()
+        await showEntities()
       } else {
-        console.error('Category not found')
+        setErrorMessage(entityType + ' not found')
+        window.alert(errorMessage)
       }
     } catch (error) {
-      console.error('Error deleting category:', error)
+      setErrorMessage('Error deleting ' + entityType.toLowerCase())
+      window.alert(errorMessage)
     }
-    setDeleteCategoryName('')
+    setDeleteEntityName('')
+    setShowDeleteEntity(false)
+  }
+
+  const toggleEntityType = (type: 'Category' | 'Type') => {
+    setEntityType(type)
+    setIsEntitiesShown(false) // Hide entities when switching type
+    showEntities() // Fetch entities for the new type
   }
 
   return (
     <div className="relative flex flex-col items-center justify-center h-full">
-      <div className="flex flex-col items-center mb-4">
-      <button onClick={handleAddCategory} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
-          Add Category
+      <div className="absolute top-0 left-0 m-4">
+        <button onClick={() => toggleEntityType('Category')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
+          Switch to Category
         </button>
-        {showAddCategory && (
+        <button onClick={() => toggleEntityType('Type')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
+          Switch to Type
+        </button>
+      </div>
+      <div className="flex flex-col items-center mb-4">
+        <button onClick={() => setShowAddEntity(true)} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
+          Add {entityType}
+        </button>
+        {showAddEntity && (
           <div>
             <input
               type="text"
-              className="px-3 py-2 mb-2 border border-gray-300 rounded-md"
-              placeholder="Enter category name"
-              value={newCategoryName}
-              onChange={handleCategoryNameInputChange}
+              className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
+              placeholder={`Enter ${entityType.toLowerCase()} name`}
+              value={newEntityName}
+              onChange={handleEntityNameInputChange}
             />
             <input
               type="text"
-              className="px-3 py-2 mb-2 border border-gray-300 rounded-md"
+              className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
               placeholder="#000000"
-              value={newCategoryColor}
-              onChange={handleCategoryColorInputChange}
-              onFocus={handleCategoryColorFocus}
-              onBlur={handleCategoryColorBlur}
+              value={newEntityColor}
+              onChange={handleEntityColorInputChange}
+              onFocus={handleEntityColorFocus}
+              onBlur={handleEntityColorBlur}
             />
-            <button onClick={handleCategorySubmit} className="px-4 py-2 text-white rounded-full shadow-md bg-green">
+            <button onClick={handleAddEntity} className="px-4 py-2 mr-2 text-white rounded-full shadow-md bg-green">
               Submit
             </button>
           </div>
         )}
-    
       </div>
-      <button onClick={handleDeleteCategory} className="px-4 py-2 text-white rounded-full shadow-md bg-red">
-          Delete Category
-        </button>
       <div className="flex flex-col items-center mb-4">
-        <input
-          type="text"
-          className="px-3 py-2 mb-2 border border-gray-300 rounded-md"
-          placeholder="Enter category name to delete"
-          value={deleteCategoryName}
-          onChange={(e) => setDeleteCategoryName(e.target.value)}
-        />
-   
+        <button onClick={() => setShowDeleteEntity(true)} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
+          Delete {entityType}
+        </button>
+        {showDeleteEntity && (
+          <div>
+            <input
+              type="text"
+              className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
+              placeholder={`Enter ${entityType.toLowerCase()} name`}
+              value={deleteEntityName}
+              onChange={(e) => setDeleteEntityName(e.target.value)}
+            />
+            <button onClick={handleDeleteEntity} className="px-4 py-2 mr-2 text-white rounded-full shadow-md bg-red">
+              Submit
+            </button>
+          </div>
+        )}
       </div>
-      <button onClick={toggleCategories} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
-        {isCategoriesShown ? 'Hide Categories' : 'Show Categories'}
+
+      <button onClick={toggleEntities} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
+        {isEntitiesShown ? `Hide ${entityType}` : `Show ${entityType}`}
       </button>
-      {isCategoriesShown && (
-        <div className="w-64 p-4 text-center bg-red-100 rounded-lg">
-          {categories.map((category, index) => (
+      {isEntitiesShown && (
+        <div className="grid w-full max-w-4xl grid-cols-3 gap-4 p-4 text-center bg-red-100 rounded-lg">
+          {entities.map((entity, index) => (
             <p key={index} className="text-black">
-              {category}
+              {entity}
             </p>
           ))}
         </div>
       )}
-      {isLoading && <LoadingOverlay isVisible={isLoading} />} {/* Show loading overlay conditionally */}
+      {isLoading && <LoadingOverlay isVisible={isLoading} />}
     </div>
   )
 }
