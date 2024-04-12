@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FirebaseApp } from 'firebase/app'
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, where, query } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, where, query, updateDoc } from 'firebase/firestore'
 import LoadingOverlay from './LoadingOverlay'
 
 interface CrudProps {
@@ -14,13 +14,18 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   const [entities, setEntities] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showAddEntity, setShowAddEntity] = useState(false)
-  const [newEntityName, setNewEntityName] = useState('')
-  const [newEntityColor, setNewEntityColor] = useState('')
+  const [addEntityName, setAddEntityName] = useState('')
+  const [addEntitySecondProperty, setAddEntitySecondProperty] = useState('')
   const [isEntitiesShown, setIsEntitiesShown] = useState(false)
   const [deleteEntityName, setDeleteEntityName] = useState('')
   const [showDeleteEntity, setShowDeleteEntity] = useState(false)
+  const [showModifyEntity, setShowModifyEntity] = useState(false)
+  const [modifyEntityOldName, setModifyEntityOldName] = useState('')
+  const [modifyEntityNewName, setModifyEntityNewName] = useState('')
+  const [modifyEntityNewSecondProperty, setModifyEntityNewSecondProperty] = useState('')
+  
   const [errorMessage, setErrorMessage] = useState('')
-  const [entityType, setEntityType] = useState<'Categories' | 'Type'>('Categories') // Initialize with Category
+  const [entityType, setEntityType] = useState<'Categories' | 'Types'>('Categories') // Initialize with Category
 
   const showEntities = async () => {
     setIsLoading(true)
@@ -42,36 +47,35 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   }
 
   const handleEntityNameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewEntityName(event.target.value)
+    setAddEntityName(event.target.value)
   }
 
-  const handleEntityColorInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewEntityColor(event.target.value)
+  const handleAddEntitySecondPropertyInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAddEntitySecondProperty(event.target.value)
   }
 
-  const handleEntityColorFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    event.target.placeholder = ''
-  }
-
-  const handleEntityColorBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    event.target.placeholder = '#000000'
-  }
-
+ 
   const handleAddEntity = async () => {
-    if (newEntityName.trim() === '' || newEntityColor.trim() === '') {
-      // Do nothing if either input field is empty
-      return
-    }
-
     try {
-      await addDoc(collection(firestore, entityType), {
-        name: newEntityName,
-        color: newEntityColor,
-      })
+      if (addEntityName.trim() === '' || addEntitySecondProperty.trim() === '') {
+        // Do nothing if either input field is empty
+        return
+      }
+      if (entityType == 'Categories') {
+        await addDoc(collection(firestore, entityType), {
+          name: addEntityName,
+          color: addEntitySecondProperty,
+        })
+      } else {
+        await addDoc(collection(firestore, entityType), {
+          name: addEntityName,
+          categoryID: addEntitySecondProperty,
+        })
+      }
 
       // Clear the input fields and hide them
-      setNewEntityName('')
-      setNewEntityColor('')
+      setAddEntityName('')
+      setAddEntitySecondProperty('')
       setShowAddEntity(false)
 
       // Call showEntities to fetch and display the updated entities list
@@ -112,7 +116,50 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
     setShowDeleteEntity(false)
   }
 
-  const toggleEntityType = (type: 'Category' | 'Type') => {
+  const handleModifyEntity = async () => {
+    if (modifyEntityNewName.trim() === '') {
+      setErrorMessage('Please enter a new name')
+      window.alert(errorMessage)
+      return
+    }
+    try {
+      const q = query(collection(firestore, entityType), where('name', '==', modifyEntityOldName));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach(async (doc) => {
+          if (entityType === 'Categories') {
+            await updateDoc(doc.ref, {
+              name: modifyEntityNewName,
+              color: modifyEntityNewSecondProperty,
+            });
+          } else {
+            await updateDoc(doc.ref, {
+              name: modifyEntityNewName,
+              categoryID: modifyEntityNewSecondProperty,
+            });
+          }
+        });
+      } else {
+        setErrorMessage(entityType + ' not found')
+        window.alert(errorMessage)
+      }
+  
+      // Clear the input fields and hide them
+      setModifyEntityNewName('');
+      setModifyEntityNewSecondProperty('');
+      setModifyEntityOldName('');
+      setShowModifyEntity(false);
+  
+      // Call showEntities to fetch and display the updated entities list
+      await showEntities();
+    } catch (error) {
+      setErrorMessage('Error modifying ' + entityType.toLowerCase())
+      window.alert(errorMessage)
+    }
+  };
+  
+
+  const toggleEntityType = (type: 'Category' | 'Types') => {
     setEntityType(type)
     setIsEntitiesShown(false) // Hide entities when switching type
     showEntities() // Fetch entities for the new type
@@ -124,7 +171,7 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
         <button onClick={() => toggleEntityType('Category')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
           Switch to Category
         </button>
-        <button onClick={() => toggleEntityType('Type')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
+        <button onClick={() => toggleEntityType('Types')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
           Switch to Type
         </button>
       </div>
@@ -138,17 +185,16 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
               type="text"
               className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
               placeholder={`Enter ${entityType.toLowerCase()} name`}
-              value={newEntityName}
+              value={addEntityName}
               onChange={handleEntityNameInputChange}
             />
             <input
               type="text"
               className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
-              placeholder="#000000"
-              value={newEntityColor}
-              onChange={handleEntityColorInputChange}
-              onFocus={handleEntityColorFocus}
-              onBlur={handleEntityColorBlur}
+              placeholder={entityType === 'Categories' ? 'Enter color code' : 'Enter category ID'}
+              value={addEntitySecondProperty}
+              onChange={handleAddEntitySecondPropertyInputChange}
+        
             />
             <button onClick={handleAddEntity} className="px-4 py-2 mr-2 text-white rounded-full shadow-md bg-green">
               Submit
@@ -175,12 +221,46 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
           </div>
         )}
       </div>
+      <div className="flex flex-col items-center mb-4">
+        <button onClick={() => setShowModifyEntity(true)} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
+          Modify {entityType}
+        </button>
+        {showModifyEntity && (
+          <div>
+            <input
+              type="text"
+              className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
+              placeholder={`old name`}
+              value={modifyEntityOldName}
+              onChange={(e) => setModifyEntityOldName(e.target.value)}
+            />
+            <input
+              type="text"
+              className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
+              placeholder={`new name`}
+              value={modifyEntityNewName}
+              onChange={(e) => setModifyEntityNewName(e.target.value)}
+       
+            />
+            <input
+              type="text"
+              className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
+              placeholder={entityType === 'Categories' ? 'new color code' : 'new category ID'}
+              value={modifyEntityNewSecondProperty}
+              onChange={(e) => setModifyEntityNewSecondProperty(e.target.value)}
+            />
+            <button onClick={handleModifyEntity} className="px-4 py-2 mr-2 text-white rounded-full shadow-md bg-green">
+              Submit
+            </button>
+          </div>
+        )}
+      </div>
 
       <button onClick={toggleEntities} className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red">
         {isEntitiesShown ? `Hide ${entityType}` : `Show ${entityType}`}
       </button>
       {isEntitiesShown && (
-        <div className="grid w-full max-w-4xl grid-cols-3 gap-4 p-4 text-center bg-red-100 rounded-lg">
+        <div className="grid w-full grid-cols-4 gap-3 p-4 text-center bg-red-100 rounded-lg max-w-8xl">
           {entities.map((entity, index) => (
             <p key={index} className="text-black">
               {entity}
