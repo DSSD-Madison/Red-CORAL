@@ -33,5 +33,6 @@ jobs:
 
     - name: Run cache script
       run: |
+        ls
         python cache_script.py
       working-directory: backend/
