@@ -41,11 +41,11 @@ def read_firestore():
 def save_to_cloud_storage(data):
     minified_data = minify_json(data)
 
-    with open('data.json', 'w') as file:
+    with open('state.json', 'w') as file:
         file.write(minified_data)
 
-    blob = bucket.blob('data.json')
-    blob.upload_from_filename('data.json')
+    blob = bucket.blob('state.json')
+    blob.upload_from_filename('state.json')
 
 def update_firestore_with_timestamp(collection_name, doc_id):
     db.collection(collection_name).document(doc_id).update({'readAt': timestamp})
@@ -67,5 +67,4 @@ def main():
     for collection_name, doc_ids in data.items():
         update_documents_concurrently(collection_name, doc_ids.keys())
 
-if __name__ == "__main__":
-    main()
+main()
