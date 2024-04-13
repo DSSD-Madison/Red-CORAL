@@ -1,0 +1,36 @@
+name: Daily Firestore Backup
+
+on:
+  push:
+    branches:
+      - backend  # Change this to your main branch if different
+  # schedule:
+  #   - cron: '0 0 * * *' # Run daily at midnight
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create Secrets File
+      run: |
+        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_RED_CORAL_MAP }}' > creds.json
+
+    - name: Run cache script
+      run: python cache_script.py
