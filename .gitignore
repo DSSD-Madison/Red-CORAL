@@ -27,3 +27,6 @@ dist-ssr
 .vite
 
 .env
+
+backend/*.json
+backend/.venv

@@ -1,0 +1,35 @@
+name: Daily Firestore Cache
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      working-directory: backend/
+
+    - name: Create Secrets File
+      run: |
+        echo '${{ secrets.FIREBASE_CREDS }}' > creds.json
+      working-directory: backend/
+
+    - name: Run cache script
+      run: |
+        ls
+        python cache_script.py
+      working-directory: backend/
