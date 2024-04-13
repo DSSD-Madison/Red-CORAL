@@ -9,27 +9,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-      working-directory: backend/
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        working-directory: backend/
 
-    - name: Create Secrets File
-      run: |
-        echo '${{ secrets.FIREBASE_CREDS }}' > creds.json
-      working-directory: backend/
+      - name: Run cache script (QA)
+        run: |
+          echo '${{ secrets.FIREBASE_CREDS }}' > creds.json
+          python cache_script.py
+        working-directory: backend/
 
-    - name: Run cache script
-      run: |
-        ls
-        python cache_script.py
-      working-directory: backend/
+      - name: Run cache script (Prod)
+        run: |
+          echo '${{ secrets.FIREBASE_CREDS_PROD }}' > creds.json
+          python cache_script.py
+        working-directory: backend/

@@ -15,7 +15,7 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
   const firestore = getFirestore(app)
-  const storage = getStorage(app, 'gs://red-coral-map.appspot.com')
+  const storage = getStorage(app, import.meta.env.VITE_FIREBASE_STORAGE_BUCKET)
   const stadiaAPIKey = import.meta.env.VITE_STADIA_KEY
 
   const [data, setData] = useState<DB>({
