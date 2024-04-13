@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - backend
-    paths:
-      - 'backend/**'
-      - '.github/workflows/docker-build.yaml'
   # schedule:
   #   - cron: '0 0 * * *' # Run daily at midnight
 
