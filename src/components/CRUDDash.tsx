@@ -16,14 +16,10 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   const [showAddEntity, setShowAddEntity] = useState(false)
   const [addEntityName, setAddEntityName] = useState('')
   const [addEntitySecondProperty, setAddEntitySecondProperty] = useState('')
-  const [isEntitiesShown, setIsEntitiesShown] = useState(false)
-  const [deleteEntityName, setDeleteEntityName] = useState('')
-  const [showDeleteEntity, setShowDeleteEntity] = useState(false)
   const [showModifyEntity, setShowModifyEntity] = useState(false)
   const [modifyEntityOldName, setModifyEntityOldName] = useState('')
   const [modifyEntityNewName, setModifyEntityNewName] = useState('')
   const [modifyEntitySecondProperty, setModifyEntitySecondProperty] = useState('')
-
   const [errorMessage, setErrorMessage] = useState('')
   const [entityType, setEntityType] = useState<'Categories' | 'Types'>('Categories')
 
@@ -52,10 +48,6 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
 
   const handleAddEntityColorChange = (color: any) => {
     setAddEntitySecondProperty(color.hex) // Actualiza el valor del color
-  }
-
-  const handleModifyEntityNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setModifyEntityNewName(event.target.value)
   }
 
   const handleModifyEntityColorChange = (color: any) => {
@@ -132,8 +124,7 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
       setErrorMessage('Error al eliminar ' + entityType.toLowerCase())
       window.alert(errorMessage)
     }
-    setDeleteEntityName('')
-    setShowDeleteEntity(false)
+
   }
 
   const handleModifyEntity = async () => {
@@ -180,7 +171,6 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
 
   const toggleEntityType = async (type: 'Categories' | 'Types') => {
     setEntityType(type) 
-    setIsEntitiesShown(false) 
     setShowAddEntity(false)
     setShowModifyEntity(false)
   }
@@ -190,18 +180,18 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   }, [entityType])
 
   const entityTypesSpanish = {
-    Categories: 'Categorías',
-    Types: 'Tipos',
+    Categories: 'Actividades',
+    Types: 'Tipos de Eventos',
   }
 
   return (
     <div className="relative flex flex-col items-center justify-center h-full">
       <div className="absolute top-0 left-0 m-4">
         <button onClick={() => toggleEntityType('Categories')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
-          Cambiar a Categoría
+          Cambiar a Actividad
         </button>
         <button onClick={() => toggleEntityType('Types')} className="px-4 py-2 mb-4 mr-2 text-white rounded-full shadow-md bg-green">
-          Cambiar a Tipo
+          Cambiar a Tipo de Evento
         </button>
       </div>
       {/* Title displaying current entity type */}
@@ -221,7 +211,7 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
             <input
               type="text"
               className="px-3 py-2 mb-2 mr-2 border border-gray-300 rounded-md"
-              placeholder="Ingresa el nuevo ID de categoría"
+              placeholder="Ingresa el nuevo ID de actividad"
               value={modifyEntitySecondProperty}
               onChange={(e) => setModifyEntitySecondProperty(e.target.value)}
             />
@@ -263,7 +253,7 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
           }}
           className="px-4 py-2 mb-4 text-white rounded-full shadow-md bg-red"
         >
-          Agregar {entityType}
+          Agregar
         </button>
         {showAddEntity && (
           <div>
