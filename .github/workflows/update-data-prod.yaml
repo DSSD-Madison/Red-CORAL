@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * *' # Run daily at midnight
   workflow_dispatch:
 
+env:
+  STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET_PROD }}
+
 jobs:
   cache:
     runs-on: ubuntu-latest

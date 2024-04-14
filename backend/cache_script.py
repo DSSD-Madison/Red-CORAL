@@ -6,8 +6,9 @@ from google.cloud import storage as gcs
 from datetime import datetime
 
 cred = credentials.Certificate('creds.json')
+bucket = os.environ['STORAGE_BUCKET'] if 'STORAGE_BUCKET' in os.environ else 'red-coral-map.appspot.com'
 initialize_app(cred, {
-    'storageBucket': 'red-coral-map.appspot.com'
+    'storageBucket': bucket
 })
 db = firestore.client()
 bucket = storage.bucket()

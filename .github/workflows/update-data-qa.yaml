@@ -2,6 +2,9 @@ name: Firestore Cache (QA)
 
 on: workflow_dispatch
 
+env:
+  STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+
 jobs:
   cache:
     runs-on: ubuntu-latest
