@@ -1,4 +1,4 @@
-name: Daily Firestore Cache
+name: Firestore Cache (Prod)
 
 on:
   schedule:

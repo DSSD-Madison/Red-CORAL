@@ -1,4 +1,4 @@
-name: Daily Firestore Cache
+name: Firestore Cache (QA)
 
 on: workflow_dispatch
 
