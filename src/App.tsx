@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
@@ -20,8 +20,14 @@ const App: React.FC = () => {
 
   const auth = getAuth(app)
 
+  useEffect(() => {
+    auth.authStateReady().then(() => {
+      setIsLoggedIn(auth.currentUser != null)
+    })
+  }, [])
+
   // init firestore, storage
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(auth.currentUser != null) // State variable for sign-in status
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
 
   const handleSignInSuccess = () => {
     setIsLoggedIn(true) // Update the sign-in status to true
