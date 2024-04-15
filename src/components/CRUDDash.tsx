@@ -17,9 +17,8 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   const [addEntityName, setAddEntityName] = useState('')
   const [addEntitySecondProperty, setAddEntitySecondProperty] = useState('')
   const [modifyEntityId, setModifyEntityId] = useState<string | null>(null)
-  const [modifyEntityNewName, setModifyEntityNewName] = useState('')
+  const [modifyEntityName, setModifyEntityName] = useState('')
   const [modifyEntitySecondProperty, setModifyEntitySecondProperty] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
   const [entityType, setEntityType] = useState<'Categories' | 'Types'>('Categories')
   const [entities, setEntities] = useState<DB['Categories'] | DB['Types']>({})
   const [cats, setCats] = useState<DB['Categories']>({})
@@ -47,8 +46,7 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
         setEntities(cats)
       } else setEntities(types)
     } catch (error) {
-      setErrorMessage('Error al obtener ' + entityType.toLowerCase())
-      window.alert(errorMessage)
+      window.alert('Error al obtener ' + entityType.toLowerCase())
     } finally {
       setIsLoading(false)
     }
@@ -68,38 +66,24 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
 
   const handleAddEntity = async () => {
     try {
-      if (addEntityName.trim() === '' || addEntitySecondProperty.trim() === '') {
-        return // No hagas nada si alguno de los campos de entrada está vacío
+      if (addEntityName.trim() === '') {
+        window.alert('El nombre no puede estar vacío')
+        return
       }
-
-      let secondProperty = addEntitySecondProperty
-
-      if (entityType === 'Types') {
-        // If entityType is 'Types', search for the category name in Firestore
-        const categoryQuery = query(collection(firestore, 'Categories'), where('name', '==', addEntitySecondProperty))
-        const categorySnapshot = await getDocs(categoryQuery)
-
-        if (!categorySnapshot.empty) {
-          // If category found, use its document ID as the category ID for 'Types'
-          categorySnapshot.forEach((doc) => {
-            secondProperty = doc.id
-          })
-        } else {
-          // Handle case when category not found
-          setErrorMessage('Categoría no encontrada')
-          window.alert(errorMessage)
-          return
-        }
+      if (entityType === 'Categories' && addEntitySecondProperty.trim() === '') {
+        window.alert('Por favor seleccione un color')
+        return
+      } else if (entityType === 'Types' && !cats[addEntitySecondProperty]) {
+        window.alert('Por favor seleccione una actividad')
+        return
       }
-
-      // Add the entity with the appropriate second property
       const docData: any = {
         name: addEntityName,
       }
       if (entityType == 'Categories') {
-        docData['color'] = secondProperty
+        docData['color'] = addEntitySecondProperty
       } else {
-        docData['categoryID'] = secondProperty
+        docData['categoryID'] = addEntitySecondProperty
       }
       await addDoc(collection(firestore, entityType), docData)
 
@@ -111,13 +95,29 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
       // Call showEntities to fetch and display the updated entities list
       await showEntities()
     } catch (error) {
-      setErrorMessage('Error al agregar ' + entityType.toLowerCase())
-      window.alert(errorMessage)
+      window.alert('Error al agregar')
     }
   }
 
   const handleDeleteEntity = async (entityId: string) => {
     try {
+      if (entityType === 'Types') {
+        let col = collection(firestore, 'Incidents')
+        const q = query(col, where('typeID', '==', entityId))
+        const querySnapshot = await getDocs(q)
+        if (!querySnapshot.empty) {
+          window.alert('No se puede eliminar una actividad que tiene eventos asociados')
+          return
+        }
+      } else {
+        let col = collection(firestore, 'Types')
+        const q = query(col, where('categoryID', '==', entityId))
+        const querySnapshot = await getDocs(q)
+        if (!querySnapshot.empty) {
+          window.alert('No se puede eliminar una actividad que tiene tipos de eventos asociados')
+          return
+        }
+      }
       // Show confirmation dialog before deleting
       const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar ${entities[entityId].name}?`)
 
@@ -128,41 +128,45 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
         await showEntities()
       }
     } catch (error) {
-      setErrorMessage('Error al eliminar ' + entityType.toLowerCase())
-      window.alert(errorMessage)
+      window.alert('Error al eliminar ' + entityType.toLowerCase())
     }
   }
 
   const handleModifyEntity = async () => {
-    if (modifyEntityNewName.trim() === '') {
-      setErrorMessage('nuevo nombre')
-      window.alert(errorMessage)
+    if (modifyEntityName.trim() === '') {
+      window.alert('El nombre no puede estar vacío')
+      return
+    }
+    if (entityType === 'Categories' && modifyEntitySecondProperty.trim() === '') {
+      window.alert('Por favor seleccione un color')
+      return
+    } else if (entityType === 'Types' && !cats[modifyEntitySecondProperty]) {
+      window.alert('Por favor seleccione una actividad')
       return
     }
     try {
       let ref = doc(firestore, `${entityType}/${modifyEntityId}`)
       if (entityType === 'Categories') {
         await updateDoc(ref, {
-          name: modifyEntityNewName,
+          name: modifyEntityName,
           color: modifyEntitySecondProperty,
         })
       } else {
         await updateDoc(ref, {
-          name: modifyEntityNewName,
+          name: modifyEntityName,
           categoryID: modifyEntitySecondProperty,
         })
       }
 
       // clear and hide input fields
-      setModifyEntityNewName('')
+      setModifyEntityName('')
       setModifyEntitySecondProperty('')
       setModifyEntityId(null)
 
       // call showEntities to fetch and display updated entities
       await showEntities()
     } catch (error) {
-      setErrorMessage('Error al modificar ' + entityType.toLowerCase())
-      window.alert(errorMessage)
+      window.alert('Error al modificar ' + entityType.toLowerCase())
     }
   }
 
@@ -177,7 +181,7 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
   }, [entityType])
 
   useEffect(() => {
-    setModifyEntityNewName(entities[modifyEntityId || '']?.name || '')
+    setModifyEntityName(entities[modifyEntityId || '']?.name || '')
     if (entityType == 'Types') {
       setModifyEntitySecondProperty((types[modifyEntityId || '']?.categoryID || '') as string)
     } else {
@@ -218,8 +222,8 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
             type="text"
             className="border-gray-300 mb-2 mr-2 rounded-md border px-3 py-2"
             placeholder={`nuevo nombre`}
-            value={modifyEntityNewName}
-            onChange={(e) => setModifyEntityNewName(e.target.value)}
+            value={modifyEntityName}
+            onChange={(e) => setModifyEntityName(e.target.value)}
           />
           {entityType === 'Categories' && <SketchPicker color={modifyEntitySecondProperty} onChange={handleModifyEntityColorChange} />}
           {entityType !== 'Categories' && (
@@ -247,7 +251,9 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
       {/* Scrollable list view */}
       <div className="ove6rflow-x-auto mb-6 h-80 w-full max-w-4xl overflow-y-scroll">
         {Object.entries(entities)
-          .sort(([id1, entity1], [id2, entity2]) => {
+          .sort((a, b) => {
+            const entity1 = a[1]
+            const entity2 = b[1]
             try {
               let catName1: string
               let catName2: string
