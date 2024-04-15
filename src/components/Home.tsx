@@ -104,7 +104,14 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
         <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
       </div> */}
       <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} deleteIncident={deleteIncident} />
-      {isAdmin && <p className="absolute right-3 top-1 z-[1000] text-4xl text-red-dark">Admin</p>}
+      {isAdmin && (
+        <div className="absolute right-3 top-1 z-[1000]">
+          <p className=" text-4xl text-red-dark">Administrador</p>
+          <button className="rounded-md bg-red-dark p-2 text-white" onClick={() => (window.location.href = '/admin/dash')}>
+            Administrar categorías
+          </button>
+        </div>
+      )}
       <LoadingOverlay isVisible={isLoading} />
     </div>
   )
