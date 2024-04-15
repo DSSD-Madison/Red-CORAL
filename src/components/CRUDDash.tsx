@@ -192,14 +192,19 @@ const CRUDDash: React.FC<CrudProps> = ({ app }) => {
 
   return (
     <div className="relative flex h-full flex-col items-center justify-center">
+      <div className="absolute right-0 top-0 m-4">
+        <button className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md" onClick={() => (window.location.href = '/admin')}>
+          Volver al mapa
+        </button>
+      </div>
       <div className="absolute left-0 top-0 m-4">
         {entityType == 'Types' && (
-          <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-green px-4 py-2 text-white shadow-md">
+          <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Actividad
           </button>
         )}
         {entityType == 'Categories' && (
-          <button onClick={() => toggleEntityType('Types')} className="mb-4 mr-2 rounded-full bg-green px-4 py-2 text-white shadow-md">
+          <button onClick={() => toggleEntityType('Types')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Tipo de Evento
           </button>
         )}

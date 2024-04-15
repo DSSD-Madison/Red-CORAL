@@ -7,6 +7,7 @@ import { Incident, Category, Type, DB } from 'types'
 import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore'
 import { getStorage, ref, getBytes } from 'firebase/storage'
 import LoadingOverlay from './LoadingOverlay'
+import { getDBData } from 'utils'
 
 interface HomeProps {
   app: FirebaseApp
@@ -27,42 +28,7 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    new Promise<DB>(async (resolve, reject) => {
-      try {
-        if (isAdmin) {
-          const db: DB = {
-            Categories: {},
-            Types: {},
-            Incidents: {},
-          }
-          // prettier-ignore
-          const [catSnap, typeSnap, incSnap] = await Promise.all([
-          getDocs(collection(firestore, 'Categories')),
-          getDocs(collection(firestore, 'Types')),
-          getDocs(collection(firestore, 'Incidents')),
-      ])
-          catSnap.forEach((doc) => {
-            const cat = doc.data() as Category
-            db.Categories[doc.id] = cat
-          })
-          typeSnap.forEach((doc) => {
-            const type = doc.data() as Type
-            db.Types[doc.id] = type
-          })
-          incSnap.forEach((doc) => {
-            const inc = doc.data() as Incident
-            db.Incidents[doc.id] = inc
-          })
-          resolve(db)
-        } else {
-          const bytes = await getBytes(ref(storage, 'state.json'))
-          const db: DB = JSON.parse(new TextDecoder().decode(bytes))
-          resolve(db)
-        }
-      } catch (error) {
-        reject(error)
-      }
-    })
+    getDBData(isAdmin, firestore, storage)
       .then(setData)
       .then(() => setIsLoading(false))
       .catch((error) => {
