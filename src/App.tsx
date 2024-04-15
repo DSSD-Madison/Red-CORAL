@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
 import Login from 'components/Login'
 import Home from 'components/Home'
+import CRUDDash from 'components/CRUDDash'
 
 const App: React.FC = () => {
   const app = initializeApp({
@@ -18,8 +19,14 @@ const App: React.FC = () => {
 
   const auth = getAuth(app)
 
+  useEffect(() => {
+    auth.authStateReady().then(() => {
+      setIsLoggedIn(auth.currentUser != null)
+    })
+  }, [])
+
   // init firestore, storage
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(auth.currentUser != null) // State variable for sign-in status
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
 
   const handleSignInSuccess = () => {
     setIsLoggedIn(true) // Update the sign-in status to true
@@ -34,11 +41,21 @@ const App: React.FC = () => {
     )
   }
 
+  function AdminDash() {
+    return (
+      <>
+        {!isLoggedIn && <Login auth={auth} onSignInSuccess={handleSignInSuccess} />}
+        {isLoggedIn && <CRUDDash app={app} />}
+      </>
+    )
+  }
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home app={app} isAdmin={false} />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/dash" element={<AdminDash />} />
       </Routes>
     </Router>
   )
