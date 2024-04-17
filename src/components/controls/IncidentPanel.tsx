@@ -1,6 +1,6 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 
 interface InfoPanelControlProps {
   data: DB
@@ -10,6 +10,9 @@ interface InfoPanelControlProps {
     name: Incident['name'],
     dateString: Incident['dateString'],
     typeID: Incident['typeID'],
+    country: Incident['country'],
+    department: Incident['department'],
+    municipality: Incident['municipality'],
     description: Incident['description']
   ) => Promise<boolean>
   setLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
@@ -32,9 +35,79 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const map = useMap()
   const [name, setName] = useState<Incident['name']>('')
   const [description, setDescription] = useState<Incident['description']>('')
+  const [country, setCountry] = useState<Incident['country']>('')
+  const [municipality, setMunicipality] = useState<Incident['municipality']>('')
+  const [department, setDepartment] = useState<Incident['department']>('')
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
+  const [municipalityOptions, setMunicipalityOptions] = useState([]);
   const [dateString, setDateString] = useState<Incident['dateString']>('')
   const [typeID, setTypeID] = useState<keyof DB['Types']>('')
   const [catID, setCatID] = useState<keyof DB['Categories']>('')
+
+  useEffect(() => {
+    if (!country) {
+      setShowDepartmentDropdown(false);
+      return; // No country selected yet
+    }
+
+    fetch('data.json')
+        .then(response => response.json())
+        .then(data => {
+          if (data[country.charAt(0).toUpperCase() + country.slice(1)]) {
+            data[country.charAt(0).toUpperCase() + country.slice(1)]["Other"] = ["Other"]
+            const departments = Object.keys(data[country]);
+            setDepartmentOptions([...departments]);
+            setShowDepartmentDropdown(true);
+          } else {
+            setDepartmentOptions([]);
+            setShowDepartmentDropdown(false);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading data.json:', error);
+        });
+  }, [country]);
+
+  useEffect(() => {
+    if (!department) {
+      return; // No department selected yet
+    }
+
+      fetch('data.json')
+          .then(response => response.json())
+          .then(data => {
+            data[country.charAt(0).toUpperCase() + country.slice(1)]["Other"] = ["Other"]
+            if (data[country] && data[country][department]) {
+              console.log(data)
+              setMunicipalityOptions([...data[country][department]]);
+            } else {
+              setMunicipalityOptions([]);
+            }
+          })
+          .catch(error => {
+            console.error('Error loading data.json:', error);
+          });
+
+  }, [department]);
+
+  const handleCountryChange = (e) => {
+    const selectedCountry = e.target.value;
+    setCountry(selectedCountry.charAt(0).toUpperCase() + selectedCountry.slice(1));
+    setDepartment('');
+    setMunicipality('');
+  };
+
+  const handleDepartmentChange = (e) => {
+    const selectedDepartment = e.target.value;
+    setDepartment(selectedDepartment.charAt(0).toUpperCase() + selectedDepartment.slice(1));
+    setMunicipality('');
+  };
+
+  const handleMunicipalityChange = (e) => {
+    const selectedMunicipality = e.target.value
+    setMunicipality(selectedMunicipality.charAt(0).toUpperCase() + selectedMunicipality.slice(1));
+  };
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -52,12 +125,15 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   }
 
   const submit = async () => {
-    if (await submitIncident(name, dateString, typeID, description)) {
+    if (await submitIncident(name, dateString, typeID, description, country, department, municipality)) {
       setName('')
       setDescription('')
       setDateString('')
       setTypeID('')
       setCatID('')
+      setCountry('')
+      setDepartment('')
+      setMunicipality('')
       close()
     }
   }
@@ -156,10 +232,79 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   </select>
                   <br />
                   <label>
-                    Descripción:
+                    País:
                     <br />
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={10} cols={40} />
+                    <input
+                        className="w-full"
+                        value={country}
+                        onChange={handleCountryChange}
+                        required
+                    />
                   </label>
+                  <br />
+                  {showDepartmentDropdown ? (
+                      <label>
+                        Departamento:
+                        <br />
+                        <select
+                            className="w-full"
+                            value={department}
+                            onChange={handleDepartmentChange}
+                            required
+                        >
+                          <option value="">Seleccione un departamento</option>
+                          {departmentOptions.map((option, index) => (
+                              <option key={index} value={option}>
+                                {option}
+                              </option>
+                          ))}
+                        </select>
+                      </label>
+                  ) : (
+                      <label>
+                        Departamento:
+                        <br />
+                        <input
+                            className="w-full"
+                            value={department}
+                            onChange={handleDepartmentChange}
+                            required
+                        />
+                      </label>
+                  )}
+                  <br />
+                  {showDepartmentDropdown ? (
+                      <label>
+                        Municipio:
+                        <br />
+                        <select
+                            className="w-full"
+                            value={municipality}
+                            onChange={handleMunicipalityChange}
+                            required
+                        >
+                          <option value="">Seleccione un municipio</option>
+                          {municipalityOptions.map((option, index) => (
+                              <option key={index} value={option}>
+                                {option}
+                              </option>
+                          ))}
+                        </select>
+                      </label>
+                  ) : (
+                      <label>
+                        Municipio:
+                        <br />
+                        <input
+                            className="w-full"
+                            value={municipality}
+                            onChange={handleMunicipalityChange}
+                            required
+                        />
+                      </label>
+                  )}
+
+
                 </div>
               </div>
               <button

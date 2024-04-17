@@ -9,6 +9,9 @@ export interface Incident {
   dateString: string
   typeID: keyof DB['Types']
   location: Coordinates
+  country: string
+  department: string,
+  municipality: string
 }
 
 export interface Category {

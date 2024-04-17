@@ -49,7 +49,10 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     name: Incident['name'],
     dateString: Incident['dateString'],
     typeID: Incident['typeID'],
-    description: Incident['description']
+    description: Incident['description'],
+    country: Incident['country'],
+    municipality: Incident['municipality'],
+    department: Incident['department']
   ): Promise<boolean> {
     if (!name) {
       alert('Please enter a name for the incident')
@@ -70,7 +73,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       return false
     }
 
-    if (!(await addIncident({ name, description, dateString, typeID, location }))) {
+    if (!(await addIncident({ name, description, dateString, typeID, location, country, department, municipality }))) {
       alert('No se pudo crear el incidente')
       return false
     }
