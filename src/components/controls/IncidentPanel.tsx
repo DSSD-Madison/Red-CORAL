@@ -1,6 +1,6 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
-import {useEffect, useState} from 'react'
+import {ChangeEvent, useEffect, useState} from 'react'
 
 interface InfoPanelControlProps {
   data: DB
@@ -38,9 +38,9 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const [country, setCountry] = useState<Incident['country']>('')
   const [municipality, setMunicipality] = useState<Incident['municipality']>('')
   const [department, setDepartment] = useState<Incident['department']>('')
-  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
-  const [municipalityOptions, setMunicipalityOptions] = useState([]);
+  const [municipalityOptions, setMunicipalityOptions] = useState<string[]>([]);
   const [dateString, setDateString] = useState<Incident['dateString']>('')
   const [typeID, setTypeID] = useState<keyof DB['Types']>('')
   const [catID, setCatID] = useState<keyof DB['Categories']>('')
@@ -91,20 +91,20 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
 
   }, [department]);
 
-  const handleCountryChange = (e) => {
+  const handleCountryChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
     const selectedCountry = e.target.value;
     setCountry(selectedCountry.charAt(0).toUpperCase() + selectedCountry.slice(1));
     setDepartment('');
     setMunicipality('');
   };
 
-  const handleDepartmentChange = (e) => {
+  const handleDepartmentChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
     const selectedDepartment = e.target.value;
     setDepartment(selectedDepartment.charAt(0).toUpperCase() + selectedDepartment.slice(1));
     setMunicipality('');
   };
 
-  const handleMunicipalityChange = (e) => {
+  const handleMunicipalityChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
     const selectedMunicipality = e.target.value
     setMunicipality(selectedMunicipality.charAt(0).toUpperCase() + selectedMunicipality.slice(1));
   };
