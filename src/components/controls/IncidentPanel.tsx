@@ -1,6 +1,6 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
-import {ChangeEvent, useEffect, useState} from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 
 interface InfoPanelControlProps {
   data: DB
@@ -38,76 +38,75 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const [country, setCountry] = useState<Incident['country']>('')
   const [municipality, setMunicipality] = useState<Incident['municipality']>('')
   const [department, setDepartment] = useState<Incident['department']>('')
-  const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
-  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
-  const [municipalityOptions, setMunicipalityOptions] = useState<string[]>([]);
+  const [departmentOptions, setDepartmentOptions] = useState<string[]>([])
+  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false)
+  const [municipalityOptions, setMunicipalityOptions] = useState<string[]>([])
   const [dateString, setDateString] = useState<Incident['dateString']>('')
   const [typeID, setTypeID] = useState<keyof DB['Types']>('')
   const [catID, setCatID] = useState<keyof DB['Categories']>('')
 
   useEffect(() => {
     if (!country) {
-      setShowDepartmentDropdown(false);
-      return; // No country selected yet
+      setShowDepartmentDropdown(false)
+      return // No country selected yet
     }
 
     fetch('data.json')
-        .then(response => response.json())
-        .then(data => {
-          if (data[country.charAt(0).toUpperCase() + country.slice(1)]) {
-            data[country.charAt(0).toUpperCase() + country.slice(1)]["Other"] = ["Other"]
-            const departments = Object.keys(data[country]);
-            setDepartmentOptions([...departments]);
-            setShowDepartmentDropdown(true);
-          } else {
-            setDepartmentOptions([]);
-            setShowDepartmentDropdown(false);
-          }
-        })
-        .catch(error => {
-          console.error('Error loading data.json:', error);
-        });
-  }, [country]);
+      .then((response) => response.json())
+      .then((data) => {
+        if (data[country.charAt(0).toUpperCase() + country.slice(1)]) {
+          data[country.charAt(0).toUpperCase() + country.slice(1)]['Other'] = ['Other']
+          const departments = Object.keys(data[country])
+          setDepartmentOptions([...departments])
+          setShowDepartmentDropdown(true)
+        } else {
+          setDepartmentOptions([])
+          setShowDepartmentDropdown(false)
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading data.json:', error)
+      })
+  }, [country])
 
   useEffect(() => {
     if (!department) {
-      return; // No department selected yet
+      return // No department selected yet
     }
 
-      fetch('data.json')
-          .then(response => response.json())
-          .then(data => {
-            data[country.charAt(0).toUpperCase() + country.slice(1)]["Other"] = ["Other"]
-            if (data[country] && data[country][department]) {
-              console.log(data)
-              setMunicipalityOptions([...data[country][department]]);
-            } else {
-              setMunicipalityOptions([]);
-            }
-          })
-          .catch(error => {
-            console.error('Error loading data.json:', error);
-          });
-
-  }, [department]);
+    fetch('data.json')
+      .then((response) => response.json())
+      .then((data) => {
+        data[country.charAt(0).toUpperCase() + country.slice(1)]['Other'] = ['Other']
+        if (data[country] && data[country][department]) {
+          console.log(data)
+          setMunicipalityOptions([...data[country][department]])
+        } else {
+          setMunicipalityOptions([])
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading data.json:', error)
+      })
+  }, [department])
 
   const handleCountryChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-    const selectedCountry = e.target.value;
-    setCountry(selectedCountry.charAt(0).toUpperCase() + selectedCountry.slice(1));
-    setDepartment('');
-    setMunicipality('');
-  };
+    const selectedCountry = e.target.value
+    setCountry(selectedCountry.charAt(0).toUpperCase() + selectedCountry.slice(1))
+    setDepartment('')
+    setMunicipality('')
+  }
 
   const handleDepartmentChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-    const selectedDepartment = e.target.value;
-    setDepartment(selectedDepartment.charAt(0).toUpperCase() + selectedDepartment.slice(1));
-    setMunicipality('');
-  };
+    const selectedDepartment = e.target.value
+    setDepartment(selectedDepartment.charAt(0).toUpperCase() + selectedDepartment.slice(1))
+    setMunicipality('')
+  }
 
   const handleMunicipalityChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
     const selectedMunicipality = e.target.value
-    setMunicipality(selectedMunicipality.charAt(0).toUpperCase() + selectedMunicipality.slice(1));
-  };
+    setMunicipality(selectedMunicipality.charAt(0).toUpperCase() + selectedMunicipality.slice(1))
+  }
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -174,8 +173,13 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   <br />
                   Tipo de evento: {data.Types[incident.typeID].name}
                 </div>
-
                 <div className="mb-6 text-shade-01">{incident.description}</div>
+                País: {incident.country}
+                <br />
+                Departamento: {incident.department}
+                <br />
+                Municipio: {incident.municipality}
+                <div className="mb-6 text-shade-01"></div>
                 {isAdmin && (
                   <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
                     Borrar
@@ -234,77 +238,50 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   <label>
                     País:
                     <br />
-                    <input
-                        className="w-full"
-                        value={country}
-                        onChange={handleCountryChange}
-                        required
-                    />
+                    <input className="w-full" value={country} onChange={handleCountryChange} required />
                   </label>
                   <br />
                   {showDepartmentDropdown ? (
-                      <label>
-                        Departamento:
-                        <br />
-                        <select
-                            className="w-full"
-                            value={department}
-                            onChange={handleDepartmentChange}
-                            required
-                        >
-                          <option value="">Seleccione un departamento</option>
-                          {departmentOptions.map((option, index) => (
-                              <option key={index} value={option}>
-                                {option}
-                              </option>
-                          ))}
-                        </select>
-                      </label>
+                    <label>
+                      Departamento:
+                      <br />
+                      <select className="w-full" value={department} onChange={handleDepartmentChange} required>
+                        <option value="">Seleccione un departamento</option>
+                        {departmentOptions.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   ) : (
-                      <label>
-                        Departamento:
-                        <br />
-                        <input
-                            className="w-full"
-                            value={department}
-                            onChange={handleDepartmentChange}
-                            required
-                        />
-                      </label>
+                    <label>
+                      Departamento:
+                      <br />
+                      <input className="w-full" value={department} onChange={handleDepartmentChange} required />
+                    </label>
                   )}
                   <br />
                   {showDepartmentDropdown ? (
-                      <label>
-                        Municipio:
-                        <br />
-                        <select
-                            className="w-full"
-                            value={municipality}
-                            onChange={handleMunicipalityChange}
-                            required
-                        >
-                          <option value="">Seleccione un municipio</option>
-                          {municipalityOptions.map((option, index) => (
-                              <option key={index} value={option}>
-                                {option}
-                              </option>
-                          ))}
-                        </select>
-                      </label>
+                    <label>
+                      Municipio:
+                      <br />
+                      <select className="w-full" value={municipality} onChange={handleMunicipalityChange} required>
+                        <option value="">Seleccione un municipio</option>
+                        {municipalityOptions.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   ) : (
-                      <label>
-                        Municipio:
-                        <br />
-                        <input
-                            className="w-full"
-                            value={municipality}
-                            onChange={handleMunicipalityChange}
-                            required
-                        />
-                      </label>
+                    <label>
+                      Municipio:
+                      <br />
+                      <input className="w-full" value={municipality} onChange={handleMunicipalityChange} required />
+                    </label>
                   )}
-
-
                 </div>
               </div>
               <button
