@@ -1,15 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
-// import SearchControl from 'components/controls/SearchControl'
 import IncidentPanel from 'components/controls/IncidentPanel'
 import ZoomControl from 'components/controls/ZoomControl'
-// import TagControl from './controls/TagControl'
-// import LegendControl from './controls/LegendControl'
 import IncidentLayer from './layers/IncidentLayer'
 import { LatLngBoundsLiteral } from 'leaflet'
 import CategoryControl from './controls/CategoryControl'
 import YearControl from './controls/YearControl'
+import CountryControl from './controls/CountryControl'
+import Control from 'react-leaflet-custom-control'
 
 interface MapProps {
   apiKey: string
@@ -40,6 +39,9 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     hideTypes: [],
     startYear: null,
     endYear: null,
+    hideCountries: [],
+    hideDepartments: [],
+    hideMunicipalities: [],
   })
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
@@ -140,7 +142,12 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       />
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />*/}
-      <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+      <Control prepend position="topleft">
+        <CountryControl data={data} filters={filters} setFilters={setFilters} />
+      </Control>
+      <Control prepend position="topleft">
+        <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+      </Control>
       <YearControl data={data} filters={filters} setFilters={setFilters} />
       <ZoomControl zoomLevel={2} setFilters={setFilters} />
       <SetInitialBounds />

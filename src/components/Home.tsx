@@ -7,7 +7,7 @@ import { Incident, DB } from 'types'
 import { getFirestore, collection, addDoc, deleteDoc, doc } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import LoadingOverlay from './LoadingOverlay'
-import { getDBData } from 'utils'
+import { calculateBounds, getDBData } from 'utils'
 
 interface HomeProps {
   app: FirebaseApp
@@ -26,6 +26,7 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
     filterBounds: {
       maxYear: 0,
       minYear: 0,
+      locations: {},
     },
   })
 
@@ -33,19 +34,7 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
 
   useEffect(() => {
     getDBData(isAdmin, firestore, storage)
-      .then((db) => {
-        const allYears = new Set(Object.values(data.Incidents).map((e) => new Date(e.dateString).getFullYear()))
-        const minYear = Math.min(...allYears)
-        const maxYear = Math.max(...allYears)
-
-        return {
-          ...db,
-          filterBounds: {
-            maxYear,
-            minYear,
-          },
-        } as DB
-      })
+      .then(calculateBounds)
       .then(setData)
       .then(() => setIsLoading(false))
       .catch((error) => {

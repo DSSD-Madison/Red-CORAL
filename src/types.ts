@@ -10,7 +10,7 @@ export interface Incident {
   typeID: keyof DB['Types']
   location: Coordinates
   country: string
-  department: string,
+  department: string, // equivalent to province/state
   municipality: string
 }
 
@@ -42,13 +42,17 @@ export interface MarkerFilters {
   hideTypes: (keyof DB['Types'])[]
   startYear: number | null
   endYear: number | null
+  hideCountries: string[]
+  hideDepartments: string[]
+  hideMunicipalities: string[]
 }
 
 export interface FilterBounds {
   minYear: number
   maxYear: number
-  countries?: (keyof FilterBounds['provinces'])[]
-  provinces?: {
-    [country: string]: string[]
+  locations: {
+    [country: string]: {
+      [departments: string]: string[] // municipalities
+    }
   }
 }

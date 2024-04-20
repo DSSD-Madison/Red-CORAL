@@ -99,25 +99,22 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
   }
 
   return (
-    <Control prepend position="topleft">
-      <div className="leaflet-bar relative rounded">
-        <a
-          className="leaflet-control-zoom-in rounded"
-          title={'Tags'}
-          role="button"
-          onClick={(e) => {
-            setDropdownVisible(!isDropdownVisible)
-            e.preventDefault()
-          }}
-        >
-          {/* ☰ */}
-          &#x2630;
-        </a>
-        {isDropdownVisible && (
-          <div
-            ref={dropdownRef}
-            className="leaflet-bar absolute -top-0.5 left-10 box-content h-96 w-60 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
-          >
+    <div className="leaflet-bar relative rounded">
+      <a
+        className="leaflet-control-zoom-in rounded"
+        title={'Tags'}
+        role="button"
+        onClick={(e) => {
+          setDropdownVisible(!isDropdownVisible)
+          e.preventDefault()
+        }}
+      >
+        {/* ☰ */}
+        &#x2630;
+      </a>
+      {isDropdownVisible && (
+        <div ref={dropdownRef}>
+          <div className="leaflet-bar absolute -top-0.5 left-10 box-content h-96 w-60 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex flex-row justify-between">
               <div className="m-1 text-base font-semibold">Actividades</div>
               <div className="mx-1 flex flex-row justify-center align-middle">
@@ -151,13 +148,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
               ))}
             </div>
           </div>
-        )}
-        {/* Incident types */}
-        {isDropdownVisible && (
-          <div
-            ref={dropdownRef}
-            className="leaflet-bar absolute -top-0.5 left-72 box-content h-96 w-80 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
-          >
+          <div className="leaflet-bar absolute -top-0.5 left-72 box-content h-96 w-80 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex h-8 flex-row justify-between">
               <div className="m-1 text-base font-semibold">Tipos de eventos</div>
               <div className="mx-1 flex flex-row justify-center align-middle">
@@ -198,9 +189,9 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
                 ))}
             </div>
           </div>
-        )}
-      </div>
-    </Control>
+        </div>
+      )}
+    </div>
   )
 }
 
