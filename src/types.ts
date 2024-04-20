@@ -34,6 +34,7 @@ export interface DB {
   Incidents: {
     [key: string]: Incident
   }
+  filterBounds: FilterBounds
 }
 
 export interface MarkerFilters {
@@ -41,4 +42,13 @@ export interface MarkerFilters {
   hideTypes: (keyof DB['Types'])[]
   startYear: number | null
   endYear: number | null
+}
+
+export interface FilterBounds {
+  minYear: number
+  maxYear: number
+  countries?: (keyof FilterBounds['provinces'])[]
+  provinces?: {
+    [country: string]: string[]
+  }
 }

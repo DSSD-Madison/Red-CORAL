@@ -23,12 +23,29 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
     Categories: {},
     Types: {},
     Incidents: {},
+    filterBounds: {
+      maxYear: 0,
+      minYear: 0,
+    },
   })
 
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     getDBData(isAdmin, firestore, storage)
+      .then((db) => {
+        const allYears = new Set(Object.values(data.Incidents).map((e) => new Date(e.dateString).getFullYear()))
+        const minYear = Math.min(...allYears)
+        const maxYear = Math.max(...allYears)
+
+        return {
+          ...db,
+          filterBounds: {
+            maxYear,
+            minYear,
+          },
+        } as DB
+      })
       .then(setData)
       .then(() => setIsLoading(false))
       .catch((error) => {
@@ -72,7 +89,7 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
       <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} deleteIncident={deleteIncident} />
       {isAdmin && (
         <div className="absolute right-3 top-1 z-[1000]">
-          <p className=" text-4xl text-red-dark">Administrador</p>
+          <p className="text-4xl text-red-dark">Administrador</p>
           <button className="rounded-md bg-red-dark p-2 text-white" onClick={() => (window.location.href = '/admin/dash')}>
             Administrar categorías
           </button>

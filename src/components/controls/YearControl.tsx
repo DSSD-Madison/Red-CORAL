@@ -12,6 +12,7 @@ interface YearControlProps {
 const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) => {
   const [isDropdownVisible, setDropdownVisible] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const { minYear, maxYear } = data.filterBounds
 
   const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -25,9 +26,6 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
-
-  const minYear = Math.min(...Object.values(data.Incidents).map((e) => new Date(e.dateString).getFullYear()))
-  const maxYear = Math.max(...Object.values(data.Incidents).map((e) => new Date(e.dateString).getFullYear()))
 
   const handleResetRange = () => {
     setFilters((filters) => ({
