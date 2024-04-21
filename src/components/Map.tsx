@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
-// import SearchControl from 'components/controls/SearchControl'
+import SearchControl from 'components/controls/SearchControl'
 import IncidentPanel from 'components/controls/IncidentPanel'
 import ZoomControl from 'components/controls/ZoomControl'
-// import TagControl from './controls/TagControl'
-// import LegendControl from './controls/LegendControl'
 import IncidentLayer from './layers/IncidentLayer'
 import { LatLngBoundsLiteral } from 'leaflet'
 import CategoryControl from './controls/CategoryControl'
@@ -138,8 +136,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           isAdmin={isAdmin}
           deleteSelectedIncident={deleteSelectedIncident}
         />
-        {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
-       <SearchControl layerRef={markersLayer} />*/}
+        <SearchControl />
         <CategoryControl data={data} filters={filters} setFilters={setFilters} />
         <YearControl data={data} filters={filters} setFilters={setFilters} />
         <ZoomControl zoomLevel={2} setFilters={setFilters} />

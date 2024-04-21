@@ -3,8 +3,8 @@ import 'leaflet/dist/leaflet.css'
 import { GeocodingApi, Configuration, PeliasLayer, PeliasGeoJSONFeature, AutocompleteRequest } from '@stadiamaps/api'
 
 interface HomeProps {
-  layers: PeliasLayer[]
-  setStringValue: (val: string) => void
+  layers?: PeliasLayer[]
+  setStringValue?: (val: string) => void
   setBounds: (bound: number[] | undefined) => void
   setCountryCode?: (code: string) => void
   countryCode?: string
@@ -26,6 +26,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   const [queryDebounce, setQueryDebounce] = useState<NodeJS.Timeout | null>(null)
 
   function getName(feat: PeliasGeoJSONFeature) {
+    if (!countryCode && !department) return feat.properties?.label || ''
     let val = feat.properties?.label || ''
     let end = val.indexOf(',')
     if (end != -1) val = val.slice(0, end)
@@ -35,7 +36,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   function handleSelect(feat: PeliasGeoJSONFeature) {
     let val = getName(feat)
     setSearch(val)
-    setStringValue(val)
+    if (setStringValue !== undefined) setStringValue(val)
     setLocalStrVal(val)
     if (setCountryCode !== undefined) setCountryCode(feat.properties?.country_a || '')
     setBounds(feat.bbox)
@@ -53,7 +54,8 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     }
     setQueryDebounce(
       setTimeout(async () => {
-        const q: AutocompleteRequest = { text: search, layers: layers }
+        const q: AutocompleteRequest = { text: search }
+        if (layers) q.layers = layers
         if (countryCode) {
           q.boundaryCountry = [countryCode]
         }
@@ -81,7 +83,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
         value={search}
         onChange={(e) => {
           setSearch(e.target.value)
-          setStringValue('')
+          if (setStringValue !== undefined) setStringValue('')
           setLocalStrVal('')
           setBounds(undefined)
           if (setCountryCode !== undefined) setCountryCode('')
