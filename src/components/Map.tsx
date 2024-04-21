@@ -51,8 +51,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     typeID: Incident['typeID'],
     description: Incident['description'],
     country: Incident['country'],
-    municipality: Incident['municipality'],
-    department: Incident['department']
+    department: Incident['department'],
+    municipality: Incident['municipality']
   ): Promise<boolean> {
     if (!name) {
       alert('Please enter a name for the incident')
@@ -77,7 +77,6 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       alert('No se pudo crear el incidente')
       return false
     }
-    setLocation(null)
     alert('Incidente creado con éxito')
     return true
   }
@@ -100,51 +99,60 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   }
 
   return (
-    <MapContainer
-      className="h-full w-full"
-      center={[20, 0]}
-      zoom={2}
-      minZoom={2}
-      maxZoom={18} // We can adjust this later depending on how detailed the data is.
-      scrollWheelZoom={true}
-      zoomControl={false}
-      maxBounds={maxBounds}
-      doubleClickZoom={false}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
-      />
-      <IncidentLayer
-        data={data}
-        selectedIncidentID={selectedIncidentID}
-        setSelectedIncidentID={setSelectedIncidentID}
-        ref={markersLayer}
-        isAdmin={isAdmin}
-        tmpLocation={location}
-        setTmpLocation={setLocation}
-        tmpSelected={tmpSelected}
-        setTmpSelected={setTmpSelected}
-        filters={filters}
-      />
-      <IncidentPanel
-        data={data}
-        incidentID={selectedIncidentID}
-        onClose={onClose}
-        submitIncident={submitIncident}
-        setLocation={setLocation}
-        tmpSelected={tmpSelected}
-        setTmpSelected={setTmpSelected}
-        isAdmin={isAdmin}
-        deleteSelectedIncident={deleteSelectedIncident}
-      />
-      {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
+    <>
+      <MapContainer
+        className="h-full w-full"
+        center={[20, 0]}
+        zoom={2}
+        minZoom={2}
+        maxZoom={18} // We can adjust this later depending on how detailed the data is.
+        scrollWheelZoom={true}
+        zoomControl={false}
+        maxBounds={maxBounds}
+        doubleClickZoom={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
+        />
+        <IncidentLayer
+          data={data}
+          selectedIncidentID={selectedIncidentID}
+          setSelectedIncidentID={setSelectedIncidentID}
+          ref={markersLayer}
+          isAdmin={isAdmin}
+          tmpLocation={location}
+          setTmpLocation={setLocation}
+          tmpSelected={tmpSelected}
+          setTmpSelected={setTmpSelected}
+          filters={filters}
+        />
+        <IncidentPanel
+          data={data}
+          incidentID={selectedIncidentID}
+          onClose={onClose}
+          submitIncident={submitIncident}
+          setLocation={setLocation}
+          tmpSelected={tmpSelected}
+          setTmpSelected={setTmpSelected}
+          isAdmin={isAdmin}
+          deleteSelectedIncident={deleteSelectedIncident}
+        />
+        {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />*/}
-      <CategoryControl data={data} filters={filters} setFilters={setFilters} />
-      <YearControl data={data} filters={filters} setFilters={setFilters} />
-      <ZoomControl zoomLevel={2} setFilters={setFilters} />
-      <SetInitialBounds />
-    </MapContainer>
+        <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+        <YearControl data={data} filters={filters} setFilters={setFilters} />
+        <ZoomControl zoomLevel={2} setFilters={setFilters} />
+        <SetInitialBounds />
+      </MapContainer>
+      {isAdmin && (
+        <div className="absolute bottom-0 right-0 z-[1000]">
+          <button className="mb-6 mr-20 rounded-md bg-green-dark p-2 text-white hover:bg-green" onClick={() => setTmpSelected(true)}>
+            Crear incidente
+          </button>
+        </div>
+      )}
+    </>
   )
 }
 

@@ -8,7 +8,7 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     colors: {
-      white: colors.white,
+      ...colors,
       crimson: '#A51C30',
       harvard: {
         'chan-gray': '#595859',
@@ -20,6 +20,7 @@ export default {
         light: '#E5CAC9',
         DEFAULT: '#B55A5A',
         dark: '#9D474B',
+        ...colors.red,
       },
       redwood: {
         light: '#F2C7B5',
@@ -30,16 +31,19 @@ export default {
         light: '#FDD1B6',
         DEFAULT: '#CA8260',
         dark: '#B36753',
+        ...colors.orange,
       },
       green: {
         light: '#C9D0C0',
         DEFAULT: '#888D81',
         dark: '#5F6962',
+        ...colors.green,
       },
       purple: {
         light: '#D5BFD1',
         DEFAULT: '#80637A',
         dark: '#655573',
+        ...colors.purple,
       },
       mauve: {
         light: '#E6C5C8',
