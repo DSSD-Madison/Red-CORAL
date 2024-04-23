@@ -19,11 +19,10 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
   ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, setTmpSelected, filters }, ref) => {
     const map = useMap()
 
+    map.removeEventListener('dblclick')
     map.addEventListener('dblclick', (e) => {
-      if (!isAdmin) return
+      if (!isAdmin || !tmpSelected) return
       setTmpLocation(e.latlng)
-      setSelectedIncidentID(null)
-      setTmpSelected(true)
     })
 
     const adjustView = (location: Incident['location'] | null) => {
@@ -76,7 +75,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             icon={L.divIcon({
               iconSize: id == selectedIncidentID ? [40, 40] : [32, 32],
               className: '',
-              html: `<svg viewBox="-1 -1 18 18" ${id == selectedIncidentID ? 'width="40px" height="40px"' : 'width="32px" height="32px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+              html: `<svg viewBox="-1 -1 18 18" ${id == selectedIncidentID ? 'width="40px" height="40px"' : 'width="32px" height="32px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]}; margin-top: -${id == selectedIncidentID ? '20px' : '16px'};">
                         <use href="#marker" />
                       </svg>`,
             })}
@@ -94,12 +93,12 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
         ))}
         {tmpLocation && (
           <LeafletMarker
-            title={''}
+            title={'Incidente incompleto'}
             position={tmpLocation}
             icon={L.divIcon({
-              iconSize: tmpSelected ? [40, 40] : [32, 32],
+              iconSize: [50, 50],
               className: '',
-              html: `<svg viewBox="-1 -1 18 18" ${tmpSelected ? 'width="40px" height="40px"' : 'width="32px" height="32px"'} style="color: ${tmpSelected ? 'red' : 'black'};">
+              html: `<svg viewBox="-1 -1 18 18" width="50px" height="50px" style="color: red; opacity: 0.5;  margin-top: -25px;">
                       <use href="#marker" />
                     </svg>`,
             })}

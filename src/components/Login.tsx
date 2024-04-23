@@ -7,7 +7,6 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ auth, onSignInSuccess }) => {
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -15,7 +14,7 @@ const Login: React.FC<LoginProps> = ({ auth, onSignInSuccess }) => {
     e.preventDefault()
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', password)
       console.log('User signed in:', userCredential.user)
       setError(null)
       onSignInSuccess() // Call the callback function
@@ -31,10 +30,6 @@ const Login: React.FC<LoginProps> = ({ auth, onSignInSuccess }) => {
     <div className="p-20 text-center">
       <h2 className="bold text-3xl">Admin Sign In</h2>
       <form onSubmit={handleSignin} className="m-10">
-        <label className="m-2 block">
-          Email:
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
         <label className="m-2 block">
           Password:
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />

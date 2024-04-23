@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
+import SearchControl from 'components/controls/SearchControl'
 import IncidentPanel from 'components/controls/IncidentPanel'
 import ZoomControl from 'components/controls/ZoomControl'
 import IncidentLayer from './layers/IncidentLayer'
@@ -53,8 +54,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     typeID: Incident['typeID'],
     description: Incident['description'],
     country: Incident['country'],
-    municipality: Incident['municipality'],
-    department: Incident['department']
+    department: Incident['department'],
+    municipality: Incident['municipality']
   ): Promise<boolean> {
     if (!name) {
       alert('Please enter a name for the incident')
@@ -79,7 +80,6 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       alert('No se pudo crear el incidente')
       return false
     }
-    setLocation(null)
     alert('Incidente creado con éxito')
     return true
   }
@@ -140,8 +140,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
         isAdmin={isAdmin}
         deleteSelectedIncident={deleteSelectedIncident}
       />
-      {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
-       <SearchControl layerRef={markersLayer} />*/}
+      <SearchControl />
       <Control prepend position="topleft">
         <div className="leaflet-bar">
           <CategoryControl data={data} filters={filters} setFilters={setFilters} />
