@@ -24,15 +24,9 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     }
   }, [])
 
-  const visibleDepartments = Object.entries(data.filterBounds.locations)
-    .filter(([country]) => !filters.hideCountries.includes(country))
-    .reduce(
-      (acc, [country, departments]) => {
-        acc[country] = Object.keys(departments)
-        return acc
-      },
-      {} as { [country: string]: string[] }
-    )
+  const visibleDepartments = Object.fromEntries(
+    Object.entries(data.filterBounds.locations).filter(([country]) => !filters.hideCountries.includes(country))
+  )
 
   const handleConCheckboxChange = (key: string, checked: boolean) => {
     if (checked) {
@@ -44,7 +38,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
       setFilters((filters) => ({
         ...filters,
         hideCountries: [...filters.hideCountries, key],
-        hideDepartments: filters.hideDepartments.filter((dep) => !visibleDepartments[key].includes(dep)),
+        hideDepartments: filters.hideDepartments.filter((dep) => !Object.keys(visibleDepartments[key]).includes(dep)),
       }))
     }
   }
@@ -72,7 +66,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     } else {
       setFilters((filters) => ({
         ...filters,
-        hideCountries: Object.keys(Object.keys(data.filterBounds.locations)),
+        hideCountries: Object.keys(data.filterBounds.locations),
       }))
     }
   }
@@ -86,7 +80,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     } else {
       setFilters((filters) => ({
         ...filters,
-        hideDepartments: Object.values(visibleDepartments).flat(),
+        hideDepartments: Object.values(visibleDepartments).map(Object.keys).flat(),
       }))
     }
   }
@@ -161,7 +155,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
               {Object.entries(visibleDepartments).map(([country, departments]) => (
                 <div key={country}>
                   {country}
-                  {departments.map((department) => (
+                  {Object.keys(departments).map((department) => (
                     <div key={department} className="flex items-center border-b border-b-tint-01 p-1 last-of-type:border-0 hover:bg-tint-02">
                       <input
                         type="checkbox"
