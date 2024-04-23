@@ -100,7 +100,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
     <>
       <a
         className="leaflet-control-zoom-in"
-        title={'Tags'}
+        title={'Filtrar por actividades y tipos de eventos'}
         role="button"
         onClick={(e) => {
           setDropdownVisible(!isDropdownVisible)

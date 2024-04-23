@@ -16,7 +16,7 @@ const SearchControl: React.FC<{}> = () => {
   }, [bounds])
 
   return (
-    <Control position="topleft">
+    <Control position="bottomleft" prepend>
       <div className="leaflet-control-search w-30 p-2">
         <label>
           Buscar un lugar:

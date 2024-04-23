@@ -89,7 +89,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     <>
       <a
         className="leaflet-control-zoom-out"
-        title={'Tags'}
+        title={'Filtrar por país/departamento'}
         role="button"
         onClick={(e) => {
           setDropdownVisible(!isDropdownVisible)

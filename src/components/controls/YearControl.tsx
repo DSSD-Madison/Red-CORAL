@@ -47,7 +47,7 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
       <div className="leaflet-bar relative rounded">
         <a
           className="leaflet-control-zoom-in rounded"
-          title={'Tags'}
+          title={'Filtrar por año'}
           role="button"
           onClick={(e) => {
             setDropdownVisible(!isDropdownVisible)
