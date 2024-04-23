@@ -10,6 +10,7 @@ import IncidentLayer from './layers/IncidentLayer'
 import { LatLngBoundsLiteral } from 'leaflet'
 import CategoryControl from './controls/CategoryControl'
 import YearControl from './controls/YearControl'
+import Control from 'react-leaflet-custom-control'
 
 interface MapProps {
   apiKey: string
@@ -141,7 +142,9 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />*/}
       <CategoryControl data={data} filters={filters} setFilters={setFilters} />
-      <YearControl data={data} filters={filters} setFilters={setFilters} />
+      <Control position="bottomleft">
+        <YearControl data={data} filters={filters} setFilters={setFilters} />
+      </Control>
       <ZoomControl zoomLevel={2} setFilters={setFilters} />
       <SetInitialBounds />
     </MapContainer>
