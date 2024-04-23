@@ -97,9 +97,9 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
   }
 
   return (
-    <div className="leaflet-bar relative rounded">
+    <>
       <a
-        className="leaflet-control-zoom-in rounded"
+        className="leaflet-control-zoom-in"
         title={'Tags'}
         role="button"
         onClick={(e) => {
@@ -190,7 +190,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 

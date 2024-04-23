@@ -45,6 +45,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
         (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
         !filters.hideCountries.includes(incident.country) &&
         !filters.hideDepartments.includes(incident.department) &&
+        !filters.hideMunicipalities.includes(incident.municipality) &&
         !filters.hideCategories.includes(data.Types[incident.typeID].categoryID) &&
         !filters.hideTypes.includes(incident.typeID)
     )

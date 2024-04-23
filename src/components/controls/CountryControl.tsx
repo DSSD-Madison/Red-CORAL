@@ -28,7 +28,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     .filter(([country]) => !filters.hideCountries.includes(country))
     .reduce(
       (acc, [country, departments]) => {
-        acc[country] = Object.keys(departments).sort()
+        acc[country] = Object.keys(departments)
         return acc
       },
       {} as { [country: string]: string[] }
@@ -92,9 +92,9 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
   }
 
   return (
-    <div className="leaflet-bar relative rounded">
+    <>
       <a
-        className="leaflet-control-zoom-in rounded"
+        className="leaflet-control-zoom-out"
         title={'Tags'}
         role="button"
         onClick={(e) => {
@@ -102,7 +102,8 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
           e.preventDefault()
         }}
       >
-        C
+        {/* 🏳 */}
+        &#127987;
       </a>
       {isDropdownVisible && (
         <div ref={dropdownRef} className="absolute -top-0.5 left-10 flex h-96 gap-5">
@@ -182,7 +183,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 

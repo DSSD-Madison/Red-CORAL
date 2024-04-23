@@ -49,7 +49,7 @@ export function calculateBounds(db: DB): DB {
   const allYears = new Set(Object.values(db.Incidents).map((e) => new Date(e.dateString).getFullYear()))
   const minYear = Math.min(...allYears)
   const maxYear = Math.max(...allYears)
-  const locations = Object.values(db.Incidents).reduce(
+  let locations = Object.values(db.Incidents).reduce(
     (acc, curr) => {
       if (!acc[curr.country]) {
         acc[curr.country] = {}
@@ -63,8 +63,14 @@ export function calculateBounds(db: DB): DB {
       return acc
     },
     {} as FilterBounds['locations']
-  ) as FilterBounds['locations']
-
+  )
+  locations = Object.entries(locations).reduce( // Sort the departments and municipalities
+    (acc, [country, departments]) => {
+      acc[country] = Object.fromEntries(Object.entries(departments).sort())
+      return acc
+    },
+    {} as FilterBounds['locations']
+  )
   return {
     ...db,
     filterBounds: {

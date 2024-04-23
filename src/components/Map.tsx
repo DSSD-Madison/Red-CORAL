@@ -143,10 +143,10 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       {/* <LegendControl selectedStakeholder={selectedStakeholder} /> 
        <SearchControl layerRef={markersLayer} />*/}
       <Control prepend position="topleft">
-        <CountryControl data={data} filters={filters} setFilters={setFilters} />
-      </Control>
-      <Control prepend position="topleft">
-        <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+        <div className="leaflet-bar">
+          <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+          <CountryControl data={data} filters={filters} setFilters={setFilters} />
+        </div>
       </Control>
       <YearControl data={data} filters={filters} setFilters={setFilters} />
       <ZoomControl zoomLevel={2} setFilters={setFilters} />
