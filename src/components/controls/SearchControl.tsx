@@ -1,41 +1,29 @@
-// import { useEffect } from 'react'
-// import { useMap } from 'react-leaflet'
-// import LControlSearch from 'leaflet-search'
+import AutocompleteSearch from 'components/AutocompleteSearch'
+import { useState, useEffect } from 'react'
+import { useMap } from 'react-leaflet'
+import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
 
-// interface SearchControlProps {
-//   // A reference to a LayerGroup in leaflet
-//   layerRef: React.MutableRefObject<any>
-// }
+const SearchControl: React.FC<{}> = () => {
+  const map = useMap()
+  const [bounds, setBounds] = useState<number[] | undefined>(undefined)
 
-// const SearchControl: React.FC<SearchControlProps> = ({ layerRef }) => {
-//   const map = useMap()
+  useEffect(() => {
+    if (bounds) {
+      const boundsExp: LatLngBoundsExpression = [bounds.slice(0, 2).reverse() as LatLngTuple, bounds.slice(2).reverse() as LatLngTuple]
+      map.flyToBounds(boundsExp, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5 })
+    }
+  }, [bounds])
 
-//   useEffect(() => {
-//     if (layerRef.current) {
-//       const searchControl = new LControlSearch({
-//         textPlaceholder: 'Search Stakeholders by name...',
-//         position: 'topleft',
-//         layer: layerRef.current,
-//         initial: false,
-//         zoom: 12,
-//         marker: false,
-//         autoCollapse: true, // Auto collapse search control on result select
-//       })
+  return (
+    <div className="leaflet-bar relative w-fit rounded">
+      <div className="w-30 bg-gray-200 rounded p-2">
+        <label>
+          Buscar un lugar:
+          <AutocompleteSearch setBounds={setBounds} />
+        </label>
+      </div>
+    </div>
+  )
+}
 
-//       // Listen for the search:locationfound event
-//       searchControl.on('search:locationfound', (e: any) => {
-//         // Simulate a click on the marker when a location is found
-//         e.layer.fire('click')
-//       })
-//       map.addControl(searchControl)
-
-//       return () => {
-//         map.removeControl(searchControl)
-//       }
-//     }
-//   }, [layerRef])
-
-//   return null
-// }
-
-// export default SearchControl
+export default SearchControl

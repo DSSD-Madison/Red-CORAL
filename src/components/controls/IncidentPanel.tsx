@@ -1,6 +1,8 @@
 import { DB, Incident } from 'types'
 import { useMap } from 'react-leaflet'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useState } from 'react'
+import AutocompleteSearch from 'components/AutocompleteSearch'
+import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
 
 interface InfoPanelControlProps {
   data: DB
@@ -11,9 +13,9 @@ interface InfoPanelControlProps {
     dateString: Incident['dateString'],
     typeID: Incident['typeID'],
     country: Incident['country'],
+    description: Incident['description'],
     department: Incident['department'],
-    municipality: Incident['municipality'],
-    description: Incident['description']
+    municipality: Incident['municipality']
   ) => Promise<boolean>
   setLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
   tmpSelected: boolean
@@ -36,77 +38,15 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const [name, setName] = useState<Incident['name']>('')
   const [description, setDescription] = useState<Incident['description']>('')
   const [country, setCountry] = useState<Incident['country']>('')
+  const [countryBounds, setCountryBounds] = useState<number[] | undefined>(undefined)
+  const [countryCode, setCountryCode] = useState<string>('')
   const [municipality, setMunicipality] = useState<Incident['municipality']>('')
+  const [municipalityBounds, setMunicipalityBounds] = useState<number[] | undefined>(undefined)
   const [department, setDepartment] = useState<Incident['department']>('')
-  const [departmentOptions, setDepartmentOptions] = useState<string[]>([])
-  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false)
-  const [municipalityOptions, setMunicipalityOptions] = useState<string[]>([])
+  const [departmentBounds, setDepartmentBounds] = useState<number[] | undefined>(undefined)
   const [dateString, setDateString] = useState<Incident['dateString']>('')
   const [typeID, setTypeID] = useState<keyof DB['Types']>('')
   const [catID, setCatID] = useState<keyof DB['Categories']>('')
-
-  useEffect(() => {
-    if (!country) {
-      setShowDepartmentDropdown(false)
-      return // No country selected yet
-    }
-
-    fetch('data.json')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data[country.charAt(0).toUpperCase() + country.slice(1)]) {
-          data[country.charAt(0).toUpperCase() + country.slice(1)]['Other'] = ['Other']
-          const departments = Object.keys(data[country])
-          setDepartmentOptions([...departments])
-          setShowDepartmentDropdown(true)
-        } else {
-          setDepartmentOptions([])
-          setShowDepartmentDropdown(false)
-        }
-      })
-      .catch((error) => {
-        console.error('Error loading data.json:', error)
-      })
-  }, [country])
-
-  useEffect(() => {
-    if (!department) {
-      return // No department selected yet
-    }
-
-    fetch('data.json')
-      .then((response) => response.json())
-      .then((data) => {
-        data[country.charAt(0).toUpperCase() + country.slice(1)]['Other'] = ['Other']
-        if (data[country] && data[country][department]) {
-          console.log(data)
-          setMunicipalityOptions([...data[country][department]])
-        } else {
-          setMunicipalityOptions([])
-        }
-      })
-      .catch((error) => {
-        console.error('Error loading data.json:', error)
-      })
-  }, [department])
-
-  const handleCountryChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-    const selectedCountry = e.target.value
-    setCountry(selectedCountry.charAt(0).toUpperCase() + selectedCountry.slice(1))
-    setDepartment('')
-    setMunicipality('')
-  }
-
-  const handleDepartmentChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-    const selectedDepartment = e.target.value
-    setDepartment(selectedDepartment.charAt(0).toUpperCase() + selectedDepartment.slice(1))
-    setMunicipality('')
-  }
-
-  const handleMunicipalityChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-    const selectedMunicipality = e.target.value
-    setMunicipality(selectedMunicipality.charAt(0).toUpperCase() + selectedMunicipality.slice(1))
-  }
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -133,6 +73,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
       setCountry('')
       setDepartment('')
       setMunicipality('')
+      setLocation(null)
       close()
     }
   }
@@ -236,63 +177,73 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   </select>
                   <br />
                   <label>
-                    País:
+                    Descripción:
                     <br />
-                    <input className="w-full" value={country} onChange={handleCountryChange} required />
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={10} cols={40} />
                   </label>
                   <br />
-                  {showDepartmentDropdown ? (
+                  <label>
+                    País:
+                    <br />
+                    <AutocompleteSearch
+                      layers={['country']}
+                      setStringValue={setCountry}
+                      setCountryCode={setCountryCode}
+                      setBounds={setCountryBounds}
+                    />
+                  </label>
+                  {country && countryBounds && (
                     <label>
                       Departamento:
                       <br />
-                      <select className="w-full" value={department} onChange={handleDepartmentChange} required>
-                        <option value="">Seleccione un departamento</option>
-                        {departmentOptions.map((option, index) => (
-                          <option key={index} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : (
-                    <label>
-                      Departamento:
-                      <br />
-                      <input className="w-full" value={department} onChange={handleDepartmentChange} required />
+                      <AutocompleteSearch
+                        layers={['region']}
+                        setStringValue={setDepartment}
+                        setBounds={setDepartmentBounds}
+                        countryCode={countryCode}
+                      />
                     </label>
                   )}
-                  <br />
-                  {showDepartmentDropdown ? (
+                  {department && departmentBounds && (
                     <label>
                       Municipio:
                       <br />
-                      <select className="w-full" value={municipality} onChange={handleMunicipalityChange} required>
-                        <option value="">Seleccione un municipio</option>
-                        {municipalityOptions.map((option, index) => (
-                          <option key={index} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : (
-                    <label>
-                      Municipio:
-                      <br />
-                      <input className="w-full" value={municipality} onChange={handleMunicipalityChange} required />
+                      <AutocompleteSearch
+                        layers={['locality']}
+                        setStringValue={setMunicipality}
+                        setBounds={setMunicipalityBounds}
+                        department={{ name: department, bbox: departmentBounds }}
+                      />
                     </label>
                   )}
                 </div>
               </div>
+              {municipalityBounds && (
+                <>
+                  <button
+                    className="bg-blue-200 hover:bg-blue-300 mr-1 rounded-sm border-0 pb-1 pl-2 pr-2 pt-1"
+                    onClick={() => {
+                      const bounds: LatLngBoundsExpression = [
+                        municipalityBounds?.slice(0, 2).reverse() as LatLngTuple,
+                        municipalityBounds?.slice(2).reverse() as LatLngTuple,
+                      ]
+                      map.flyToBounds(bounds)
+                    }}
+                  >
+                    Zoom sobre el Municipio
+                  </button>
+                </>
+              )}
+
               <button
-                className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-redwood-light"
+                className="bg-red-100 hover:bg-red-200 mr-1 rounded-sm border-0 pb-1 pl-2 pr-2 pt-1"
                 onClick={() => {
                   setLocation(null)
                 }}
               >
                 Quitar marcador
               </button>
-              <button className="rounded-sm border-0 bg-green-light pb-1 pl-2 pr-2 pt-1 hover:bg-green" onClick={submit}>
+              <button className="bg-green-100 hover:bg-green-200 rounded-sm border-0 pb-1 pl-2 pr-2 pt-1" onClick={submit}>
                 Crear
               </button>
             </div>

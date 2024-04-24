@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
-import Login from 'components/Login'
 import Home from 'components/Home'
+import Login from 'components/Login'
 import CRUDDash from 'components/CRUDDash'
 
 const App: React.FC = () => {
@@ -32,6 +32,10 @@ const App: React.FC = () => {
     setIsLoggedIn(true) // Update the sign-in status to true
   }
 
+  // const Home = lazy(() => import('components/Home'))
+  // const Login = lazy(() => import('components/Login'))
+  // const CRUDDash = lazy(() => import('components/CRUDDash'))
+
   function Admin() {
     return (
       <>
@@ -52,11 +56,13 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      {/* <Suspense fallback={<LoadingOverlay isVisible={true} color="#ab0000" />}> */}
       <Routes>
         <Route path="/" element={<Home app={app} isAdmin={false} />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/dash" element={<AdminDash />} />
       </Routes>
+      {/* </Suspense> */}
     </Router>
   )
 }

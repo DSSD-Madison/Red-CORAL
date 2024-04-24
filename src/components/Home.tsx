@@ -7,7 +7,7 @@ import { Incident, DB } from 'types'
 import { getFirestore, collection, addDoc, deleteDoc, doc } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import LoadingOverlay from './LoadingOverlay'
-import { getDBData } from 'utils'
+import { calculateBounds, getDBData } from 'utils'
 
 interface HomeProps {
   app: FirebaseApp
@@ -23,12 +23,18 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
     Categories: {},
     Types: {},
     Incidents: {},
+    filterBounds: {
+      maxYear: 0,
+      minYear: 0,
+      locations: {},
+    },
   })
 
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     getDBData(isAdmin, firestore, storage)
+      .then(calculateBounds)
       .then(setData)
       .then(() => setIsLoading(false))
       .catch((error) => {
@@ -72,7 +78,7 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
       <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} deleteIncident={deleteIncident} />
       {isAdmin && (
         <div className="absolute right-3 top-1 z-[1000]">
-          <p className=" text-4xl text-red-dark">Administrador</p>
+          <p className="text-4xl text-red-dark">Administrador</p>
           <button className="rounded-md bg-red-dark p-2 text-white" onClick={() => (window.location.href = '/admin/dash')}>
             Administrar categorías
           </button>
