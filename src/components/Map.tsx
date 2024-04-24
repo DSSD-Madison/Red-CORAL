@@ -8,6 +8,8 @@ import IncidentLayer from './layers/IncidentLayer'
 import { LatLngBoundsLiteral } from 'leaflet'
 import CategoryControl from './controls/CategoryControl'
 import YearControl from './controls/YearControl'
+import CountryControl from './controls/CountryControl'
+import Control from 'react-leaflet-custom-control'
 
 interface MapProps {
   apiKey: string
@@ -38,6 +40,9 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     hideTypes: [],
     startYear: null,
     endYear: null,
+    hideCountries: [],
+    hideDepartments: [],
+    hideMunicipalities: [],
   })
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
@@ -136,9 +141,16 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           isAdmin={isAdmin}
           deleteSelectedIncident={deleteSelectedIncident}
         />
-        <SearchControl />
-        <CategoryControl data={data} filters={filters} setFilters={setFilters} />
-        <YearControl data={data} filters={filters} setFilters={setFilters} />
+        <Control prepend position="topleft">
+          <div className="leaflet-bar">
+            <CategoryControl data={data} filters={filters} setFilters={setFilters} />
+            <CountryControl data={data} filters={filters} setFilters={setFilters} />
+          </div>
+        </Control>
+        <Control position="bottomleft">
+          <YearControl data={data} filters={filters} setFilters={setFilters} />
+          <SearchControl />
+        </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>

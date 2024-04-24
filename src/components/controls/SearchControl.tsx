@@ -1,7 +1,6 @@
 import AutocompleteSearch from 'components/AutocompleteSearch'
 import { useState, useEffect } from 'react'
 import { useMap } from 'react-leaflet'
-import Control from 'react-leaflet-custom-control'
 import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
 
 const SearchControl: React.FC<{}> = () => {
@@ -16,14 +15,14 @@ const SearchControl: React.FC<{}> = () => {
   }, [bounds])
 
   return (
-    <Control position="topleft">
-      <div className="leaflet-control-search w-30 p-2">
+    <div className="leaflet-bar relative w-fit rounded">
+      <div className="w-30 bg-gray-200 rounded p-2">
         <label>
           Buscar un lugar:
           <AutocompleteSearch setBounds={setBounds} />
         </label>
       </div>
-    </Control>
+    </div>
   )
 }
 

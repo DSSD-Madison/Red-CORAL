@@ -37,13 +37,17 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
       map.flyToBounds(bounds, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5 })
     }
 
-    const incidentList = Object.entries(data?.Incidents || {}).filter(([_, incident]) => {
-      if (filters.hideCategories.includes(data.Types[incident.typeID].categoryID)) return false
-      if (filters.hideTypes.includes(incident.typeID)) return false
-      if (filters.startYear && new Date(incident.dateString).getFullYear() < filters.startYear) return false
-      if (filters.endYear && new Date(incident.dateString).getFullYear() > filters.endYear) return false
-      return true
-    })
+    // Applying MarkerFilters to the incidents.
+    const incidentList = Object.entries(data?.Incidents || {}).filter(
+      ([_, incident]) =>
+        (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
+        (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
+        !filters.hideCountries.includes(incident.country) &&
+        !filters.hideDepartments.includes(incident.department) &&
+        !filters.hideMunicipalities.includes(incident.municipality) &&
+        !filters.hideCategories.includes(data.Types[incident.typeID].categoryID) &&
+        !filters.hideTypes.includes(incident.typeID)
+    )
 
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
 

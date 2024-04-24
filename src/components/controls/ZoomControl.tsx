@@ -51,6 +51,9 @@ function ZoomControl(props: ZoomControlProps) {
               hideTypes: [],
               startYear: null,
               endYear: null,
+              hideCountries: [],
+              hideDepartments: [],
+              hideMunicipalities: [],
             })
             e.preventDefault()
           }} // circle arrow symbol
