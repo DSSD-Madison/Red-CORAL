@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-
-import Control from 'react-leaflet-custom-control'
 import { DB, MarkerFilters } from 'types'
 
 interface YearControlProps {
@@ -43,52 +41,50 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
   }
 
   return (
-    <Control prepend position="bottomleft">
-      <div className="leaflet-bar relative rounded">
-        <a
-          className="leaflet-control-zoom-in rounded"
-          title={'Filtrar por año'}
-          role="button"
-          onClick={(e) => {
-            setDropdownVisible(!isDropdownVisible)
-            e.preventDefault()
-          }}
+    <div className="leaflet-bar relative w-fit rounded">
+      <a
+        className="leaflet-control-zoom-in rounded"
+        title={'Filtrar por año'}
+        role="button"
+        onClick={(e) => {
+          setDropdownVisible(!isDropdownVisible)
+          e.preventDefault()
+        }}
+      >
+        {/* ⧗ */}
+        &#x029D7;
+      </a>
+      {isDropdownVisible && (
+        <div
+          ref={dropdownRef}
+          className="leaflet-bar absolute -bottom-0.5 left-10 box-content h-24 w-[calc(100vw-4.25rem)] rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
         >
-          {/* ⧗ */}
-          &#x029D7;
-        </a>
-        {isDropdownVisible && (
-          <div
-            ref={dropdownRef}
-            className="leaflet-bar absolute -bottom-0.5 left-10 box-content h-24 w-[calc(100vw-4.25rem)] rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
-          >
-            <label className="block text-center text-xl font-semibold" htmlFor="year">
-              Año
-            </label>
-            <div className="flex w-full items-center justify-center gap-2 p-2">
-              <button
-                className="rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
-                onClick={handleResetRange}
-              >
-                Reset
-              </button>
-              {minYear}
-              <input
-                type="range"
-                min={minYear}
-                max={maxYear}
-                value={filters.startYear || minYear}
-                onMouseEnter={() => (filters.endYear == null ? handleRangeUpdate(minYear) : null)}
-                onChange={(e) => handleRangeUpdate(parseInt(e.target.value))}
-                className="flex-grow"
-              />
-              {maxYear}
-              <span className="text-lg font-semibold">{filters.startYear || minYear}</span>
-            </div>
+          <label className="block text-center text-xl font-semibold" htmlFor="year">
+            Año
+          </label>
+          <div className="flex w-full items-center justify-center gap-2 p-2">
+            <button
+              className="rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
+              onClick={handleResetRange}
+            >
+              Reset
+            </button>
+            {minYear}
+            <input
+              type="range"
+              min={minYear}
+              max={maxYear}
+              value={filters.startYear || minYear}
+              onMouseEnter={() => (filters.endYear == null ? handleRangeUpdate(minYear) : null)}
+              onChange={(e) => handleRangeUpdate(parseInt(e.target.value))}
+              className="flex-grow"
+            />
+            {maxYear}
+            <span className="text-lg font-semibold">{filters.startYear || minYear}</span>
           </div>
-        )}
-      </div>
-    </Control>
+        </div>
+      )}
+    </div>
   )
 }
 

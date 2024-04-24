@@ -141,14 +141,16 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           isAdmin={isAdmin}
           deleteSelectedIncident={deleteSelectedIncident}
         />
-        <SearchControl />
         <Control prepend position="topleft">
           <div className="leaflet-bar">
             <CategoryControl data={data} filters={filters} setFilters={setFilters} />
             <CountryControl data={data} filters={filters} setFilters={setFilters} />
           </div>
         </Control>
-        <YearControl data={data} filters={filters} setFilters={setFilters} />
+        <Control position="bottomleft">
+          <YearControl data={data} filters={filters} setFilters={setFilters} />
+          <SearchControl />
+        </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>
