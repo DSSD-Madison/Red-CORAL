@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { DB, MarkerFilters } from 'types'
+import RangeSlider from 'react-range-slider-input'
+import 'react-range-slider-input/dist/style.css'
 
 interface YearControlProps {
   data: DB
@@ -19,9 +21,9 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
   }
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('pointerdown', handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('pointerdown', handleClickOutside)
     }
   }, [])
 
@@ -32,11 +34,12 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
       endYear: null,
     }))
   }
-  const handleRangeUpdate = (newYear: number) => {
+
+  const handleRangeUpdate = (lower: number, upper: number) => {
     setFilters((filters) => ({
       ...filters,
-      startYear: newYear,
-      endYear: newYear,
+      startYear: lower,
+      endYear: upper,
     }))
   }
 
@@ -67,20 +70,17 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
               className="rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
               onClick={handleResetRange}
             >
-              Reset
+              Restablecer
             </button>
-            {minYear}
-            <input
-              type="range"
+            {filters.startYear || minYear}
+            <RangeSlider
               min={minYear}
               max={maxYear}
-              value={filters.startYear || minYear}
-              onMouseEnter={() => (filters.endYear == null ? handleRangeUpdate(minYear) : null)}
-              onChange={(e) => handleRangeUpdate(parseInt(e.target.value))}
+              value={[filters.startYear || minYear, filters.endYear || maxYear]}
+              onInput={(e) => handleRangeUpdate(e[0], e[1])}
               className="flex-grow"
             />
-            {maxYear}
-            <span className="text-lg font-semibold">{filters.startYear || minYear}</span>
+            {filters.endYear || maxYear}
           </div>
         </div>
       )}
