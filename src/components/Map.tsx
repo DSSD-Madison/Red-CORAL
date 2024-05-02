@@ -22,7 +22,7 @@ interface MapProps {
 function SetInitialBounds() {
   const map = useMap()
   useEffect(() => {
-    map.setView([-27, -60], 3.5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
+    map.setView([-5, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
   }, [])
   return null
 }
@@ -49,7 +49,6 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   const [location, setLocation] = useState<Incident['location'] | null>(null)
 
   async function submitIncident(
-    name: Incident['name'],
     dateString: Incident['dateString'],
     typeID: Incident['typeID'],
     description: Incident['description'],
@@ -57,10 +56,6 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     department: Incident['department'],
     municipality: Incident['municipality']
   ): Promise<boolean> {
-    if (!name) {
-      alert('Please enter a name for the incident')
-      return false
-    }
     if (!dateString) {
       alert('Please enter a date for the incident')
       return false
@@ -76,7 +71,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       return false
     }
 
-    if (!(await addIncident({ name, description, dateString, typeID, location, country, department, municipality }))) {
+    if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
       alert('No se pudo crear el incidente')
       return false
     }
@@ -135,6 +130,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           incidentID={selectedIncidentID}
           onClose={onClose}
           submitIncident={submitIncident}
+          location={location}
           setLocation={setLocation}
           tmpSelected={tmpSelected}
           setTmpSelected={setTmpSelected}

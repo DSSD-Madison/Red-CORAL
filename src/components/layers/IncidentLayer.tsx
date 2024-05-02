@@ -53,30 +53,21 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     return (
       <LayerGroup ref={ref}>
-        <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 18 18">
+        <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
           <symbol id="marker">
-            <path
-              d="M8,0C4.688,0,2,2.688,2,6c0,6,6,10,6,10s6-4,6-10C14,2.688,11.312,0,8,0z M8,8C6.344,8,5,6.656,5,5s1.344-3,3-3s3,1.344,3,3 S9.656,8,8,8z"
-              stroke="#D6D6D7"
-              strokeWidth="1"
-              fill="none"
-            />
-            <path
-              d="M8,0C4.688,0,2,2.688,2,6c0,6,6,10,6,10s6-4,6-10C14,2.688,11.312,0,8,0z M8,8C6.344,8,5,6.656,5,5s1.344-3,3-3s3,1.344,3,3 S9.656,8,8,8z"
-              fill="currentColor"
-            />
+            <circle r="6" cx="6" cy="6" fill="currentColor" />
           </symbol>
         </svg>
         {incidentList.map(([id, incident], i) => (
           <LeafletMarker
             key={`incident-${i}-marker`}
-            title={incident.name}
+            title={incident.description}
             position={incident.location}
             icon={L.divIcon({
-              iconSize: id == selectedIncidentID ? [40, 40] : [32, 32],
+              iconSize: id == selectedIncidentID ? [20, 20] : [15, 15],
               className: '',
-              html: `<svg viewBox="-1 -1 18 18" ${id == selectedIncidentID ? 'width="40px" height="40px"' : 'width="32px" height="32px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]}; margin-top: -${id == selectedIncidentID ? '20px' : '16px'};">
-                        <use href="#marker" />
+              html: `<svg viewBox="0 0 18 18" ${id == selectedIncidentID ? 'width="20px" height="20px"' : 'width="15px" height="15px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+              <use href="#marker" />
                       </svg>`,
             })}
             eventHandlers={{
@@ -98,7 +89,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             icon={L.divIcon({
               iconSize: [50, 50],
               className: '',
-              html: `<svg viewBox="-1 -1 18 18" width="50px" height="50px" style="color: red; opacity: 0.5;  margin-top: -25px;">
+              html: `<svg viewBox="0 0 18 18" width="20px" height="20px" style="color: red; opacity: 0.5;">
                       <use href="#marker" />
                     </svg>`,
             })}

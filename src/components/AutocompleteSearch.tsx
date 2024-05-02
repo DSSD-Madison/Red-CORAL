@@ -39,6 +39,9 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     if (setStringValue !== undefined) setStringValue(val)
     setLocalStrVal(val)
     if (setCountryCode !== undefined) setCountryCode(feat.properties?.country_a || '')
+    if (!feat.bbox) {
+      alert('Stadia Maps no tiene información de ubicación para este municipio. No podrás acercarlo automáticamente.')
+    }
     setBounds(feat.bbox)
   }
 
