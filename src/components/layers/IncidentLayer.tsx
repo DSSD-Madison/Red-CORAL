@@ -55,7 +55,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
       <LayerGroup ref={ref}>
         <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
           <symbol id="marker">
-            <circle r="6" cx="6" cy="6" fill="currentColor" />
+            <circle r="9" cx="9" cy="9" fill="currentColor" />
           </symbol>
         </svg>
         {incidentList.map(([id, incident], i) => (
@@ -66,7 +66,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             icon={L.divIcon({
               iconSize: id == selectedIncidentID ? [20, 20] : [15, 15],
               className: '',
-              html: `<svg viewBox="0 0 18 18" ${id == selectedIncidentID ? 'width="20px" height="20px"' : 'width="15px" height="15px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+              html: `<svg viewBox="0 0 18 18" ${id == selectedIncidentID ? 'width="20px" height="20px"' : 'width="15px" height="15px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]}; margin-top: ${id == selectedIncidentID ? '10px' : '12.5px'}; margin-left: ${id == selectedIncidentID ? '10px' : '12.5px'};">
               <use href="#marker" />
                       </svg>`,
             })}
@@ -89,7 +89,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             icon={L.divIcon({
               iconSize: [50, 50],
               className: '',
-              html: `<svg viewBox="0 0 18 18" width="20px" height="20px" style="color: red; opacity: 0.5;">
+              html: `<svg viewBox="0 0 18 18" width="20px" height="20px" style="color: red; opacity: 0.5; margin-top: 10px; margin-left: 10px;">
                       <use href="#marker" />
                     </svg>`,
             })}
