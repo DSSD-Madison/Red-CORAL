@@ -4,7 +4,6 @@ export interface Coordinates {
 }
 
 export interface Incident {
-  name: string
   description: string
   dateString: string
   typeID: keyof DB['Types']

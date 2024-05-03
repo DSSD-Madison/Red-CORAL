@@ -45,7 +45,7 @@ function ZoomControl(props: ZoomControlProps) {
           title={zoomResetTitle}
           role="button"
           onClick={(e) => {
-            map.setView([-27, -60], 3.5)
+            map.setView([-5, -70], 5)
             setFilters({
               hideCategories: [],
               hideTypes: [],
