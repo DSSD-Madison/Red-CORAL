@@ -14,7 +14,8 @@ interface InfoPanelControlProps {
     country: Incident['country'],
     description: Incident['description'],
     department: Incident['department'],
-    municipality: Incident['municipality']
+    municipality: Incident['municipality'],
+    incidentID: keyof DB['Incidents'] | null
   ) => Promise<boolean>
   location: Incident['location'] | null
   setLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
@@ -22,6 +23,8 @@ interface InfoPanelControlProps {
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   isAdmin: boolean
   deleteSelectedIncident: () => void
+  editID: keyof DB['Incidents'] | null
+  setEditID: React.Dispatch<React.SetStateAction<keyof DB['Incidents'] | null>>
 }
 
 const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
@@ -34,6 +37,8 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   tmpSelected,
   isAdmin,
   deleteSelectedIncident,
+  editID,
+  setEditID,
 }) => {
   const map = useMap()
   const [description, setDescription] = useState<Incident['description']>('')
@@ -60,11 +65,24 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
 
   const close = () => {
     enableZoom()
+    cancelEdit()
     onClose()
   }
 
+  const cancelEdit = () => {
+    setDescription('')
+    setDateString('')
+    setTypeID('')
+    setCatID('')
+    setCountry('')
+    setDepartment('')
+    setMunicipality('')
+    setEditID(null)
+    setLocation(null)
+  }
+
   const submit = async () => {
-    if (await submitIncident(dateString, typeID, description, country, department, municipality)) {
+    if (await submitIncident(dateString, typeID, description, country, department, municipality, editID)) {
       setDescription('')
       setDateString('')
       setTypeID('')
@@ -80,8 +98,29 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const incident = incidentID ? data.Incidents[incidentID] : null
 
   useEffect(() => {
-    console.log(municipalityBounds)
-  }, [municipalityBounds])
+    if (editID != null) {
+      if (incident) {
+        setDescription(incident.description)
+        setDateString(incident.dateString)
+        setTypeID(incident.typeID)
+        setCatID(data.Types[incident.typeID].categoryID)
+        setCountry(incident.country)
+        setLocation(incident.location)
+        setCountry(incident.country)
+        setDepartment(incident.department)
+        setMunicipality(incident.municipality)
+      } else {
+        setDescription('')
+        setDateString('')
+        setTypeID('')
+        setCatID('')
+        setCountry('')
+        setDepartment('')
+        setMunicipality('')
+        setLocation(null)
+      }
+    }
+  }, [editID])
 
   return (
     <div
@@ -101,7 +140,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
             &times;
           </span>
 
-          {incident && (
+          {incident && editID == null && (
             <div className="px-6 py-10">
               <div className="mb-4">
                 <span className="font-bold">País:</span> {incident.country}
@@ -123,19 +162,31 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
               <div className="mb-6 text-shade-01">{incident.description}</div>
               <div className="mb-6 text-shade-01"></div>
               {isAdmin && (
-                <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
-                  Borrar
-                </button>
+                <>
+                  <button className="mr-1 rounded-sm border-0 bg-red-light pb-1 pl-2 pr-2 pt-1 hover:bg-red" onClick={deleteSelectedIncident}>
+                    Borrar
+                  </button>
+                  <button className="rounded-sm border-0 bg-blue-100 pb-1 pl-2 pr-2 pt-1 hover:bg-blue-200" onClick={() => setEditID(incidentID)}>
+                    Editar
+                  </button>
+                </>
               )}
             </div>
           )}
-          {tmpSelected && (
+          {(tmpSelected || editID != null) && (
             <div className="px-6 py-10">
+              <h2 className="mb-4 text-xl font-bold">{editID != null ? 'Editar' : 'Crear'} Incidente</h2>
               <div className="mb-4">
                 <label>
                   País:
                   <br />
-                  <AutocompleteSearch layers={['country']} setStringValue={setCountry} setCountryCode={setCountryCode} setBounds={setCountryBounds} />
+                  <AutocompleteSearch
+                    layers={['country']}
+                    setStringValue={setCountry}
+                    setCountryCode={setCountryCode}
+                    setBounds={setCountryBounds}
+                    initialValue={editID != null ? incident?.country : undefined}
+                  />
                 </label>
                 {country && countryBounds && (
                   <label>
@@ -146,6 +197,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                       setStringValue={setDepartment}
                       setBounds={setDepartmentBounds}
                       countryCode={countryCode}
+                      initialValue={editID != null ? incident?.department : undefined}
                     />
                   </label>
                 )}
@@ -158,6 +210,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                       setStringValue={setMunicipality}
                       setBounds={setMunicipalityBounds}
                       department={{ name: department, bbox: departmentBounds }}
+                      initialValue={editID != null ? incident?.municipality : undefined}
                     />
                   </label>
                 )}
@@ -231,8 +284,13 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
               </div>
               <button className="rounded-sm border-0 bg-green-100 pb-1 pl-2 pr-2 pt-1 hover:bg-green-200" onClick={submit}>
-                Crear
+                {editID != null ? 'Aplicar' : 'Crear'}
               </button>
+              {editID != null && (
+                <button className="rounded-sm border-0 bg-red-100 pb-1 pl-2 pr-2 pt-1 hover:bg-red-200" onClick={cancelEdit}>
+                  Cancelar
+                </button>
+              )}
             </div>
           )}
         </>
