@@ -133,7 +133,6 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           tmpLocation={location}
           setTmpLocation={setLocation}
           tmpSelected={tmpSelected}
-          setTmpSelected={setTmpSelected}
           filters={filters}
           editID={editID}
         />

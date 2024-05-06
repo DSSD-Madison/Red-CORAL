@@ -11,13 +11,12 @@ interface IncidentLayerProps {
   tmpLocation: Incident['location'] | null
   setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
   tmpSelected: boolean
-  setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   filters: MarkerFilters
   editID: keyof DB['Incidents'] | null
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
-  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, setTmpSelected, filters, editID }, ref) => {
+  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID }, ref) => {
     const map = useMap()
 
     map.removeEventListener('dblclick')
