@@ -2,44 +2,6 @@ import { Incident, Category, Type, DB, FilterBounds } from 'types'
 import { collection, getDocs, Firestore } from 'firebase/firestore'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
 
-export async function getDBData(isAdmin: boolean, firestore: Firestore, storage: FirebaseStorage) {
-  if (isAdmin) {
-    const db: DB = {
-      Categories: {},
-      Types: {},
-      Incidents: {},
-      filterBounds: {
-        maxYear: 0,
-        minYear: 0,
-        locations: {},
-      },
-    }
-    // prettier-ignore
-    const [catSnap, typeSnap, incSnap] = await Promise.all([
-      getDocs(collection(firestore, 'Categories')),
-      getDocs(collection(firestore, 'Types')),
-      getDocs(collection(firestore, 'Incidents')),
-    ])
-    catSnap.forEach((doc) => {
-      const cat = doc.data() as Category
-      db.Categories[doc.id] = cat
-    })
-    typeSnap.forEach((doc) => {
-      const type = doc.data() as Type
-      db.Types[doc.id] = type
-    })
-    incSnap.forEach((doc) => {
-      const inc = doc.data() as Incident
-      db.Incidents[doc.id] = inc
-    })
-    return db
-  } else {
-    const bytes = await getBytes(ref(storage, 'state.json'))
-    const db: DB = JSON.parse(new TextDecoder().decode(bytes))
-    return db
-  }
-}
-
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
  * @param db a database object
@@ -64,7 +26,8 @@ export function calculateBounds(db: DB): DB {
     },
     {} as FilterBounds['locations']
   )
-  locations = Object.entries(locations).reduce( // Sort the departments and municipalities
+  locations = Object.entries(locations).reduce(
+    // Sort the departments and municipalities
     (acc, [country, departments]) => {
       acc[country] = Object.fromEntries(Object.entries(departments).sort())
       return acc
@@ -78,5 +41,13 @@ export function calculateBounds(db: DB): DB {
       minYear,
       locations,
     },
+  } as DB
+}
+
+export function mergeDBs(db1: DB, db2: DB) {
+  return {
+    Categories: { ...db1.Categories, ...db2.Categories },
+    Types: { ...db1.Types, ...db2.Types },
+    Incidents: { ...db1.Incidents, ...db2.Incidents },
   } as DB
 }
