@@ -1,6 +1,7 @@
 import { useMap } from 'react-leaflet'
 import Control from 'react-leaflet-custom-control'
 import { MarkerFilters } from 'types'
+import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../../constants'
 
 interface ZoomControlProps {
   zoomInTitle?: string
@@ -45,7 +46,7 @@ function ZoomControl(props: ZoomControlProps) {
           title={zoomResetTitle}
           role="button"
           onClick={(e) => {
-            map.setView([0, -70], 5)
+            map.setView(INITIAL_BOUNDS, INITIAL_ZOOM)
             setFilters({
               hideCategories: [],
               hideTypes: [],

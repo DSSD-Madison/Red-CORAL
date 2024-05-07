@@ -10,9 +10,9 @@ import CategoryControl from './controls/CategoryControl'
 import YearControl from './controls/YearControl'
 import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
+import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
 
 interface MapProps {
-  apiKey: string
   data: DB
   isAdmin: boolean
   addIncident: (incident: Incident) => Promise<boolean>
@@ -23,12 +23,13 @@ interface MapProps {
 function SetInitialBounds() {
   const map = useMap()
   useEffect(() => {
-    map.setView([0, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
+    map.setView(INITIAL_BOUNDS, INITIAL_ZOOM)
   }, [])
   return null
 }
 
-const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+  const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
     [-90, -180],
@@ -108,7 +109,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   }
 
   return (
-    <>
+    <div className="relative h-full">
       <MapContainer
         className="h-full w-full"
         center={[20, 0]}
@@ -180,7 +181,10 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           </button>
         </div>
       )}
-    </>
+      {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
+        <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
+      </div> */}
+    </div>
   )
 }
 

@@ -1,6 +1,4 @@
-import { Incident, Category, Type, DB, FilterBounds } from 'types'
-import { collection, getDocs, Firestore } from 'firebase/firestore'
-import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
+import { DB, FilterBounds } from 'types'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
