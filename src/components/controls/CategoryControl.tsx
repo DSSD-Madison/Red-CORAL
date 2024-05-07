@@ -128,22 +128,24 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
               </div>
             </div>
             <div className="h-max overflow-y-auto">
-              {Object.entries(data.Categories).map(([id, { name, color }]) => (
-                <div key={id} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
-                  <input
-                    type="checkbox"
-                    name={id}
-                    id={id}
-                    checked={!filters.hideCategories?.includes(id)}
-                    onChange={(e) => handleCategoryCheckboxChange(id, e.target.checked)}
-                    className="mr-2"
-                  />
-                  <label htmlFor={id} className="w-full">
-                    {name}
-                  </label>
-                  <div className="ml-auto h-4 w-4 flex-shrink-0 rounded-full border border-harvard-slate" style={{ backgroundColor: color }} />
-                </div>
-              ))}
+              {Object.entries(data.Categories)
+                .sort(([_, { name: name1 }], [__, { name: name2 }]) => name1.localeCompare(name2))
+                .map(([id, { name, color }]) => (
+                  <div key={id} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
+                    <input
+                      type="checkbox"
+                      name={id}
+                      id={id}
+                      checked={!filters.hideCategories?.includes(id)}
+                      onChange={(e) => handleCategoryCheckboxChange(id, e.target.checked)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={id} className="w-full">
+                      {name}
+                    </label>
+                    <div className="ml-auto h-4 w-4 flex-shrink-0 rounded-full border border-harvard-slate" style={{ backgroundColor: color }} />
+                  </div>
+                ))}
             </div>
           </div>
           {/* Event Subtypes */}
@@ -165,6 +167,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
             <div className="h-[calc(100%-2rem)] overflow-y-auto px-1">
               {Object.entries(data.Categories)
                 .filter(([catID]) => !filters.hideCategories.includes(catID))
+                .sort(([_, { name: name1 }], [__, { name: name2 }]) => name1.localeCompare(name2))
                 .map(([catID, { name: catName }]) => (
                   <div key={catID}>
                     {catName}

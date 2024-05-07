@@ -159,6 +159,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
                 <span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}
               </div>
+              <span className="font-bold">Descripción:</span>
               <div className="mb-6 text-shade-01">{incident.description}</div>
               <div className="mb-6 text-shade-01"></div>
               {isAdmin && (

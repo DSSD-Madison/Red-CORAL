@@ -118,21 +118,23 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
               </div>
             </div>
             <div className="h-max overflow-y-auto">
-              {Object.keys(data.filterBounds.locations).map((country) => (
-                <div key={country} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
-                  <input
-                    type="checkbox"
-                    name={country}
-                    id={country}
-                    checked={!filters.hideCountries?.includes(country)}
-                    onChange={(e) => handleConCheckboxChange(country, e.target.checked)}
-                    className="mr-2"
-                  />
-                  <label htmlFor={country} className="w-full">
-                    {country}
-                  </label>
-                </div>
-              ))}
+              {Object.keys(data.filterBounds.locations)
+                .sort()
+                .map((country) => (
+                  <div key={country} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
+                    <input
+                      type="checkbox"
+                      name={country}
+                      id={country}
+                      checked={!filters.hideCountries?.includes(country)}
+                      onChange={(e) => handleConCheckboxChange(country, e.target.checked)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={country} className="w-full">
+                      {country}
+                    </label>
+                  </div>
+                ))}
             </div>
           </div>
           {/* Departments */}
@@ -152,27 +154,29 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
               </div>
             </div>
             <div className="h-[calc(100%-2rem)] overflow-y-auto px-1">
-              {Object.entries(visibleDepartments).map(([country, departments]) => (
-                <div key={country}>
-                  {country}
-                  {Object.keys(departments).map((department) => (
-                    <div key={department} className="flex items-center border-b border-b-tint-01 p-1 last-of-type:border-0 hover:bg-tint-02">
-                      <input
-                        type="checkbox"
-                        name={department}
-                        id={department}
-                        checked={!filters.hideDepartments?.includes(department)}
-                        onChange={(e) => handleDepCheckboxChange(department, e.target.checked)}
-                        className="mr-2"
-                      />
-                      <label htmlFor={department} className="w-full">
-                        {department}
-                      </label>
-                    </div>
-                  ))}
-                  <hr />
-                </div>
-              ))}
+              {Object.entries(visibleDepartments)
+                .sort(([country1, _], [country2, __]) => country1.localeCompare(country2))
+                .map(([country, departments]) => (
+                  <div key={country}>
+                    {country}
+                    {Object.keys(departments).map((department) => (
+                      <div key={department} className="flex items-center border-b border-b-tint-01 p-1 last-of-type:border-0 hover:bg-tint-02">
+                        <input
+                          type="checkbox"
+                          name={department}
+                          id={department}
+                          checked={!filters.hideDepartments?.includes(department)}
+                          onChange={(e) => handleDepCheckboxChange(department, e.target.checked)}
+                          className="mr-2"
+                        />
+                        <label htmlFor={department} className="w-full">
+                          {department}
+                        </label>
+                      </div>
+                    ))}
+                    <hr />
+                  </div>
+                ))}
             </div>
           </div>
         </div>
