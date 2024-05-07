@@ -223,7 +223,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                         municipalityBounds?.slice(0, 2).reverse() as LatLngTuple,
                         municipalityBounds?.slice(2).reverse() as LatLngTuple,
                       ]
-                      map.flyToBounds(bounds)
+                      map.flyToBounds(bounds, { maxZoom: 10 })
                     }}
                   >
                     Zoom sobre el Municipio

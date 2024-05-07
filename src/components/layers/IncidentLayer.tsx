@@ -34,7 +34,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
         [Math.min(...path.map((coords) => coords[0])), Math.min(...path.map((coords) => coords[1]))],
         [Math.max(...path.map((coords) => coords[0])), Math.max(...path.map((coords) => coords[1]))],
       ])
-      map.flyToBounds(bounds, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5 })
+      map.flyToBounds(bounds, { paddingTopLeft: [300, 0], duration: 3, easeLinearity: 0.5, maxZoom: 10 })
     }
 
     // Applying MarkerFilters to the incidents.
