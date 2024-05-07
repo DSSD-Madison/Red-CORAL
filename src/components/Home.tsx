@@ -4,7 +4,7 @@ import { FirebaseApp } from 'firebase/app'
 import Map from 'components/Map'
 import 'leaflet/dist/leaflet.css'
 import { Incident, DB } from 'types'
-import { getFirestore, collection, addDoc, deleteDoc, doc } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, setDoc, deleteDoc, doc } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import LoadingOverlay from './LoadingOverlay'
 import { calculateBounds, getDBData } from 'utils'
@@ -56,6 +56,20 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
     }
   }
 
+  async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
+    setIsLoading(true)
+    try {
+      await setDoc(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
+      data.Incidents[incidentID] = incident
+      setIsLoading(false)
+      return true
+    } catch (e) {
+      console.error(e)
+      setIsLoading(false)
+      return false
+    }
+  }
+
   async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
     try {
       setIsLoading(true)
@@ -75,7 +89,14 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
       {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
         <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
       </div> */}
-      <Map apiKey={stadiaAPIKey} data={data} isAdmin={isAdmin} addIncident={addIncident} deleteIncident={deleteIncident} />
+      <Map
+        apiKey={stadiaAPIKey}
+        data={data}
+        isAdmin={isAdmin}
+        addIncident={addIncident}
+        editIncident={editIncident}
+        deleteIncident={deleteIncident}
+      />
       {isAdmin && (
         <div className="absolute right-3 top-1 z-[1000]">
           <p className="text-4xl text-red-dark">Administrador</p>

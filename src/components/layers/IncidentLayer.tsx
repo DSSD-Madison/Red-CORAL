@@ -11,17 +11,17 @@ interface IncidentLayerProps {
   tmpLocation: Incident['location'] | null
   setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
   tmpSelected: boolean
-  setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   filters: MarkerFilters
+  editID: keyof DB['Incidents'] | null
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
-  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, setTmpSelected, filters }, ref) => {
+  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID }, ref) => {
     const map = useMap()
 
     map.removeEventListener('dblclick')
     map.addEventListener('dblclick', (e) => {
-      if (!isAdmin || !tmpSelected) return
+      if (!isAdmin || !(tmpSelected || editID != null)) return
       setTmpLocation(e.latlng)
     })
 
@@ -39,14 +39,15 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     // Applying MarkerFilters to the incidents.
     const incidentList = Object.entries(data?.Incidents || {}).filter(
-      ([_, incident]) =>
+      ([id, incident]) =>
         (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
         (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
         !filters.hideCountries.includes(incident.country) &&
         !filters.hideDepartments.includes(incident.department) &&
         !filters.hideMunicipalities.includes(incident.municipality) &&
         !filters.hideCategories.includes(data.Types[incident.typeID].categoryID) &&
-        !filters.hideTypes.includes(incident.typeID)
+        !filters.hideTypes.includes(incident.typeID) &&
+        (editID == null || id != editID)
     )
 
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
@@ -66,7 +67,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             icon={L.divIcon({
               iconSize: id == selectedIncidentID ? [20, 20] : [15, 15],
               className: '',
-              html: `<svg viewBox="0 0 18 18" ${id == selectedIncidentID ? 'width="20px" height="20px"' : 'width="15px" height="15px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]}; margin-top: ${id == selectedIncidentID ? '10px' : '12.5px'}; margin-left: ${id == selectedIncidentID ? '10px' : '12.5px'};">
+              html: `<svg viewBox="0 0 18 18" ${id == selectedIncidentID ? 'width="20px" height="20px"' : 'width="15px" height="15px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
               <use href="#marker" />
                       </svg>`,
             })}
@@ -87,22 +88,12 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             title={'Incidente incompleto'}
             position={tmpLocation}
             icon={L.divIcon({
-              iconSize: [50, 50],
+              iconSize: [20, 20],
               className: '',
-              html: `<svg viewBox="0 0 18 18" width="20px" height="20px" style="color: red; opacity: 0.5; margin-top: 10px; margin-left: 10px;">
+              html: `<svg viewBox="0 0 18 18" width="20px" height="20px" style="color: red; opacity: 0.5;">
                       <use href="#marker" />
                     </svg>`,
             })}
-            eventHandlers={{
-              click: () => {
-                if (tmpSelected) {
-                  setTmpSelected(false)
-                } else {
-                  setTmpSelected(true)
-                  adjustView(tmpLocation)
-                }
-              },
-            }}
           />
         )}
         {/* {incidentList.map(([id, incident], i) => {

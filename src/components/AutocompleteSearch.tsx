@@ -9,13 +9,14 @@ interface HomeProps {
   setCountryCode?: (code: string) => void
   countryCode?: string
   department?: { name: string; bbox: number[] }
+  initialValue?: string
 }
 
 const stadiaAPIKey = import.meta.env.VITE_STADIA_KEY
 const api = new GeocodingApi(new Configuration({ apiKey: stadiaAPIKey }))
 
-const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBounds, setCountryCode, countryCode, department }) => {
-  const [search, setSearch] = useState<string>('')
+const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBounds, setCountryCode, countryCode, department, initialValue }) => {
+  const [search, setSearch] = useState<string>(initialValue || '')
 
   const [options, setOptions] = useState<PeliasGeoJSONFeature[]>([])
 
@@ -43,6 +44,27 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
       alert('Stadia Maps no tiene información de ubicación para este municipio. No podrás acercarlo automáticamente.')
     }
     setBounds(feat.bbox)
+    setOptions([])
+  }
+
+  async function getFeats(search: string) {
+    const q: AutocompleteRequest = { text: search }
+    if (layers) q.layers = layers
+    if (countryCode) {
+      q.boundaryCountry = [countryCode]
+    }
+    if (department) {
+      q.boundaryRectMinLon = department.bbox[0]
+      q.boundaryRectMinLat = department.bbox[1]
+      q.boundaryRectMaxLon = department.bbox[2]
+      q.boundaryRectMaxLat = department.bbox[3]
+    }
+    const response = await api.autocomplete(q)
+    let feats = response.features
+    if (department) {
+      feats = feats.filter((feat) => feat.properties?.region == department.name)
+    }
+    return feats
   }
 
   useEffect(() => {
@@ -57,22 +79,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     }
     setQueryDebounce(
       setTimeout(async () => {
-        const q: AutocompleteRequest = { text: search }
-        if (layers) q.layers = layers
-        if (countryCode) {
-          q.boundaryCountry = [countryCode]
-        }
-        if (department) {
-          q.boundaryRectMinLon = department.bbox[0]
-          q.boundaryRectMinLat = department.bbox[1]
-          q.boundaryRectMaxLon = department.bbox[2]
-          q.boundaryRectMaxLat = department.bbox[3]
-        }
-        const response = await api.autocomplete(q)
-        let feats = response.features
-        if (department) {
-          feats = feats.filter((feat) => feat.properties?.region == department.name)
-        }
+        const feats = await getFeats(search)
         setOptions(feats)
         setIsLoading(false)
       }, 400)

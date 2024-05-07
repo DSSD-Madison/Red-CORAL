@@ -17,6 +17,7 @@ interface MapProps {
   isAdmin: boolean
   addIncident: (incident: Incident) => Promise<boolean>
   deleteIncident: (incidentID: keyof DB['Incidents']) => Promise<boolean>
+  editIncident: (incidentID: keyof DB['Incidents'], incident: Incident) => Promise<boolean>
 }
 
 function SetInitialBounds() {
@@ -27,7 +28,7 @@ function SetInitialBounds() {
   return null
 }
 
-const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteIncident }) => {
+const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteIncident, editIncident }) => {
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
     [-90, -180],
@@ -47,6 +48,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
   const [location, setLocation] = useState<Incident['location'] | null>(null)
+  const [editID, setEditID] = useState<keyof DB['Incidents'] | null>(null)
 
   async function submitIncident(
     dateString: Incident['dateString'],
@@ -54,7 +56,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     description: Incident['description'],
     country: Incident['country'],
     department: Incident['department'],
-    municipality: Incident['municipality']
+    municipality: Incident['municipality'],
+    incidentID: keyof DB['Incidents'] | null
   ): Promise<boolean> {
     if (!dateString) {
       alert('Please enter a date for the incident')
@@ -70,12 +73,19 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       alert('Por favor, selecciona una lugar en el mapa')
       return false
     }
-
-    if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
-      alert('No se pudo crear el incidente')
-      return false
+    if (incidentID != null) {
+      if (!(await editIncident(incidentID, { description, dateString, typeID, location, country, department, municipality }))) {
+        alert('No se pudo editar el incidente')
+        return false
+      }
+      alert('Incidente editado con éxito')
+    } else {
+      if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
+        alert('No se pudo crear el incidente')
+        return false
+      }
+      alert('Incidente creado con éxito')
     }
-    alert('Incidente creado con éxito')
     return true
   }
 
@@ -94,6 +104,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   function onClose() {
     setSelectedIncidentID(null)
     setTmpSelected(false)
+    setLocation(null)
   }
 
   return (
@@ -122,8 +133,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           tmpLocation={location}
           setTmpLocation={setLocation}
           tmpSelected={tmpSelected}
-          setTmpSelected={setTmpSelected}
           filters={filters}
+          editID={editID}
         />
         <IncidentPanel
           data={data}
@@ -136,6 +147,8 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           setTmpSelected={setTmpSelected}
           isAdmin={isAdmin}
           deleteSelectedIncident={deleteSelectedIncident}
+          setEditID={setEditID}
+          editID={editID}
         />
         <Control prepend position="topleft">
           <div className="leaflet-bar">
@@ -152,7 +165,13 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       </MapContainer>
       {isAdmin && (
         <div className="absolute bottom-0 right-0 z-[1000]">
-          <button className="mb-6 mr-20 rounded-md bg-green-dark p-2 text-white hover:bg-green" onClick={() => setTmpSelected(true)}>
+          <button
+            className="mb-6 mr-20 rounded-md bg-green-dark p-2 text-white hover:bg-green"
+            onClick={() => {
+              setSelectedIncidentID(null)
+              setTmpSelected(true)
+            }}
+          >
             Crear incidente
           </button>
         </div>
