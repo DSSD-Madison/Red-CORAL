@@ -97,14 +97,6 @@ const Home: React.FC<HomeProps> = ({ app, isAdmin }) => {
         editIncident={editIncident}
         deleteIncident={deleteIncident}
       />
-      {isAdmin && (
-        <div className="absolute right-3 top-1 z-[1000]">
-          <p className="text-4xl text-red-dark">Administrador</p>
-          <button className="rounded-md bg-red-dark p-2 text-white" onClick={() => (window.location.href = '/admin/dash')}>
-            Administrar categorías
-          </button>
-        </div>
-      )}
       <LoadingOverlay isVisible={isLoading} />
     </div>
   )

@@ -16,7 +16,7 @@ function ZoomControl(props: ZoomControlProps) {
   const map = useMap()
 
   return (
-    <Control position="topleft">
+    <Control position="topright">
       <div className="leaflet-bar">
         <a
           className="leaflet-control-zoom-in"
