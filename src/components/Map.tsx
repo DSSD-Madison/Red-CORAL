@@ -23,7 +23,7 @@ interface MapProps {
 function SetInitialBounds() {
   const map = useMap()
   useEffect(() => {
-    map.setView([-5, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
+    map.setView([0, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
   }, [])
   return null
 }
