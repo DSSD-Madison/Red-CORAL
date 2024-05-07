@@ -111,7 +111,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
         &#x2630;
       </a>
       {isDropdownVisible && (
-        <div ref={dropdownRef} className="absolute -top-0.5 left-10 flex h-96 gap-5">
+        <div ref={dropdownRef} className="absolute right-10 top-0.5 flex h-96 gap-5">
           <div className="leaflet-bar box-content w-60 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex flex-row justify-between">
               <div className="m-1 text-base font-semibold">Actividades</div>

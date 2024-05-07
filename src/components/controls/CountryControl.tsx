@@ -100,7 +100,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
         &#127987;
       </a>
       {isDropdownVisible && (
-        <div ref={dropdownRef} className="absolute -top-0.5 left-10 flex h-96 gap-5">
+        <div ref={dropdownRef} className="absolute right-10 top-0.5 flex h-96 gap-5">
           {/* Countries */}
           <div className="leaflet-bar box-content w-max rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex flex-row justify-between">
