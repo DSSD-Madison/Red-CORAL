@@ -159,6 +159,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
                 <span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}
               </div>
+              <span className="font-bold">Descripción:</span>
               <div className="mb-6 text-shade-01">{incident.description}</div>
               <div className="mb-6 text-shade-01"></div>
               {isAdmin && (
@@ -222,7 +223,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                         municipalityBounds?.slice(0, 2).reverse() as LatLngTuple,
                         municipalityBounds?.slice(2).reverse() as LatLngTuple,
                       ]
-                      map.flyToBounds(bounds)
+                      map.flyToBounds(bounds, { maxZoom: 10 })
                     }}
                   >
                     Zoom sobre el Municipio

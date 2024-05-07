@@ -16,7 +16,7 @@ function ZoomControl(props: ZoomControlProps) {
   const map = useMap()
 
   return (
-    <Control position="topleft">
+    <Control position="topright">
       <div className="leaflet-bar">
         <a
           className="leaflet-control-zoom-in"
@@ -45,7 +45,7 @@ function ZoomControl(props: ZoomControlProps) {
           title={zoomResetTitle}
           role="button"
           onClick={(e) => {
-            map.setView([-5, -70], 5)
+            map.setView([0, -70], 5)
             setFilters({
               hideCategories: [],
               hideTypes: [],

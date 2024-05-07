@@ -23,7 +23,7 @@ interface MapProps {
 function SetInitialBounds() {
   const map = useMap()
   useEffect(() => {
-    map.setView([-5, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
+    map.setView([0, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
   }, [])
   return null
 }
@@ -150,29 +150,33 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
           setEditID={setEditID}
           editID={editID}
         />
-        <Control prepend position="topleft">
+        <Control prepend position="topright">
           <div className="leaflet-bar">
             <CategoryControl data={data} filters={filters} setFilters={setFilters} />
             <CountryControl data={data} filters={filters} setFilters={setFilters} />
           </div>
         </Control>
-        <Control position="bottomleft">
-          <YearControl data={data} filters={filters} setFilters={setFilters} />
+        <Control position="topleft">
           <SearchControl />
+          <YearControl data={data} filters={filters} setFilters={setFilters} />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>
       {isAdmin && (
-        <div className="absolute bottom-0 right-0 z-[1000]">
+        <div className="absolute bottom-0 right-0 z-[1000] pb-5 pr-3">
+          <p className="text-center text-4xl text-red-dark">Administrador</p>
           <button
-            className="mb-6 mr-20 rounded-md bg-green-dark p-2 text-white hover:bg-green"
+            className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
             onClick={() => {
               setSelectedIncidentID(null)
               setTmpSelected(true)
             }}
           >
             Crear incidente
+          </button>
+          <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => (window.location.href = '/admin/dash')}>
+            Administrar categorías
           </button>
         </div>
       )}
