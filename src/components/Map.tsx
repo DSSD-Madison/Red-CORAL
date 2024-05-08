@@ -11,6 +11,7 @@ import YearControl from './controls/YearControl'
 import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
+import { useNavigate } from 'react-router-dom'
 
 interface MapProps {
   data: DB
@@ -29,6 +30,7 @@ function SetInitialBounds() {
 }
 
 const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+  const navigate = useNavigate()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -176,7 +178,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
           >
             Crear incidente
           </button>
-          <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => (window.location.href = '/admin/dash')}>
+          <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
             Administrar categorías
           </button>
         </div>

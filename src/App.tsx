@@ -91,6 +91,7 @@ const App: React.FC = () => {
 
     // fetch data from firebase storage on mount of app
     setIsLoading(true)
+    console.log('querying storage')
     getBytes(ref(storage, 'state.json'))
       .then((bytes) => {
         const db: DB = JSON.parse(new TextDecoder().decode(bytes))
@@ -118,7 +119,17 @@ const App: React.FC = () => {
         locations: {},
       },
     }
+    console.log('querying firestore')
     // prettier-ignore
+    // const q = or(
+    //   where('readAt', "==", undefined),
+    //   where('updatedAt', '>', 'readAt'),
+    //   where('deletedAt', '>', 'readAt')
+    // )
+    // Promise.all([
+    //   getDocs(query(collection(firestore, 'Categories'), q)),
+    //   getDocs(query(collection(firestore, 'Types'), q)),
+    //   getDocs(query(collection(firestore, 'Incidents'), q)),
     Promise.all([
       getDocs(collection(firestore, 'Categories')),
       getDocs(collection(firestore, 'Types')),
@@ -158,7 +169,7 @@ const App: React.FC = () => {
     return (
       <>
         {!isLoggedIn && <Login auth={auth} onSignInSuccess={handleSignInSuccess} />}
-        {isLoggedIn && <CRUDDash app={app} />}
+        {isLoggedIn && <CRUDDash firestore={firestore} data={data} setData={setData} />}
       </>
     )
   }
@@ -175,7 +186,7 @@ const App: React.FC = () => {
           <Route path="/admin/dash" element={<AdminDash />} />
         </Routes>
       </Router>
-      <LoadingOverlay isVisible={isLoading} />
+      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
     </>
   )
 }
