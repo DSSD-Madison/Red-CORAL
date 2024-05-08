@@ -9,18 +9,21 @@ export interface Incident {
   typeID: keyof DB['Types']
   location: Coordinates
   country: string
-  department: string, // equivalent to province/state
+  department: string // equivalent to province/state
   municipality: string
+  deletedAt?: string
 }
 
 export interface Category {
   name: string
   color: string
+  deletedAt?: string
 }
 
 export interface Type {
   name: string
   categoryID: keyof DB['Categories']
+  deletedAt?: string
 }
 
 export interface DB {
@@ -34,6 +37,7 @@ export interface DB {
     [key: string]: Incident
   }
   filterBounds: FilterBounds
+  readAt?: string
 }
 
 export interface MarkerFilters {

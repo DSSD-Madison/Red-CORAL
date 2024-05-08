@@ -6,9 +6,9 @@ import 'leaflet/dist/leaflet.css'
 import Map from 'components/Map'
 import Login from 'components/Login'
 import CRUDDash from 'components/CRUDDash'
-import { getFirestore, collection, addDoc, setDoc, deleteDoc, doc, getDocs } from 'firebase/firestore'
+import { getFirestore, collection, doc, getDocs, query, where, or, Timestamp } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
-import { calculateBounds, mergeDBs } from 'utils'
+import { calculateBounds, mergeDBs, addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from 'utils'
 import { Incident, Category, Type, DB } from 'types'
 import { ref, getBytes } from 'firebase/storage'
 import LoadingOverlay from './components/LoadingOverlay'
@@ -30,7 +30,7 @@ const App: React.FC = () => {
   async function addIncident(incident: Incident): Promise<boolean> {
     setIsLoading(true)
     try {
-      const ref = await addDoc(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
+      const ref = await addDocWithTimestamp(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
       data.Incidents[ref.id] = incident
       setIsLoading(false)
       return true
@@ -44,7 +44,7 @@ const App: React.FC = () => {
   async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
     setIsLoading(true)
     try {
-      await setDoc(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
+      await setDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
       data.Incidents[incidentID] = incident
       setIsLoading(false)
       return true
@@ -58,7 +58,7 @@ const App: React.FC = () => {
   async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
     try {
       setIsLoading(true)
-      await deleteDoc(doc(firestore, `Incidents/${incidentID}`))
+      await deleteDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`))
       delete data.Incidents[incidentID]
       setIsLoading(false)
       return true
@@ -83,6 +83,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
   const [gotStorageData, setGotStorageData] = useState<boolean>(false)
+  const [readAt, setReadAt] = useState<Timestamp | null>(null)
 
   useEffect(() => {
     auth.authStateReady().then(() => {
@@ -95,6 +96,17 @@ const App: React.FC = () => {
     getBytes(ref(storage, 'state.json'))
       .then((bytes) => {
         const db: DB = JSON.parse(new TextDecoder().decode(bytes))
+        if (db.readAt) setReadAt(Timestamp.fromDate(new Date(db.readAt)))
+        for (let col of ['Categories', 'Types', 'Incidents']) {
+          //@ts-ignore
+          for (let key in db[col]) {
+            //@ts-ignore
+            if (db[col][key].deletedAt != undefined) {
+              //@ts-ignore
+              delete db[col][key]
+            }
+          }
+        }
         const dbWithBounds = calculateBounds(db)
         setData(dbWithBounds)
         setGotStorageData(true)
@@ -120,36 +132,46 @@ const App: React.FC = () => {
       },
     }
     console.log('querying firestore')
-    // prettier-ignore
-    // const q = or(
-    //   where('readAt', "==", undefined),
-    //   where('updatedAt', '>', 'readAt'),
-    //   where('deletedAt', '>', 'readAt')
-    // )
-    // Promise.all([
-    //   getDocs(query(collection(firestore, 'Categories'), q)),
-    //   getDocs(query(collection(firestore, 'Types'), q)),
-    //   getDocs(query(collection(firestore, 'Incidents'), q)),
+    //prettier-ignore
+    let q = or()
+
+    if (readAt) q = or(where('updatedAt', '>', readAt), where('deletedAt', '>', readAt))
+    // Need to have indices in Firestore for the above query to work
+
+    console.log(q)
+
     Promise.all([
-      getDocs(collection(firestore, 'Categories')),
-      getDocs(collection(firestore, 'Types')),
-      getDocs(collection(firestore, 'Incidents')),
-    ]).then(([catSnap, typeSnap, incSnap]) => {
-      catSnap.forEach((doc) => {
-        const cat = doc.data() as Category
-        db.Categories[doc.id] = cat
+      getDocs(query(collection(firestore, 'Categories'), q)),
+      getDocs(query(collection(firestore, 'Types'), q)),
+      getDocs(query(collection(firestore, 'Incidents'), q)),
+    ])
+      .then(([catSnap, typeSnap, incSnap]) => {
+        catSnap.forEach((doc) => {
+          const cat = doc.data() as Category
+          if (cat.deletedAt != undefined) {
+            delete db.Categories[doc.id]
+          } else db.Categories[doc.id] = cat
+        })
+        typeSnap.forEach((doc) => {
+          const type = doc.data() as Type
+          if (type.deletedAt != undefined) {
+            delete db.Types[doc.id]
+          } else db.Types[doc.id] = type
+        })
+        incSnap.forEach((doc) => {
+          const inc = doc.data() as Incident
+          if (inc.deletedAt != undefined) {
+            delete db.Incidents[doc.id]
+          } else db.Incidents[doc.id] = inc
+        })
+        setData(calculateBounds(mergeDBs(data, db)))
+        setIsLoading(false)
       })
-      typeSnap.forEach((doc) => {
-        const type = doc.data() as Type
-        db.Types[doc.id] = type
+      .catch((e) => {
+        console.error(e)
+        alert('No se pudo obtener la versión más reciente de los datos.')
+        setIsLoading(false)
       })
-      incSnap.forEach((doc) => {
-        const inc = doc.data() as Incident
-        db.Incidents[doc.id] = inc
-      })
-      setData(calculateBounds(mergeDBs(data, db)))
-      setIsLoading(false)
-    })
   }, [isLoggedIn, gotStorageData])
 
   const handleSignInSuccess = () => {

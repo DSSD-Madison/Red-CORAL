@@ -1,4 +1,5 @@
 import { DB, FilterBounds } from 'types'
+import { addDoc, setDoc, serverTimestamp, DocumentReference, CollectionReference, Timestamp } from 'firebase/firestore'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
@@ -48,4 +49,16 @@ export function mergeDBs(db1: DB, db2: DB) {
     Types: { ...db1.Types, ...db2.Types },
     Incidents: { ...db1.Incidents, ...db2.Incidents },
   } as DB
+}
+
+export function addDocWithTimestamp(ref: CollectionReference, data: any) {
+  return addDoc(ref, { ...data, updatedAt: serverTimestamp(), readAt: new Timestamp(0, 0) })
+}
+
+export function setDocWithTimestamp(ref: DocumentReference, data: any) {
+  return setDoc(ref, { ...data, updatedAt: serverTimestamp() })
+}
+
+export function deleteDocWithTimestamp(ref: DocumentReference) {
+  return setDoc(ref, { deletedAt: serverTimestamp() }, { merge: true })
 }
