@@ -132,6 +132,7 @@ const App: React.FC = () => {
             element={<Map data={data} isAdmin={isLoggedIn} addIncident={addIncident} editIncident={editIncident} deleteIncident={deleteIncident} />}
           />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />
         </Routes>
       </Router>
