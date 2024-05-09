@@ -176,26 +176,26 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>
-      {isAdmin && (
-        <div className="absolute bottom-0 right-0 z-[1000] pb-5 pr-3">
-          <p className="text-center text-4xl text-red-dark">Administrador</p>
-          <button
-            className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
-            onClick={() => {
-              setSelectedIncidentID(null)
-              setTmpSelected(true)
-            }}
-          >
-            Crear incidente
-          </button>
-          <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
-            Administrar categorías
-          </button>
-        </div>
-      )}
-      {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
-        <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
-      </div> */}
+      <div className="w-30% absolute bottom-0 right-0 z-[1000] pb-5 pr-3">
+        <img src="banner.png" alt="Red CORAL logo" className=" block h-48 drop-shadow filter" />
+        {isAdmin && (
+          <div className="float-right block">
+            <p className="text-center text-4xl text-red-dark">Administrador</p>
+            <button
+              className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
+              onClick={() => {
+                setSelectedIncidentID(null)
+                setTmpSelected(true)
+              }}
+            >
+              Crear incidente
+            </button>
+            <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
+              Administrar categorías
+            </button>
+          </div>
+        )}
+      </div>
       <LoadingOverlay isVisible={isLoading} color={'#888888'} />
     </div>
   )
