@@ -10,9 +10,11 @@ import CategoryControl from './controls/CategoryControl'
 import YearControl from './controls/YearControl'
 import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
+import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
+import { useNavigate } from 'react-router-dom'
+import LoadingOverlay from './LoadingOverlay'
 
 interface MapProps {
-  apiKey: string
   data: DB
   isAdmin: boolean
   addIncident: (incident: Incident) => Promise<boolean>
@@ -23,12 +25,14 @@ interface MapProps {
 function SetInitialBounds() {
   const map = useMap()
   useEffect(() => {
-    map.setView([0, -70], 5) // Centered on South America. If changing this, make sure to adjust the reset button in ZoomControl.tsx
+    map.setView(INITIAL_BOUNDS, INITIAL_ZOOM)
   }, [])
   return null
 }
 
-const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+  const navigate = useNavigate()
+  const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
     [-90, -180],
@@ -49,6 +53,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   const markersLayer = useRef(null)
   const [location, setLocation] = useState<Incident['location'] | null>(null)
   const [editID, setEditID] = useState<keyof DB['Incidents'] | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   async function submitIncident(
     dateString: Incident['dateString'],
@@ -74,16 +79,21 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
       return false
     }
     if (incidentID != null) {
+      setIsLoading(true)
       if (!(await editIncident(incidentID, { description, dateString, typeID, location, country, department, municipality }))) {
+        setIsLoading(false)
         alert('No se pudo editar el incidente')
         return false
       }
+      setIsLoading(false)
       alert('Incidente editado con éxito')
     } else {
       if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
+        setIsLoading(false)
         alert('No se pudo crear el incidente')
         return false
       }
+      setIsLoading(false)
       alert('Incidente creado con éxito')
     }
     return true
@@ -93,10 +103,13 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
     if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') == false) {
       return
     }
+    setIsLoading(true)
     if (await deleteIncident(selectedIncidentID)) {
+      setIsLoading(false)
       setSelectedIncidentID(null)
       alert('Incidente eliminado con éxito')
     } else {
+      setIsLoading(false)
       alert('No se pudo eliminar el incidente')
     }
   }
@@ -108,7 +121,7 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
   }
 
   return (
-    <>
+    <div className="relative h-full">
       <MapContainer
         className="h-full w-full"
         center={[20, 0]}
@@ -163,24 +176,28 @@ const Map: React.FC<MapProps> = ({ apiKey, data, isAdmin, addIncident, deleteInc
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>
-      {isAdmin && (
-        <div className="absolute bottom-0 right-0 z-[1000] pb-5 pr-3">
-          <p className="text-center text-4xl text-red-dark">Administrador</p>
-          <button
-            className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
-            onClick={() => {
-              setSelectedIncidentID(null)
-              setTmpSelected(true)
-            }}
-          >
-            Crear incidente
-          </button>
-          <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => (window.location.href = '/admin/dash')}>
-            Administrar categorías
-          </button>
-        </div>
-      )}
-    </>
+      <div className="w-30% absolute bottom-0 right-0 z-[1000] pb-5 pr-3">
+        <img src="banner.png" alt="Red CORAL logo" className=" block h-48 drop-shadow filter" />
+        {isAdmin && (
+          <div className="float-right block">
+            <p className="text-center text-4xl text-red-dark">Administrador</p>
+            <button
+              className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
+              onClick={() => {
+                setSelectedIncidentID(null)
+                setTmpSelected(true)
+              }}
+            >
+              Crear incidente
+            </button>
+            <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
+              Administrar categorías
+            </button>
+          </div>
+        )}
+      </div>
+      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
+    </div>
   )
 }
 

@@ -1,23 +1,25 @@
 import React, { useState } from 'react'
 import { Auth, signInWithEmailAndPassword } from 'firebase/auth' // Import Auth type from firebase/auth
+import LoadingOverlay from './LoadingOverlay'
 
 interface LoginProps {
-  auth: Auth // Declare auth prop of type Auth
-  onSignInSuccess: () => void
+  auth: Auth
 }
 
-const Login: React.FC<LoginProps> = ({ auth, onSignInSuccess }) => {
+const Login: React.FC<LoginProps> = ({ auth }) => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
+      setIsLoading(true)
       const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', password)
+      setIsLoading(false)
       console.log('User signed in:', userCredential.user)
       setError(null)
-      onSignInSuccess() // Call the callback function
     } catch (error) {
       //@ts-ignore
       console.error('Error signing in:', error.message)
@@ -41,6 +43,7 @@ const Login: React.FC<LoginProps> = ({ auth, onSignInSuccess }) => {
         </div>
       </form>
       {error && <p className="text-center text-red-dark">{error}</p>}
+      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
     </div>
   )
 }

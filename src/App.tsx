@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, signOut } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
-import Home from 'components/Home'
+import Map from 'components/Map'
 import Login from 'components/Login'
 import CRUDDash from 'components/CRUDDash'
+import { getFirestore, collection, doc } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
+import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData } from 'utils'
+import { Incident, DB } from 'types'
+import LoadingOverlay from './components/LoadingOverlay'
 
 const App: React.FC = () => {
   const app = initializeApp({
@@ -18,29 +23,93 @@ const App: React.FC = () => {
   })
 
   const auth = getAuth(app)
+  const firestore = getFirestore(app)
+  const storage = getStorage(app, import.meta.env.VITE_FIREBASE_STORAGE_BUCKET)
 
-  useEffect(() => {
-    auth.authStateReady().then(() => {
-      setIsLoggedIn(auth.currentUser != null)
-    })
-  }, [])
-
-  // init firestore, storage
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
-
-  const handleSignInSuccess = () => {
-    setIsLoggedIn(true) // Update the sign-in status to true
+  async function addIncident(incident: Incident): Promise<boolean> {
+    // setIsLoading(true)
+    try {
+      const ref = await addDocWithTimestamp(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
+      data.Incidents[ref.id] = incident
+      // setIsLoading(false)
+      return true
+    } catch (e) {
+      console.error(e)
+      // setIsLoading(false)
+      return false
+    }
   }
 
-  // const Home = lazy(() => import('components/Home'))
-  // const Login = lazy(() => import('components/Login'))
-  // const CRUDDash = lazy(() => import('components/CRUDDash'))
+  async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
+    // setIsLoading(true)
+    try {
+      await setDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
+      data.Incidents[incidentID] = incident
+      // setIsLoading(false)
+      return true
+    } catch (e) {
+      console.error(e)
+      // setIsLoading(false)
+      return false
+    }
+  }
 
-  function Admin() {
+  async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
+    try {
+      // setIsLoading(true)
+      await deleteDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`))
+      delete data.Incidents[incidentID]
+      // setIsLoading(false)
+      return true
+    } catch (e) {
+      console.error(e)
+      // setIsLoading(false)
+      return false
+    }
+  }
+
+  const [data, setData] = useState<DB>({
+    Categories: {},
+    Types: {},
+    Incidents: {},
+    filterBounds: {
+      maxYear: 0,
+      minYear: 0,
+      locations: {},
+    },
+  })
+
+  const [loadCount, setLoadCount] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
+
+  useEffect(() => {
+    return auth.onAuthStateChanged((user) => setIsLoggedIn(!!user))
+  }, [])
+
+  async function fetchData(isAdmin: boolean) {
+    setLoadCount((prev) => prev + 1)
+    getData(isAdmin, storage, firestore)
+      .then((db) => {
+        setData(db)
+      })
+      .catch((e) => {
+        console.error(e)
+        alert('No se pudo cargar la información')
+      })
+      .finally(() => {
+        setLoadCount((prev) => prev - 1)
+      })
+  }
+
+  useEffect(() => {
+    fetchData(isLoggedIn)
+  }, [isLoggedIn])
+
+  function LoginPage() {
     return (
       <>
-        {!isLoggedIn && <Login auth={auth} onSignInSuccess={handleSignInSuccess} />}
-        {isLoggedIn && <Home app={app} isAdmin={true} />}
+        {!isLoggedIn && <Login auth={auth} />}
+        {isLoggedIn && <Navigate to="/" />}
       </>
     )
   }
@@ -48,22 +117,39 @@ const App: React.FC = () => {
   function AdminDash() {
     return (
       <>
-        {!isLoggedIn && <Login auth={auth} onSignInSuccess={handleSignInSuccess} />}
-        {isLoggedIn && <CRUDDash app={app} />}
+        {!isLoggedIn && <Login auth={auth} />}
+        {isLoggedIn && <CRUDDash firestore={firestore} data={data} />}
       </>
     )
   }
 
   return (
-    <Router>
-      {/* <Suspense fallback={<LoadingOverlay isVisible={true} color="#ab0000" />}> */}
-      <Routes>
-        <Route path="/" element={<Home app={app} isAdmin={false} />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/dash" element={<AdminDash />} />
-      </Routes>
-      {/* </Suspense> */}
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={<Map data={data} isAdmin={isLoggedIn} addIncident={addIncident} editIncident={editIncident} deleteIncident={deleteIncident} />}
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin" element={<Navigate to="/login" />} />
+          <Route path="/admin/dash" element={<AdminDash />} />
+        </Routes>
+      </Router>
+      <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
+      <div className="letf-0 absolute bottom-0 z-[500] pb-5 pl-2">
+        {isLoggedIn && (
+          <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 hover:bg-gray-300">
+            Salir del Sistema
+          </button>
+        )}
+        {!isLoggedIn && (
+          <button onClick={() => (window.location.href = '/login')} className="cursor-pointer rounded-md bg-gray-300 p-1 hover:bg-gray-400">
+            Registrarse como Admin
+          </button>
+        )}
+      </div>
+    </>
   )
 }
 
