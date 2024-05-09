@@ -79,7 +79,7 @@ const App: React.FC = () => {
     },
   })
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [loadCount, setLoadCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const App: React.FC = () => {
   }, [])
 
   async function fetchData(isAdmin: boolean) {
-    setIsLoading(true)
+    setLoadCount((prev) => prev + 1)
     getData(isAdmin, storage, firestore)
       .then((db) => {
         setData(db)
@@ -97,7 +97,7 @@ const App: React.FC = () => {
         alert('No se pudo cargar la información')
       })
       .finally(() => {
-        setIsLoading(false)
+        setLoadCount((prev) => prev - 1)
       })
   }
 
@@ -136,8 +136,8 @@ const App: React.FC = () => {
           <Route path="/admin/dash" element={<AdminDash />} />
         </Routes>
       </Router>
-      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
-      <div className="letf-0 absolute bottom-0 z-[1000] pb-5 pl-2">
+      <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
+      <div className="letf-0 absolute bottom-0 z-[500] pb-5 pl-2">
         {isLoggedIn && (
           <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 hover:bg-gray-300">
             Salir del Sistema
