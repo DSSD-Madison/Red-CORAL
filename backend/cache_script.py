@@ -32,13 +32,12 @@ def read_firestore():
     for d, collection_name in [(categories, 'Categories'), (types, 'Types'), (incidents, 'Incidents')]:
         for doc in db.collection(collection_name).stream():
             d[doc.id] = doc.to_dict()
-            if 'deletedAt' in d[doc.id]:
+            if d[doc.id].get('deleted', False):
                 to_remove.append((collection_name, doc.id))
-                del d[doc.id]['deletedAt']
-            if 'readAt' in d[doc.id]:
-                del d[doc.id]['readAt']
+                del d[doc.id]
+                continue
             if 'updatedAt' in d[doc.id]:
-                del d[doc.id]['updatedAt']
+                del d[doc.id]['updatedAt'] # not serializable and it's not needed
         out[collection_name] = d
 
     return out

@@ -11,19 +11,19 @@ export interface Incident {
   country: string
   department: string // equivalent to province/state
   municipality: string
-  deletedAt?: string
+  deleted?: boolean
 }
 
 export interface Category {
   name: string
   color: string
-  deletedAt?: string
+  deleted?: boolean
 }
 
 export interface Type {
   name: string
   categoryID: keyof DB['Categories']
-  deletedAt?: string
+  deleted?: boolean
 }
 
 export interface DB {

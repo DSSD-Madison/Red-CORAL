@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { collection, addDoc, getDocs, deleteDoc, where, query, updateDoc, doc, Firestore } from 'firebase/firestore'
+import { collection, getDocs, where, query, doc, Firestore } from 'firebase/firestore'
+import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from 'utils'
 import LoadingOverlay from './LoadingOverlay'
 import { SketchPicker } from 'react-color'
 import { Category, Type, DB } from '../types'
@@ -57,7 +58,7 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
         docData['categoryID'] = addEntitySecondProperty
       }
       setIsLoading(true)
-      const ref = await addDoc(collection(firestore, entityType), docData)
+      const ref = await addDocWithTimestamp(collection(firestore, entityType), docData)
       data[entityType][ref.id] = docData
       setData({ ...data })
       setIsLoading(false)
@@ -100,7 +101,7 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
         // if confirmed, delete
         setIsLoading(true)
         let ref = doc(firestore, `${entityType}/${entityId}`)
-        await deleteDoc(ref)
+        await deleteDocWithTimestamp(ref)
         delete data[entityType][entityId]
         setData({ ...data })
         setIsLoading(false)
@@ -136,7 +137,7 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
       }
       let ref = doc(firestore, `${entityType}/${modifyEntityId}`)
       setIsLoading(true)
-      await updateDoc(ref, docData as any)
+      await setDocWithTimestamp(ref, docData as any)
       data[entityType][ref.id] = docData
       setData({ ...data })
       setIsLoading(false)

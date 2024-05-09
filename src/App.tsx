@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
 import Map from 'components/Map'
 import Login from 'components/Login'
 import CRUDDash from 'components/CRUDDash'
-import { getFirestore, collection, doc, getDocs, query, where, or, Timestamp } from 'firebase/firestore'
+import { getFirestore, collection, doc, getDocs, query, where, Timestamp } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { calculateBounds, mergeDBs, addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from 'utils'
 import { Incident, Category, Type, DB } from 'types'
@@ -83,7 +83,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false) // State variable for sign-in status
   const [gotStorageData, setGotStorageData] = useState<boolean>(false)
-  const [readAt, setReadAt] = useState<Timestamp | null>(null)
+  const [readAt, setReadAt] = useState<Timestamp>(new Timestamp(0, 0))
 
   useEffect(() => {
     auth.authStateReady().then(() => {
@@ -91,12 +91,16 @@ const App: React.FC = () => {
     })
 
     // fetch data from firebase storage on mount of app
+    if (gotStorageData) return
     setIsLoading(true)
     console.log('querying storage')
     getBytes(ref(storage, 'state.json'))
       .then((bytes) => {
         const db: DB = JSON.parse(new TextDecoder().decode(bytes))
-        if (db.readAt) setReadAt(Timestamp.fromDate(new Date(db.readAt)))
+        if (db.readAt) {
+          let date = new Date(db.readAt)
+          setReadAt(Timestamp.fromDate(date))
+        }
         for (let col of ['Categories', 'Types', 'Incidents']) {
           //@ts-ignore
           for (let key in db[col]) {
@@ -133,12 +137,10 @@ const App: React.FC = () => {
     }
     console.log('querying firestore')
     //prettier-ignore
-    let q = or()
-
-    if (readAt) q = or(where('updatedAt', '>', readAt), where('deletedAt', '>', readAt))
+    const q = where('updatedAt', '>', readAt)
     // Need to have indices in Firestore for the above query to work
 
-    console.log(q)
+    // console.log(readAt?.toDate())
 
     Promise.all([
       getDocs(query(collection(firestore, 'Categories'), q)),
@@ -148,20 +150,21 @@ const App: React.FC = () => {
       .then(([catSnap, typeSnap, incSnap]) => {
         catSnap.forEach((doc) => {
           const cat = doc.data() as Category
-          if (cat.deletedAt != undefined) {
-            delete db.Categories[doc.id]
+          if (cat.deleted) {
+            delete data.Categories[doc.id]
           } else db.Categories[doc.id] = cat
         })
         typeSnap.forEach((doc) => {
           const type = doc.data() as Type
-          if (type.deletedAt != undefined) {
-            delete db.Types[doc.id]
+          if (type.deleted) {
+            delete data.Types[doc.id]
           } else db.Types[doc.id] = type
         })
         incSnap.forEach((doc) => {
           const inc = doc.data() as Incident
-          if (inc.deletedAt != undefined) {
-            delete db.Incidents[doc.id]
+          // console.log(inc)
+          if (inc.deleted) {
+            delete data.Incidents[doc.id]
           } else db.Incidents[doc.id] = inc
         })
         setData(calculateBounds(mergeDBs(data, db)))
