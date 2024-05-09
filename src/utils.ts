@@ -8,7 +8,6 @@ import {
   Firestore,
   Timestamp,
   collection,
-  doc,
   getDocs,
   query,
   where,
