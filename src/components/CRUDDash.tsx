@@ -9,10 +9,9 @@ import { useNavigate } from 'react-router-dom'
 interface CrudProps {
   firestore: Firestore
   data: DB
-  setData: React.Dispatch<React.SetStateAction<DB>>
 }
 
-const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
+const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -60,7 +59,6 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
       setIsLoading(true)
       const ref = await addDocWithTimestamp(collection(firestore, entityType), docData)
       data[entityType][ref.id] = docData
-      setData({ ...data })
       setIsLoading(false)
 
       // Clear the input fields and hide them
@@ -103,7 +101,6 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
         let ref = doc(firestore, `${entityType}/${entityId}`)
         await deleteDocWithTimestamp(ref)
         delete data[entityType][entityId]
-        setData({ ...data })
         setIsLoading(false)
       }
     } catch (error) {
@@ -139,7 +136,6 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
       setIsLoading(true)
       await setDocWithTimestamp(ref, docData as any)
       data[entityType][ref.id] = docData
-      setData({ ...data })
       setIsLoading(false)
 
       // clear and hide input fields
@@ -315,7 +311,7 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data, setData }) => {
           </div>
         )}
       </div>
-      {isLoading && <LoadingOverlay isVisible={isLoading} color={'#666666'} />}
+      <LoadingOverlay isVisible={isLoading} color={'#666666'} />
     </div>
   )
 }

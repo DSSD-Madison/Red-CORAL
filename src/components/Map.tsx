@@ -12,6 +12,7 @@ import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
 import { useNavigate } from 'react-router-dom'
+import LoadingOverlay from './LoadingOverlay'
 
 interface MapProps {
   data: DB
@@ -52,6 +53,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
   const markersLayer = useRef(null)
   const [location, setLocation] = useState<Incident['location'] | null>(null)
   const [editID, setEditID] = useState<keyof DB['Incidents'] | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   async function submitIncident(
     dateString: Incident['dateString'],
@@ -77,16 +79,21 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
       return false
     }
     if (incidentID != null) {
+      setIsLoading(true)
       if (!(await editIncident(incidentID, { description, dateString, typeID, location, country, department, municipality }))) {
+        setIsLoading(false)
         alert('No se pudo editar el incidente')
         return false
       }
+      setIsLoading(false)
       alert('Incidente editado con éxito')
     } else {
       if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
+        setIsLoading(false)
         alert('No se pudo crear el incidente')
         return false
       }
+      setIsLoading(false)
       alert('Incidente creado con éxito')
     }
     return true
@@ -96,10 +103,13 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') == false) {
       return
     }
+    setIsLoading(true)
     if (await deleteIncident(selectedIncidentID)) {
+      setIsLoading(false)
       setSelectedIncidentID(null)
       alert('Incidente eliminado con éxito')
     } else {
+      setIsLoading(false)
       alert('No se pudo eliminar el incidente')
     }
   }
@@ -186,6 +196,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
       {/* <div className="header-drop absolute left-0 right-0 top-0 z-[1000] flex justify-end p-2 md:p-5">
         <img src="banner.png" alt="Red CORAL logo" className="h-30 max-w-[40%] object-scale-down drop-shadow filter" />
       </div> */}
+      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
     </div>
   )
 }
