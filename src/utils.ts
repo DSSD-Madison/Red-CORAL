@@ -56,14 +56,6 @@ export function calculateBounds(db: DB): DB {
   } as DB
 }
 
-export function mergeDBs(db1: DB, db2: DB) {
-  return {
-    Categories: { ...db1.Categories, ...db2.Categories },
-    Types: { ...db1.Types, ...db2.Types },
-    Incidents: { ...db1.Incidents, ...db2.Incidents },
-  } as DB
-}
-
 export function addDocWithTimestamp(ref: CollectionReference, data: any) {
   return addDoc(ref, { ...data, updatedAt: serverTimestamp() })
 }
@@ -76,6 +68,12 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
   return setDoc(ref, { updatedAt: serverTimestamp(), deleted: true }, { merge: true })
 }
 
+/**
+ * Fetches the data from the firebase storage and returns the database object
+ * if isAdmin is set, also queries firestore for documents with updateAt timestamps
+ * after the readAt timestamp from firebase storage. Any documents having `deleted: true`
+ * will not be returned in the database object.
+ */
 export async function getData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
   const bytes = await getBytes(ref(storage, 'state.json'))
   const db: DB = JSON.parse(new TextDecoder().decode(bytes))

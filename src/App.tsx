@@ -26,44 +26,51 @@ const App: React.FC = () => {
   const firestore = getFirestore(app)
   const storage = getStorage(app, import.meta.env.VITE_FIREBASE_STORAGE_BUCKET)
 
+  /**
+   * Adds an incident to firestore.
+   * 🚨🚨🚨 Mutates the data state variable (does not trigger rerender).
+   * Child that calls this function should trigger local rerender
+   * This is so that the Map component isn't constantly getting rerendered,
+   * causing the map to reset its view.
+   */
   async function addIncident(incident: Incident): Promise<boolean> {
-    // setIsLoading(true)
     try {
       const ref = await addDocWithTimestamp(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
       data.Incidents[ref.id] = incident
-      // setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
-      // setIsLoading(false)
       return false
     }
   }
 
+  /**
+   * Modifies the firetore document for an incident
+   * 🚨🚨🚨@see {@link addIncident} about how this affects state
+   */
   async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
-    // setIsLoading(true)
     try {
       await setDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
       data.Incidents[incidentID] = incident
-      // setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
-      // setIsLoading(false)
       return false
     }
   }
 
+  /**
+   * Deletes the firestore document for an incident
+   * documents are not actually deleted for query efficiency reasons @see {@link deleteDocWithTimestamp}
+   * 🚨🚨🚨@see {@link addIncident} about how this affects state
+   */
   async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
     try {
-      // setIsLoading(true)
       await deleteDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`))
       delete data.Incidents[incidentID]
-      // setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
-      // setIsLoading(false)
       return false
     }
   }
