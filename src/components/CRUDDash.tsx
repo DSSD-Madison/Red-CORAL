@@ -35,6 +35,9 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
     setModifyEntitySecondProperty(color.hex)
   }
 
+  // 🚨 Below handlers mutate the data object 🚨
+  // They cause this component to rerender, but not any parent component (and thus not any cousins such as Map)
+
   const handleAddEntity = async () => {
     try {
       if (addEntityName.trim() === '') {

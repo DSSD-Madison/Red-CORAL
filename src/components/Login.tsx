@@ -23,6 +23,9 @@ const Login: React.FC<LoginProps> = ({ auth }) => {
     } catch (error) {
       //@ts-ignore
       console.error('Error signing in:', error.message)
+
+      setIsLoading(false)
+
       //@ts-ignore
       setError('Failed to sign in, make sure your username and password are correct.')
     }

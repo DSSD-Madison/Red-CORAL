@@ -100,7 +100,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
         &#127987;
       </a>
       {isDropdownVisible && (
-        <div ref={dropdownRef} className="absolute right-10 top-0.5 flex h-96 gap-5">
+        <div ref={dropdownRef} className="absolute left-10 top-0.5 flex h-96 gap-5">
           {/* Countries */}
           <div className="leaflet-bar box-content w-max rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex flex-row justify-between">
@@ -158,7 +158,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
                 .sort(([country1, _], [country2, __]) => country1.localeCompare(country2))
                 .map(([country, departments]) => (
                   <div key={country}>
-                    {country}
+                    <span className="font-bold">{country}</span>
                     {Object.keys(departments).map((department) => (
                       <div key={department} className="flex items-center border-b border-b-tint-01 p-1 last-of-type:border-0 hover:bg-tint-02">
                         <input

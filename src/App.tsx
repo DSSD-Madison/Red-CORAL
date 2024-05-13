@@ -26,44 +26,51 @@ const App: React.FC = () => {
   const firestore = getFirestore(app)
   const storage = getStorage(app, import.meta.env.VITE_FIREBASE_STORAGE_BUCKET)
 
+  /**
+   * Adds an incident to firestore.
+   * 🚨🚨🚨 Mutates the data state variable (does not trigger rerender).
+   * Child that calls this function should trigger local rerender
+   * This is so that the Map component isn't constantly getting rerendered,
+   * causing the map to reset its view.
+   */
   async function addIncident(incident: Incident): Promise<boolean> {
-    // setIsLoading(true)
     try {
       const ref = await addDocWithTimestamp(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
       data.Incidents[ref.id] = incident
-      // setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
-      // setIsLoading(false)
       return false
     }
   }
 
+  /**
+   * Modifies the firetore document for an incident
+   * 🚨🚨🚨@see {@link addIncident} about how this affects state
+   */
   async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
-    // setIsLoading(true)
     try {
       await setDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
       data.Incidents[incidentID] = incident
-      // setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
-      // setIsLoading(false)
       return false
     }
   }
 
+  /**
+   * Deletes the firestore document for an incident
+   * documents are not actually deleted for query efficiency reasons @see {@link deleteDocWithTimestamp}
+   * 🚨🚨🚨@see {@link addIncident} about how this affects state
+   */
   async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
     try {
-      // setIsLoading(true)
       await deleteDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`))
       delete data.Incidents[incidentID]
-      // setIsLoading(false)
       return true
     } catch (e) {
       console.error(e)
-      // setIsLoading(false)
       return false
     }
   }
@@ -137,15 +144,15 @@ const App: React.FC = () => {
         </Routes>
       </Router>
       <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
-      <div className="letf-0 absolute bottom-0 z-[500] pb-5 pl-2">
+      <div className="absolute bottom-0 right-64 z-[1500] pb-1">
         {isLoggedIn && (
-          <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 hover:bg-gray-300">
-            Salir del Sistema
+          <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 text-sm hover:bg-gray-300">
+            Salir
           </button>
         )}
         {!isLoggedIn && (
-          <button onClick={() => (window.location.href = '/login')} className="cursor-pointer rounded-md bg-gray-300 p-1 hover:bg-gray-400">
-            Registrarse como Admin
+          <button onClick={() => (window.location.href = '/login')} className="cursor-pointer rounded-md bg-gray-300 p-1 text-sm hover:bg-gray-400">
+            Registrarse
           </button>
         )}
       </div>
