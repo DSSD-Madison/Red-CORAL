@@ -137,15 +137,15 @@ const App: React.FC = () => {
         </Routes>
       </Router>
       <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
-      <div className="letf-0 absolute bottom-0 z-[500] pb-5 pl-2">
+      <div className="absolute bottom-0 right-64 z-[1500] pb-1">
         {isLoggedIn && (
-          <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 hover:bg-gray-300">
-            Salir del Sistema
+          <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 text-sm hover:bg-gray-300">
+            Salir
           </button>
         )}
         {!isLoggedIn && (
-          <button onClick={() => (window.location.href = '/login')} className="cursor-pointer rounded-md bg-gray-300 p-1 hover:bg-gray-400">
-            Registrarse como Admin
+          <button onClick={() => (window.location.href = '/login')} className="cursor-pointer rounded-md bg-gray-300 p-1 text-sm hover:bg-gray-400">
+            Registrarse
           </button>
         )}
       </div>

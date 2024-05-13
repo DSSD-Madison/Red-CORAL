@@ -111,7 +111,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
         &#x2630;
       </a>
       {isDropdownVisible && (
-        <div ref={dropdownRef} className="absolute right-10 top-0.5 flex h-96 gap-5">
+        <div ref={dropdownRef} className="absolute left-10 top-0.5 flex h-96 gap-5">
           <div className="leaflet-bar box-content w-60 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex flex-row justify-between">
               <div className="m-1 text-base font-semibold">Actividades</div>
@@ -168,9 +168,12 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
               {Object.entries(data.Categories)
                 .filter(([catID]) => !filters.hideCategories.includes(catID))
                 .sort(([_, { name: name1 }], [__, { name: name2 }]) => name1.localeCompare(name2))
-                .map(([catID, { name: catName }]) => (
+                .map(([catID, { name: catName, color: catColor }]) => (
                   <div key={catID}>
-                    {catName}
+                    <div className="mx-1 flex flex-row justify-center align-middle">
+                      <span className="font-bold">{catName}</span>
+                      <div className="ml-auto h-4 w-4 flex-shrink-0 rounded-full border border-harvard-slate" style={{ backgroundColor: catColor }} />
+                    </div>
                     {typesByCategory[catID]?.map(({ typeID, name: typeName }) => (
                       <div key={typeID} className="flex items-center border-b border-b-tint-01 p-1 last-of-type:border-0 hover:bg-tint-02">
                         <input

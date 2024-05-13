@@ -163,24 +163,25 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
           setEditID={setEditID}
           editID={editID}
         />
-        <Control prepend position="topright">
+        <Control prepend position="topleft">
           <div className="leaflet-bar">
             <CategoryControl data={data} filters={filters} setFilters={setFilters} />
             <CountryControl data={data} filters={filters} setFilters={setFilters} />
           </div>
         </Control>
-        <Control position="topleft">
-          <SearchControl />
+        <Control position="bottomleft">
           <YearControl data={data} filters={filters} setFilters={setFilters} />
+          <SearchControl />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>
-      <div className="w-30% absolute bottom-0 right-0 z-[1000] pb-5 pr-3">
-        <img src="banner.png" alt="Red CORAL logo" className=" block h-48 drop-shadow filter" />
+      <div className="w-30% absolute bottom-0 right-0 z-[1000] pb-10 pr-3 text-sm">
+        <div>
+          <img src="banner.png" alt="Red CORAL logo" className=" float-right block w-64 drop-shadow filter" />
+        </div>
         {isAdmin && (
           <div className="float-right block">
-            <p className="text-center text-4xl text-red-dark">Administrador</p>
             <button
               className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
               onClick={() => {
