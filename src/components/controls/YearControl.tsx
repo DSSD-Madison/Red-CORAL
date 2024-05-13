@@ -60,7 +60,7 @@ const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) 
       {isDropdownVisible && (
         <div
           ref={dropdownRef}
-          className="leaflet-bar w-80% absolute -bottom-0.5 left-10 box-content w-[80vw] rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
+          className="leaflet-bar absolute -bottom-0.5 left-10 box-content w-[50vw] rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
         >
           <label className="block text-center text-xl font-semibold" htmlFor="year">
             Año

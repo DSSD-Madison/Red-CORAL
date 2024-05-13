@@ -144,7 +144,7 @@ const App: React.FC = () => {
         </Routes>
       </Router>
       <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
-      <div className="absolute bottom-0 right-64 z-[1500] pb-1">
+      <div className="absolute bottom-0 right-64 z-[800] pb-1">
         {isLoggedIn && (
           <button onClick={() => signOut(auth)} className=" cursor-pointer rounded-md bg-gray-200 p-1 text-sm hover:bg-gray-300">
             Salir
