@@ -176,7 +176,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
       </MapContainer>
-      <div className="w-30% absolute bottom-0 right-0 z-[1000] pb-10 pr-3 text-sm">
+      <div className="w-30% absolute bottom-0 right-0 z-[750] pb-10 pr-3 text-sm">
         <div>
           <img src="banner.png" alt="Red CORAL logo" className=" float-right block w-64 drop-shadow filter" />
         </div>
