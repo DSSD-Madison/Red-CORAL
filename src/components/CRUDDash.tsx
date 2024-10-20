@@ -191,13 +191,28 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
         </button>
       </div>
 
+      {/* Section for Download JSON and Analytics Link */}
       <div className="absolute right-0 top-16 m-4">
+
+        {/* Download JSON Button */}
         <button
           onClick={handleDownload}
           className="rounded-full bg-blue-500 px-4 py-2 text-white shadow-md hover:bg-blue-600"
         >
           Download JSON File
         </button>
+
+        {/* Link to Analytics Page */}
+        <a
+          href="https://net.tsuni.dev/redcoralmap.web.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full bg-green-500 px-4 py-2 text-white shadow-md hover:bg-green-600 text-center"
+        >
+          
+          Go to Analytics Page
+        </a>
+
       </div>
     
       <div className="absolute left-0 top-0 m-4">
