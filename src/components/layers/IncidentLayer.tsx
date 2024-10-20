@@ -1,6 +1,6 @@
 import L, { LatLngTuple } from 'leaflet'
 import { forwardRef } from 'react'
-import { useMap, Marker as LeafletMarker, LayerGroup } from 'react-leaflet'
+import { useMap, Marker as LeafletMarker, LayerGroup, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 
 interface IncidentLayerProps {
@@ -81,7 +81,16 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                 }
               },
             }}
-          />
+          >
+            <Tooltip direction="bottom" offset={[0, 8]}>
+              <div className="w-max min-w-24 max-w-72 text-wrap break-words">
+                <p className="font-bold">Tipo de evento:</p>
+                <p>{data.Types[incident.typeID].name}</p>
+                <p className="font-bold">Descripción:</p>
+                <p>{incident.description}</p>
+              </div>
+            </Tooltip>
+          </LeafletMarker>
         ))}
         {tmpLocation && (
           <LeafletMarker
