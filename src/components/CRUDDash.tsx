@@ -23,6 +23,16 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
   const [modifyEntitySecondProperty, setModifyEntitySecondProperty] = useState('')
   const [entityType, setEntityType] = useState<'Categories' | 'Types'>('Categories')
 
+  const handleDownload = () => {
+    const downloadUrl = "https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media";
+    const anchor = document.createElement('a');
+    anchor.href = downloadUrl;
+    anchor.download = 'state.json';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  };
+
   const handleAddEntityNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAddEntityName(event.target.value)
   }
@@ -180,8 +190,19 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
           Volver al mapa
         </button>
       </div>
+
+      <div className="absolute right-0 top-16 m-4">
+        <button
+          onClick={handleDownload}
+          className="rounded-full bg-blue-500 px-4 py-2 text-white shadow-md hover:bg-blue-600"
+        >
+          Download JSON File
+        </button>
+      </div>
+    
       <div className="absolute left-0 top-0 m-4">
         {entityType == 'Types' && (
+
           <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Actividad
           </button>
