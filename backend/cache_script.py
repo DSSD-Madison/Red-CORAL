@@ -21,7 +21,7 @@ def minify_json(data):
     return json.dumps(data, separators=(',', ':'))
 
 def read_firestore():
-    categories = {}
+    categories = {} # hi
     types = {}
     incidents = {}
 
