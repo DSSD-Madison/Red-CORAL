@@ -83,7 +83,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             }}
           >
             <Tooltip direction="bottom" offset={[0, 8]}>
-              <div className="min-w-24 max-w-72 text-balance">
+              <div className="min-w-24 max-w-72 text-balance break-words">
                 <p className="font-bold">Tipo de evento:</p>
                 <p>{data.Types[incident.typeID].name}</p>
                 <p className="font-bold">Descripción:</p>
