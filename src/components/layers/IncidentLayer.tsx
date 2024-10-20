@@ -82,7 +82,14 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
               },
             }}
           >
-            <Tooltip>{incident.description}</Tooltip>
+            <Tooltip direction="bottom" offset={[0, 8]}>
+              <div className="min-w-24 max-w-72 text-balance">
+                <p className="font-bold">Tipo de evento:</p>
+                <p>{data.Types[incident.typeID].name}</p>
+                <p className="font-bold">Descripción:</p>
+                <p>{incident.description}</p>
+              </div>
+            </Tooltip>
           </LeafletMarker>
         ))}
         {tmpLocation && (
