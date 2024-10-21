@@ -39,6 +39,24 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     // Northeast coordinate
     [90, 180],
   ]
+
+  const handleDownload = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault();
+    fetch("https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media")
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'state.json';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(() => alert('An error occurred while downloading the file.'));
+  };
+  
   const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
@@ -194,6 +212,25 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
             <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
               Administrar categorías
             </button>
+
+            {/* New Button: Download JSON File */}
+            <a
+            href="#"
+              onClick={handleDownload}
+              className="ml-2 rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
+            >
+              Guardar copia de datos
+            </a>
+
+            {/* New Link: Analytics Page */}
+            <a
+              href="https://net.tsuni.dev/redcoralmap.web.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 rounded-md bg-green-500 p-2 text-white hover:bg-green-600"
+            >
+              Analítica web
+            </a>
           </div>
         )}
       </div>
