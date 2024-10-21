@@ -49,6 +49,7 @@ def save_to_cloud_storage(data):
         file.write(minified_data)
 
     blob = bucket.blob('state.json')
+    blob.content_disposition = 'attachment; filename="state.json"'
     blob.upload_from_filename('state.json')
 
 def main():
