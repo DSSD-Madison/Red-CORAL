@@ -82,13 +82,26 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
               },
             }}
           >
-            <Tooltip direction={incident.location.lat < map.getCenter().lat ? "top" : "bottom"} offset={[0, 8]}>
+            <Tooltip
+              direction={incident.location.lat < map.getCenter().lat ? 'top' : 'bottom'}
+              offset={[0, incident.location.lat < map.getCenter().lat ? -8 : 8]}
+            >
               <div className="w-max min-w-24 max-w-72 text-wrap break-words">
-                <p><span className="font-bold">Pais:</span> {incident.country}</p>
-                <p><span className="font-bold">Municipalidad:</span> {incident.municipality}</p>
-                <p><span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES')}</p>
-                <p><span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}</p>
-                <p><span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}</p>
+                <p>
+                  <span className="font-bold">Pais:</span> {incident.country}
+                </p>
+                <p>
+                  <span className="font-bold">Municipalidad:</span> {incident.municipality}
+                </p>
+                <p>
+                  <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES')}
+                </p>
+                <p>
+                  <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}
+                </p>
+                <p>
+                  <span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}
+                </p>
               </div>
             </Tooltip>
           </LeafletMarker>
