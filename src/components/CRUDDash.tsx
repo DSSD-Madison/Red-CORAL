@@ -182,6 +182,7 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
       </div>
       <div className="absolute left-0 top-0 m-4">
         {entityType == 'Types' && (
+
           <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Actividad
           </button>
