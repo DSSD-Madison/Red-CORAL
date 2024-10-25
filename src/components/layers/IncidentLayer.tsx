@@ -94,7 +94,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                   <span className="font-bold">Municipalidad:</span> {incident.municipality}
                 </p>
                 <p>
-                  <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES')}
+                  <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })}
                 </p>
                 <p>
                   <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}
