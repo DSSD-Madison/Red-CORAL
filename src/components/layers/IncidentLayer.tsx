@@ -1,5 +1,5 @@
-import L, { LatLngTuple } from 'leaflet'
-import { forwardRef } from 'react'
+import L, { LatLngTuple, PointTuple } from 'leaflet'
+import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useMap, Marker as LeafletMarker, LayerGroup, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 
@@ -18,14 +18,9 @@ interface IncidentLayerProps {
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
   ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID }, ref) => {
     const map = useMap()
+    const [zoomLevel, setZoomLevel] = useState<number>(map.getZoom())
 
-    map.removeEventListener('dblclick')
-    map.addEventListener('dblclick', (e) => {
-      if (!isAdmin || !(tmpSelected || editID != null)) return
-      setTmpLocation(e.latlng)
-    })
-
-    const adjustView = (location: Incident['location'] | null) => {
+    const zoomToLocation = (location: Incident['location'] | null) => {
       if (!location) return
       // Incident location can be arbitrary number of coordinate
       const path = [location].map((coords) => [coords.lat, coords.lng] as LatLngTuple)
@@ -37,20 +32,52 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
       map.flyToBounds(bounds, { maxZoom: 10 })
     }
 
-    // Applying MarkerFilters to the incidents.
-    const incidentList = Object.entries(data?.Incidents || {}).filter(
-      ([id, incident]) =>
-        (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
-        (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
-        !filters.hideCountries.includes(incident.country) &&
-        !filters.hideDepartments.includes(incident.department) &&
-        !filters.hideMunicipalities.includes(incident.municipality) &&
-        !filters.hideCategories.includes(data.Types[incident.typeID].categoryID) &&
-        !filters.hideTypes.includes(incident.typeID) &&
-        (editID == null || id != editID)
+    // Registering event listeners for zoom and double click events.
+    useEffect(() => {
+      const zoomHandler = () => {
+        setZoomLevel(() => map.getZoom())
+      }
+      const clickHandler = (e: L.LeafletMouseEvent) => {
+        if (!isAdmin || !(tmpSelected || editID != null)) return
+        setTmpLocation(e.latlng)
+      }
+
+      map.addEventListener('zoomend', zoomHandler)
+      map.addEventListener('dblclick', clickHandler)
+      return () => {
+        map.removeEventListener('zoomend', zoomHandler)
+        map.removeEventListener('dblclick', clickHandler)
+      }
+    }, [map])
+
+    // Filtering incidents based on the current filters.
+    const incidentList = useMemo(
+      () =>
+        Object.entries(data?.Incidents || {}).filter(
+          ([id, incident]) =>
+            (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
+            (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
+            !filters.hideCountries.includes(incident.country) &&
+            !filters.hideDepartments.includes(incident.department) &&
+            !filters.hideMunicipalities.includes(incident.municipality) &&
+            !filters.hideCategories.includes(data.Types[incident.typeID].categoryID) &&
+            !filters.hideTypes.includes(incident.typeID) &&
+            (editID == null || id != editID)
+        ),
+      [data, filters, editID]
     )
 
+    // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
+
+    const markerSize = (id: string): PointTuple => (id == selectedIncidentID ? [20, 20] : zoomLevel > 7 ? [15, 15] : [10, 10])
+
+    const markerSVG = (id: string, incident: Incident): string => {
+      const size = markerSize(id)[0]
+      return `<svg viewBox="0 0 18 18" width="${size}px" height="${size}px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+        <use href="#marker" />
+      </svg>`
+    }
 
     return (
       <LayerGroup ref={ref}>
@@ -59,16 +86,14 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             <circle r="9" cx="9" cy="9" fill="currentColor" />
           </symbol>
         </svg>
-        {incidentList.map(([id, incident], i) => (
+        {incidentList.map(([id, incident]) => (
           <LeafletMarker
             key={id}
             position={incident.location}
             icon={L.divIcon({
-              iconSize: id == selectedIncidentID ? [20, 20] : [15, 15],
+              iconSize: markerSize(id),
               className: '',
-              html: `<svg viewBox="0 0 18 18" ${id == selectedIncidentID ? 'width="20px" height="20px"' : 'width="15px" height="15px"'} style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
-              <use href="#marker" />
-                      </svg>`,
+              html: markerSVG(id, incident),
             })}
             eventHandlers={{
               click: () => {
@@ -76,7 +101,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                   setSelectedIncidentID(null)
                 } else {
                   setSelectedIncidentID(id)
-                  adjustView(incident.location)
+                  zoomToLocation(incident.location)
                 }
               },
             }}
