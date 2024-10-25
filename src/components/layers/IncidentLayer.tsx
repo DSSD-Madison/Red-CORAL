@@ -61,8 +61,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
         </svg>
         {incidentList.map(([id, incident], i) => (
           <LeafletMarker
-            key={`incident-${i}-marker`}
-            title={incident.description}
+            key={id}
             position={incident.location}
             icon={L.divIcon({
               iconSize: id == selectedIncidentID ? [20, 20] : [15, 15],
