@@ -118,46 +118,6 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             })}
           />
         )}
-        {/* {incidentList.map(([id, incident], i) => {
-          if (incident.location.length > 1) {
-            const positions = incident.location.map((coords) => [coords.lat, coords.lng] as LatLngExpression)
-            const opts = id == selectedIncidentID ? { color: 'red', opacity: 0.7 } : { color: 'black', opacity: 0.5 }
-            return (
-              <Polyline
-                key={`incident-${i}-path`}
-                positions={positions}
-                pathOptions={opts}
-                eventHandlers={{
-                  click: () => {
-                    if (selectedIncidentID === id) {
-                      setSelectedIncidentID(null)
-                    } else {
-                      setSelectedIncidentID(id)
-                      adjustView(incident.location)
-                    }
-                  },
-                }}
-              />
-            )
-          }
-        })} */}
-        {/* {tmpLocation.length > 1 && (
-          <Polyline
-            key={`tmp-incident-path`}
-            positions={tmpLocation.map((coords) => [coords.lat, coords.lng] as LatLngExpression)}
-            pathOptions={tmpSelected ? { color: 'red', opacity: 0.7 } : { color: 'black', opacity: 0.5 }}
-            eventHandlers={{
-              click: () => {
-                if (tmpSelected) {
-                  setTmpSelected(false)
-                } else {
-                  setTmpSelected(true)
-                  adjustView(tmpLocation)
-                }
-              },
-            }}
-          />
-        )} */}
       </LayerGroup>
     )
   }
