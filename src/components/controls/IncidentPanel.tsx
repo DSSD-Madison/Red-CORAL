@@ -152,7 +152,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
                 {incident.dateString && (
                   <>
-                    <span className="font-bold">Fecha:</span> {incident.dateString} <br />
+                    <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })} <br />
                   </>
                 )}
                 <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}
