@@ -2,6 +2,7 @@ import L, { LatLngTuple, PointTuple } from 'leaflet'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useMap, Marker as LeafletMarker, LayerGroup, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
+import { filterIncidents } from 'utils'
 
 interface IncidentLayerProps {
   data: DB
@@ -51,21 +52,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     }, [map])
 
     // Filtering incidents based on the current filters.
-    const incidentList = useMemo(
-      () =>
-        Object.entries(data?.Incidents || {}).filter(
-          ([id, incident]) =>
-            (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
-            (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
-            !filters.hideCountries.includes(incident.country) &&
-            !filters.hideDepartments.includes(incident.department) &&
-            !filters.hideMunicipalities.includes(incident.municipality) &&
-            !filters.hideCategories.includes(data.Types[incident.typeID].categoryID) &&
-            !filters.hideTypes.includes(incident.typeID) &&
-            (editID == null || id != editID)
-        ),
-      [data, filters, editID]
-    )
+    const incidentList = useMemo(() => filterIncidents(data.Incidents, filters, data.Types, editID), [data, filters, editID])
 
     // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))

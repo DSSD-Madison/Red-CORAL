@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { GeocodingApi, Configuration, PeliasLayer, PeliasGeoJSONFeature, AutocompleteRequest } from '@stadiamaps/api'
+import { ADDITIONAL_FEATURES } from '../constants'
 
 interface HomeProps {
   layers?: PeliasLayer[]
@@ -40,15 +41,21 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     if (setStringValue !== undefined) setStringValue(val)
     setLocalStrVal(val)
     if (setCountryCode !== undefined) setCountryCode(feat.properties?.country_a || '')
-    if (!feat.bbox) {
+    if (!layers?.includes('country') && !feat.bbox) {
       alert('Stadia Maps no tiene información de ubicación para este municipio. No podrás acercarlo automáticamente.')
     }
     setBounds(feat.bbox)
     setOptions([])
   }
 
+  function isMatch(feat: PeliasGeoJSONFeature, search: string) {
+    const normalizedSearch = search.toLowerCase()
+    const normalizedLabel = feat.properties?.label?.toLowerCase()
+    return normalizedLabel?.includes(normalizedSearch) || false
+  }
+
   async function getFeats(search: string) {
-    const q: AutocompleteRequest = { text: search }
+    const q: AutocompleteRequest = { text: search, lang: 'es' }
     if (layers) q.layers = layers
     if (countryCode) {
       q.boundaryCountry = [countryCode]
@@ -61,6 +68,9 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     }
     const response = await api.autocomplete(q)
     let feats = response.features
+    if (layers?.includes('country')) {
+      feats.push(...ADDITIONAL_FEATURES.filter((feat) => isMatch(feat, search)))
+    }
     if (department) {
       feats = feats.filter((feat) => feat.properties?.region == department.name)
     }

@@ -38,12 +38,14 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
       setFilters((filters) => ({
         ...filters,
         hideCountries: [...filters.hideCountries, key],
-        hideDepartments: filters.hideDepartments.filter((dep) => !Object.keys(visibleDepartments[key]).includes(dep)),
+        hideDepartments: filters.hideDepartments.filter((dep) => !dep.startsWith(key)),
       }))
     }
   }
 
-  const handleDepCheckboxChange = (key: string, checked: boolean) => {
+  const handleDepCheckboxChange = (con: string, dep: string, checked: boolean) => {
+    const key = `${con} - ${dep}`
+    console.log(filters, key, checked)
     if (checked) {
       setFilters((filters) => ({
         ...filters,
@@ -80,7 +82,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     } else {
       setFilters((filters) => ({
         ...filters,
-        hideDepartments: Object.values(visibleDepartments).map(Object.keys).flat(),
+        hideDepartments: Object.entries(visibleDepartments).flatMap(([con, deps]) => Object.keys(deps).map((muni) => `${con} - ${muni}`)),
       }))
     }
   }
@@ -165,8 +167,8 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
                           type="checkbox"
                           name={department}
                           id={department}
-                          checked={!filters.hideDepartments?.includes(department)}
-                          onChange={(e) => handleDepCheckboxChange(department, e.target.checked)}
+                          checked={!filters.hideDepartments?.includes(`${country} - ${department}`)}
+                          onChange={(e) => handleDepCheckboxChange(country, department, e.target.checked)}
                           className="mr-2"
                         />
                         <label htmlFor={department} className="w-full">
