@@ -1,7 +1,7 @@
 import { PeliasGeoJSONFeature } from '@stadiamaps/api';
 import { LatLngExpression } from 'leaflet'
 export const INITIAL_BOUNDS = [6, -75] as LatLngExpression // Centered on Medellin, Colombia
-export const INITIAL_ZOOM = 7
+export const INITIAL_ZOOM = 6.25;
 export const ADDITIONAL_FEATURES: PeliasGeoJSONFeature[] = [
   {
     type: "Feature",

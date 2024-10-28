@@ -144,6 +144,10 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         className="h-full w-full"
         center={[20, 0]}
         zoom={2}
+        zoomSnap={0.1}
+        zoomDelta={1}
+        wheelPxPerZoomLevel={80}
+        wheelDebounceTime={100}
         minZoom={2}
         maxZoom={18} // We can adjust this later depending on how detailed the data is.
         scrollWheelZoom={true}
@@ -196,7 +200,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
       </MapContainer>
       <div className="w-30% absolute bottom-0 right-0 z-[750] pb-10 pr-3 text-sm">
         <div>
-          <img src="banner.png" alt="Red CORAL logo" className=" float-right block w-64 drop-shadow filter" />
+          <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
         </div>
         {isAdmin && (
           <div className="float-right block">
@@ -214,11 +218,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
             </button>
 
             {/* New Button: Download JSON File */}
-            <a
-            href="#"
-              onClick={handleDownload}
-              className="ml-2 rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
-            >
+            <a href="#" onClick={handleDownload} className="ml-2 rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600">
               Guardar copia de datos
             </a>
 

@@ -23,3 +23,9 @@ body {
 .header-drop {
   background: linear-gradient(0deg, rgba(255, 0, 0, 0) 0%, rgba(0, 0, 0, 0.2) 100%);
 }
+
+.leaflet-zoom-anim
+.leaflet-zoom-animated {
+  transition-timing-function: linear;
+  transition-duration: 100ms;
+}

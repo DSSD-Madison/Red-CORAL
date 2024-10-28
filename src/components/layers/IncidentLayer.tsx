@@ -30,7 +30,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
         [Math.min(...path.map((coords) => coords[0])), Math.min(...path.map((coords) => coords[1]))],
         [Math.max(...path.map((coords) => coords[0])), Math.max(...path.map((coords) => coords[1]))],
       ])
-      map.flyToBounds(bounds, { maxZoom: 10 })
+      map.flyToBounds(bounds, { maxZoom: 15 })
     }
 
     // Registering event listeners for zoom and double click events.
@@ -101,14 +101,23 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                 <p>
                   <span className="font-bold">Pais:</span> {incident.country}
                 </p>
-                <p>
-                  <span className="font-bold">Municipalidad:</span> {incident.municipality}
-                </p>
+                {incident.department && (
+                  <p>
+                    <span className="font-bold">Departamento:</span> {incident.department}
+                  </p>
+                )}
+                {incident.municipality && (
+                  <p>
+                    <span className="font-bold">Municipalidad:</span> {incident.municipality}
+                  </p>
+                )}
                 <p>
                   <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })}
                 </p>
+                <hr className="my-2 border-neutral-500" />
                 <p>
                   <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}
+                  <span className="ml-1 inline-block h-[1em] w-[1em] rounded-full" style={{ backgroundColor: typeColors[incident.typeID] }} />
                 </p>
                 <p>
                   <span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}

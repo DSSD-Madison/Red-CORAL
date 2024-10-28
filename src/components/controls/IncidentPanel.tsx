@@ -145,10 +145,18 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
               <div className="mb-4">
                 <span className="font-bold">País:</span> {incident.country}
                 <br />
-                <span className="font-bold">Departamento:</span> {incident.department}
-                <br />
-                <span className="font-bold">Municipio:</span> {incident.municipality}
-                <br />
+                {incident.department && (
+                  <>
+                    <span className="font-bold">Departamento:</span> {incident.department}
+                    <br />
+                  </>
+                )}
+                {incident.municipality && (
+                  <>
+                    <span className="font-bold">Municipio:</span> {incident.municipality}
+                    <br />
+                  </>
+                )}
                 <br />
                 {incident.dateString && (
                   <>
