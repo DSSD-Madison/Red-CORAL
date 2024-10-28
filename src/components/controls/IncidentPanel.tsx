@@ -247,10 +247,16 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   </button>
                 )}
                 <br />
-                <br />
+                <hr className="my-4 border-neutral-500" />
                 Fecha:
                 <br />
-                <input type="date" className="w-full" value={dateString} onChange={(e) => setDateString(e.target.value)} required />
+                <input
+                  type="date"
+                  className="mb-2 w-full rounded-md p-2"
+                  value={dateString}
+                  onChange={(e) => setDateString(e.target.value)}
+                  required
+                />
                 <br />
                 Actividad:
                 <br />
@@ -260,7 +266,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     setCatID(e.target.value)
                     setTypeID('')
                   }}
-                  className="w-full"
+                  className="mb-2 w-full rounded-md bg-white/70 p-2"
                 >
                   <option value="">--Por favor elige una actividad--</option>
                   {Object.entries(data.Categories).map(([id, category]) => (
@@ -272,7 +278,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
                 Tipo de evento:
                 <br />
-                <select value={typeID} onChange={(e) => setTypeID(e.target.value)} className="w-full">
+                <select value={typeID} onChange={(e) => setTypeID(e.target.value)} className="mb-2 w-full rounded-md bg-white/70 p-2">
                   <option value="">--Por favor elige un tipo de evento--</option>
                   {Object.entries(data.Types).map(
                     ([id, type]) =>
@@ -287,18 +293,26 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <label>
                   Descripción:
                   <br />
-                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={10} cols={40} />
+                  <textarea
+                    className="w-full rounded-md px-3 py-2"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                    rows={10}
+                  />
                 </label>
                 <br />
               </div>
-              <button className="rounded-sm border-0 bg-green-100 pb-1 pl-2 pr-2 pt-1 hover:bg-green-200" onClick={submit}>
-                {editID != null ? 'Aplicar' : 'Crear'}
-              </button>
-              {editID != null && (
-                <button className="rounded-sm border-0 bg-red-100 pb-1 pl-2 pr-2 pt-1 hover:bg-red-200" onClick={cancelEdit}>
-                  Cancelar
+              <div className="flex justify-center">
+                <button className="rounded-md border-0 bg-green-100 p-2 hover:bg-green-200" onClick={submit}>
+                  {editID != null ? 'Aplicar' : 'Crear'}
                 </button>
-              )}
+                {editID != null && (
+                  <button className="rounded-sm border-0 bg-red-100 pb-1 pl-2 pr-2 pt-1 hover:bg-red-200" onClick={cancelEdit}>
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </>

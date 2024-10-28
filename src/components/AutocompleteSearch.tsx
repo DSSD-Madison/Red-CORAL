@@ -97,7 +97,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }, [search])
 
   return (
-    <div>
+    <div className="relative mb-2">
       <input
         type="text"
         value={search}
@@ -108,12 +108,12 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
           setBounds(undefined)
           if (setCountryCode !== undefined) setCountryCode('')
         }}
-        className="w-2/3"
+        className="w-full rounded-md border border-tint-02 p-2"
       />
-      {localStrVal && <p className="ml-2 inline-block text-xl text-[#00ad2b]">✓</p>}
-      {isLoading && <p>Loading...</p>}
+      {localStrVal && <p className="absolute right-2 top-1 text-xl text-[#00ad2b]">✓</p>}
+      {isLoading && <p className="text-center">Loading...</p>}
       {!isLoading && options.length != 0 && (
-        <ul className="max-h-20 w-2/3 overflow-y-scroll bg-white">
+        <ul className="mt-1 max-h-20 w-full overflow-y-scroll rounded-md bg-white p-2">
           {options.map((option) => {
             return (
               <li key={option.properties?.gid} onClick={() => handleSelect(option)} className="hover:cursor-pointer hover:bg-tint-02">
