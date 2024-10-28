@@ -43,7 +43,6 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const map = useMap()
   const [description, setDescription] = useState<Incident['description']>('')
   const [country, setCountry] = useState<Incident['country']>('')
-  const [countryBounds, setCountryBounds] = useState<number[] | undefined>(undefined)
   const [countryCode, setCountryCode] = useState<string>('')
   const [municipality, setMunicipality] = useState<Incident['municipality']>('')
   const [municipalityBounds, setMunicipalityBounds] = useState<number[] | undefined>(undefined)
@@ -127,7 +126,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
       key={'overlay'}
       className={`${
         incident || tmpSelected ? 'w-[100%] md:w-[400px]' : 'w-0'
-      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-scroll rounded-e-xl bg-tint-02/60 font-merriweather text-sm text-shade-02 shadow-lg backdrop-blur-sm transition-all duration-100`}
+      } duration-400 fixed left-0 z-[1000] box-border h-screen cursor-default overflow-y-auto rounded-e-xl bg-tint-02/60 font-merriweather text-sm text-shade-02 shadow-lg backdrop-blur-sm transition-all duration-100`}
       onMouseEnter={disableZoom}
       onMouseLeave={enableZoom}
     >
@@ -193,7 +192,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     layers={['country']}
                     setStringValue={setCountry}
                     setCountryCode={setCountryCode}
-                    setBounds={setCountryBounds}
+                    setBounds={() => {}} // Country bounds are not used
                     initialValue={editID != null ? incident?.country : undefined}
                   />
                 </label>
