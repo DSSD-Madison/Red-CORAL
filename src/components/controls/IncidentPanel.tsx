@@ -197,7 +197,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     initialValue={editID != null ? incident?.country : undefined}
                   />
                 </label>
-                {country && countryBounds && (
+                {country && countryCode != 'world' && (
                   <label>
                     Departamento:
                     <br />
@@ -210,7 +210,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     />
                   </label>
                 )}
-                {department && departmentBounds && (
+                {department && (
                   <label>
                     Municipio:
                     <br />

@@ -7,7 +7,7 @@ export const ADDITIONAL_FEATURES: PeliasGeoJSONFeature[] = [
     type: "Feature",
     properties: {
       label: "Océano Pacífico",
-      country_a: "PO"
+      country_a: "world"
     },
     geometry: {
       type: "Point",
@@ -18,7 +18,7 @@ export const ADDITIONAL_FEATURES: PeliasGeoJSONFeature[] = [
     type: "Feature",
     properties: {
       label: "Mar Caribe",
-      country_a: "CS"
+      country_a: "world"
     },
     geometry: {
       type: "Point",

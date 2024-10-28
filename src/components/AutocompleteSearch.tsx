@@ -9,7 +9,7 @@ interface HomeProps {
   setBounds: (bound: number[] | undefined) => void
   setCountryCode?: (code: string) => void
   countryCode?: string
-  department?: { name: string; bbox: number[] }
+  department?: { name: string; bbox: number[] | undefined }
   initialValue?: string
 }
 
@@ -55,12 +55,12 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }
 
   async function getFeats(search: string) {
-    const q: AutocompleteRequest = { text: search, lang: 'es' }
+    const q: AutocompleteRequest = { text: search }
     if (layers) q.layers = layers
-    if (countryCode) {
+    if (countryCode && countryCode != 'world') {
       q.boundaryCountry = [countryCode]
     }
-    if (department) {
+    if (department && department.bbox) {
       q.boundaryRectMinLon = department.bbox[0]
       q.boundaryRectMinLat = department.bbox[1]
       q.boundaryRectMaxLon = department.bbox[2]
