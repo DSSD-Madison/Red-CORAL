@@ -40,23 +40,6 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     [90, 180],
   ]
 
-  const handleDownload = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    event.preventDefault();
-    fetch("https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media")
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'state.json';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch(() => alert('An error occurred while downloading the file.'));
-  };
-  
   const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
