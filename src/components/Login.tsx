@@ -32,21 +32,31 @@ const Login: React.FC<LoginProps> = ({ auth }) => {
   }
 
   return (
-    <div className="p-20 text-center">
-      <h2 className="bold text-3xl">Admin Sign In</h2>
-      <form onSubmit={handleSignin} className="m-10">
-        <label className="m-2 block">
-          Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
-        <div className="m-5 flex justify-center">
-          <button type="submit" className="rounded-sm border-0 bg-harvard-putty pb-1 pl-2 pr-2 pt-1 hover:bg-harvard-slate">
-            Sign In
-          </button>
-        </div>
-      </form>
-      {error && <p className="text-center text-red-dark">{error}</p>}
-      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
+    <div className="flex h-full w-full items-center justify-center">
+      <div className="rounded-lg border border-gray-500 p-10 text-center">
+        <img src="banner.png" alt="Red CORAL logo" className="mb-10 w-80" />
+        <h2 className="mb-10 text-3xl font-bold">Admin Login</h2>
+        <form onSubmit={handleSignin} className="w-full text-left">
+          <label htmlFor="password" className="mb-1 block text-sm">
+            Password
+          </label>
+          <div className="mb-2 flex justify-between gap-2">
+            <input
+              type="password"
+              className="flex-grow rounded-md border border-gray-500 px-2 py-1"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              id="password"
+            />
+            <button type="submit" className="rounded-md border-0 bg-harvard-putty px-2 py-1 hover:bg-harvard-slate">
+              Sign In
+            </button>
+          </div>
+        </form>
+        {error && <p className="text-center text-red-dark">{error}</p>}
+        <LoadingOverlay isVisible={isLoading} color={'#888888'} />
+      </div>
     </div>
   )
 }

@@ -113,10 +113,14 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
       {localStrVal && <p className="absolute right-2 top-1 text-xl text-[#00ad2b]">✓</p>}
       {isLoading && <p className="text-center">Loading...</p>}
       {!isLoading && options.length != 0 && (
-        <ul className="mt-1 max-h-20 w-full overflow-y-scroll rounded-md bg-white p-2">
+        <ul className="mt-1 max-h-32 w-full overflow-y-scroll rounded-md bg-white/70">
           {options.map((option) => {
             return (
-              <li key={option.properties?.gid} onClick={() => handleSelect(option)} className="hover:cursor-pointer hover:bg-tint-02">
+              <li
+                key={option.properties?.gid}
+                onClick={() => handleSelect(option)}
+                className="not-last:border-b border-gray-500 p-2 hover:cursor-pointer hover:bg-white"
+              >
                 {getName(option)}
               </li>
             )
