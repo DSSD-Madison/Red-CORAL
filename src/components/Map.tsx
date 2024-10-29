@@ -185,7 +185,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         {isAdmin && (
           <div className="float-right flex flex-col gap-2">
             <button
-              className="rounded-md bg-white p-2 text-center hover:bg-white"
+              className="rounded-md bg-white p-2 text-center hover:bg-neutral-300"
               onClick={() => {
                 setSelectedIncidentID(null)
                 setTmpSelected(true)
