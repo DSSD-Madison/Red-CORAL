@@ -39,17 +39,16 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
         setZoomLevel(() => map.getZoom())
       }
       const clickHandler = (e: L.LeafletMouseEvent) => {
-        if (!isAdmin || !(tmpSelected || editID != null)) return
+        if (!isAdmin || (!tmpSelected && editID == null)) return
         setTmpLocation(e.latlng)
       }
-
       map.addEventListener('zoomend', zoomHandler)
       map.addEventListener('dblclick', clickHandler)
       return () => {
         map.removeEventListener('zoomend', zoomHandler)
         map.removeEventListener('dblclick', clickHandler)
       }
-    }, [map])
+    }, [isAdmin, tmpSelected, editID, map])
 
     // Filtering incidents based on the current filters.
     const incidentList = useMemo(() => filterIncidents(data.Incidents, filters, data.Types, editID), [data, filters, editID])
