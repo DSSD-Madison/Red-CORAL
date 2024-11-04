@@ -11,7 +11,7 @@ import YearControl from './controls/YearControl'
 import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import LoadingOverlay from './LoadingOverlay'
 
 interface MapProps {
@@ -31,7 +31,6 @@ function SetInitialBounds() {
 }
 
 const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, editIncident }) => {
-  const navigate = useNavigate()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
