@@ -237,7 +237,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
               className="rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600"
               onClick={() => navigate('/stats-dashboard')}
             >
-              View Statistics Dashboard
+              Ver Panel de Datos
             </button>
           </div>
         )}
