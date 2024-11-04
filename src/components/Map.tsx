@@ -40,6 +40,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     [90, 180],
   ]
 
+<<<<<<< HEAD
   const handleDownload = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault();
     fetch("https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media")
@@ -57,6 +58,8 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
       .catch(() => alert('An error occurred while downloading the file.'));
   };
   
+=======
+>>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
   const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
@@ -144,6 +147,10 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         className="h-full w-full"
         center={[20, 0]}
         zoom={2}
+        zoomSnap={0.1}
+        zoomDelta={1}
+        wheelPxPerZoomLevel={80}
+        wheelDebounceTime={100}
         minZoom={2}
         maxZoom={18} // We can adjust this later depending on how detailed the data is.
         scrollWheelZoom={true}
@@ -195,13 +202,10 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         <SetInitialBounds />
       </MapContainer>
       <div className="w-30% absolute bottom-0 right-0 z-[750] pb-10 pr-3 text-sm">
-        <div>
-          <img src="banner.png" alt="Red CORAL logo" className=" float-right block w-64 drop-shadow filter" />
-        </div>
         {isAdmin && (
-          <div className="float-right block">
+          <div className="float-right flex flex-col gap-2">
             <button
-              className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
+              className="rounded-md bg-white p-2 text-center hover:bg-neutral-300"
               onClick={() => {
                 setSelectedIncidentID(null)
                 setTmpSelected(true)
@@ -209,30 +213,46 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
             >
               Crear incidente
             </button>
-            <button className="ml-2 rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
+            <button className="rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
               Administrar categorías
             </button>
 
+<<<<<<< HEAD
             {/* New Button: Download JSON File */}
             <a
             href="#"
               onClick={handleDownload}
               className="ml-2 rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
+=======
+            <a
+              href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media"
+              className="block rounded-md bg-blue-500 p-2 text-center text-white hover:bg-blue-600"
+>>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
             >
               Guardar copia de datos
             </a>
 
+<<<<<<< HEAD
             {/* New Link: Analytics Page */}
+=======
+>>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
             <a
               href="https://net.tsuni.dev/redcoralmap.web.app"
               target="_blank"
               rel="noopener noreferrer"
+<<<<<<< HEAD
               className="ml-2 rounded-md bg-green-500 p-2 text-white hover:bg-green-600"
+=======
+              className="block rounded-md bg-green-500 p-2 text-center text-white hover:bg-green-600"
+>>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
             >
               Analítica web
             </a>
           </div>
         )}
+        <div>
+          <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
+        </div>
       </div>
       <LoadingOverlay isVisible={isLoading} color={'#888888'} />
     </div>

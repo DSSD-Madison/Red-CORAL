@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { GeocodingApi, Configuration, PeliasLayer, PeliasGeoJSONFeature, AutocompleteRequest } from '@stadiamaps/api'
+import { ADDITIONAL_FEATURES } from '../constants'
 
 interface HomeProps {
   layers?: PeliasLayer[]
@@ -8,7 +9,7 @@ interface HomeProps {
   setBounds: (bound: number[] | undefined) => void
   setCountryCode?: (code: string) => void
   countryCode?: string
-  department?: { name: string; bbox: number[] }
+  department?: { name: string; bbox: number[] | undefined }
   initialValue?: string
 }
 
@@ -40,20 +41,26 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     if (setStringValue !== undefined) setStringValue(val)
     setLocalStrVal(val)
     if (setCountryCode !== undefined) setCountryCode(feat.properties?.country_a || '')
-    if (!feat.bbox) {
+    if (!layers?.includes('country') && !feat.bbox) {
       alert('Stadia Maps no tiene información de ubicación para este municipio. No podrás acercarlo automáticamente.')
     }
     setBounds(feat.bbox)
     setOptions([])
   }
 
+  function isMatch(feat: PeliasGeoJSONFeature, search: string) {
+    const normalizedSearch = search.toLowerCase()
+    const normalizedLabel = feat.properties?.label?.toLowerCase()
+    return normalizedLabel?.includes(normalizedSearch) || false
+  }
+
   async function getFeats(search: string) {
     const q: AutocompleteRequest = { text: search }
     if (layers) q.layers = layers
-    if (countryCode) {
+    if (countryCode && countryCode != 'world') {
       q.boundaryCountry = [countryCode]
     }
-    if (department) {
+    if (department && department.bbox) {
       q.boundaryRectMinLon = department.bbox[0]
       q.boundaryRectMinLat = department.bbox[1]
       q.boundaryRectMaxLon = department.bbox[2]
@@ -61,6 +68,9 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     }
     const response = await api.autocomplete(q)
     let feats = response.features
+    if (layers?.includes('country')) {
+      feats.push(...ADDITIONAL_FEATURES.filter((feat) => isMatch(feat, search)))
+    }
     if (department) {
       feats = feats.filter((feat) => feat.properties?.region == department.name)
     }
@@ -87,7 +97,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }, [search])
 
   return (
-    <div>
+    <div className="relative mb-2">
       <input
         type="text"
         value={search}
@@ -98,15 +108,19 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
           setBounds(undefined)
           if (setCountryCode !== undefined) setCountryCode('')
         }}
-        className="w-2/3"
+        className="w-full rounded-md border border-tint-02 p-2"
       />
-      {localStrVal && <p className="ml-2 inline-block text-xl text-[#00ad2b]">✓</p>}
-      {isLoading && <p>Loading...</p>}
+      {localStrVal && <p className="absolute right-2 top-1 text-xl text-[#00ad2b]">✓</p>}
+      {isLoading && <p className="text-center">Loading...</p>}
       {!isLoading && options.length != 0 && (
-        <ul className="max-h-20 w-2/3 overflow-y-scroll bg-white">
+        <ul className="mt-1 max-h-32 w-full overflow-y-scroll rounded-md bg-white/70">
           {options.map((option) => {
             return (
-              <li key={option.properties?.gid} onClick={() => handleSelect(option)} className="hover:cursor-pointer hover:bg-tint-02">
+              <li
+                key={option.properties?.gid}
+                onClick={() => handleSelect(option)}
+                className="not-last:border-b border-gray-500 p-2 hover:cursor-pointer hover:bg-white"
+              >
                 {getName(option)}
               </li>
             )

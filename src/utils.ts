@@ -1,4 +1,4 @@
-import { DB, FilterBounds } from 'types'
+import { DB, FilterBounds, Incident, MarkerFilters } from 'types'
 import {
   addDoc,
   setDoc,
@@ -102,4 +102,21 @@ export async function getData(isAdmin: boolean, storage: FirebaseStorage, firest
     }
   }
   return calculateBounds(db)
+}
+
+export function filterIncidents(incidents: DB['Incidents'],
+  filters: MarkerFilters,
+  types: DB['Types'],
+  editID: keyof DB['Incidents'] | null): [string, Incident][] {
+  return Object.entries(incidents).filter(
+    ([id, incident]) =>
+      (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
+      (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
+      !filters.hideCountries.includes(incident.country) &&
+      !filters.hideDepartments.includes(`${incident.country} - ${incident.department}`) &&
+      !filters.hideMunicipalities.includes(incident.municipality) &&
+      !filters.hideCategories.includes(types[incident.typeID].categoryID) &&
+      !filters.hideTypes.includes(incident.typeID) &&
+      (editID == null || id != editID)
+  )
 }
