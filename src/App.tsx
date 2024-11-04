@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import Map from 'components/Map'
 import Login from 'components/Login'
 import CRUDDash from 'components/CRUDDash'
+import StatsDashboard from 'components/StatsDashboard'
 import { getFirestore, collection, doc } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData } from 'utils'
@@ -138,6 +139,7 @@ const App: React.FC = () => {
             path="/"
             element={<Map data={data} isAdmin={isLoggedIn} addIncident={addIncident} editIncident={editIncident} deleteIncident={deleteIncident} />}
           />
+          <Route path="/stats" element={<StatsDashboard />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />

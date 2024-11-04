@@ -11,7 +11,7 @@ import YearControl from './controls/YearControl'
 import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import LoadingOverlay from './LoadingOverlay'
 
 interface MapProps {
@@ -183,9 +183,9 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
       </MapContainer>
       <div className="w-30% absolute bottom-0 right-0 z-[750] pb-10 pr-3 text-sm">
         {isAdmin && (
-          <div className="float-right flex flex-col gap-2">
+          <div className="float-right flex flex-col gap-2 text-center">
             <button
-              className="rounded-md bg-white p-2 text-center hover:bg-neutral-300"
+              className="rounded-md bg-white p-2 hover:bg-neutral-300"
               onClick={() => {
                 setSelectedIncidentID(null)
                 setTmpSelected(true)
@@ -193,13 +193,13 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
             >
               Crear incidente
             </button>
-            <button className="rounded-md bg-red-dark p-2 text-white hover:bg-red-900" onClick={() => navigate('/admin/dash')}>
+            <Link to="/admin/dash" className="rounded-md bg-red-dark p-2 text-white hover:bg-red-900">
               Administrar categorías
-            </button>
+            </Link>
 
             <a
               href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media"
-              className="block rounded-md bg-blue-500 p-2 text-center text-white hover:bg-blue-600"
+              className="block rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
             >
               Guardar copia de datos
             </a>
@@ -208,10 +208,13 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
               href="https://net.tsuni.dev/redcoralmap.web.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-md bg-green-500 p-2 text-center text-white hover:bg-green-600"
+              className="block rounded-md bg-green-500 p-2 text-white hover:bg-green-600"
             >
               Analítica web
             </a>
+            <Link to="/stats" className="rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600">
+              Panel de Datos
+            </Link>
           </div>
         )}
         <div>
