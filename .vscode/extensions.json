@@ -1,11 +1,3 @@
 {
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "usernamehw.errorlens",
-    "heybourn.headwind",
-    "ms-vscode.vscode-typescript-next",
-    "bradlc.vscode-tailwindcss",
-    "austenc.tailwind-docs"
-  ]
+  "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "usernamehw.errorlens", "ms-vscode.vscode-typescript-next", "bradlc.vscode-tailwindcss"]
 }
