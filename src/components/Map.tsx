@@ -40,7 +40,6 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     [90, 180],
   ]
 
-<<<<<<< HEAD
   const handleDownload = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault();
     fetch("https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media")
@@ -58,8 +57,6 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
       .catch(() => alert('An error occurred while downloading the file.'));
   };
   
-=======
->>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
   const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
@@ -217,37 +214,31 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
               Administrar categorías
             </button>
 
-<<<<<<< HEAD
-            {/* New Button: Download JSON File */}
+            {/* Download JSON File */}
             <a
             href="#"
               onClick={handleDownload}
               className="ml-2 rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
-=======
-            <a
-              href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media"
-              className="block rounded-md bg-blue-500 p-2 text-center text-white hover:bg-blue-600"
->>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
             >
               Guardar copia de datos
             </a>
 
-<<<<<<< HEAD
-            {/* New Link: Analytics Page */}
-=======
->>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
+            {/* Analytics Page */}
             <a
               href="https://net.tsuni.dev/redcoralmap.web.app"
               target="_blank"
               rel="noopener noreferrer"
-<<<<<<< HEAD
               className="ml-2 rounded-md bg-green-500 p-2 text-white hover:bg-green-600"
-=======
-              className="block rounded-md bg-green-500 p-2 text-center text-white hover:bg-green-600"
->>>>>>> 9ee97576a1e02b00fb23c3c46385ceb5b3e9b249
             >
               Analítica web
             </a>
+            {/* Statistics Dashboard */}
+            <button
+              className="rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600"
+              onClick={() => navigate('/stats-dashboard')}
+            >
+              View Statistics Dashboard
+            </button>
           </div>
         )}
         <div>
