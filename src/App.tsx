@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { initializeApp } from 'firebase/app'
-import { getAuth, signOut } from 'firebase/auth'
+import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
 import Map from 'components/Map'
 import Login from 'components/Login'
@@ -12,6 +12,7 @@ import { getStorage } from 'firebase/storage'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData } from 'utils'
 import { Incident, DB } from 'types'
 import LoadingOverlay from './components/LoadingOverlay'
+import Navigation from 'components/Navigation'
 
 const App: React.FC = () => {
   const app = initializeApp({
@@ -113,6 +114,16 @@ const App: React.FC = () => {
     fetchData(isLoggedIn)
   }, [isLoggedIn])
 
+  function Layout() {
+    return (
+      <div className="relative h-screen max-h-screen">
+        <Navigation isLoggedIn={isLoggedIn} auth={auth} />
+        <Outlet />
+        <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
+      </div>
+    )
+  }
+
   function LoginPage() {
     return (
       <>
@@ -135,28 +146,18 @@ const App: React.FC = () => {
     <>
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={<Map data={data} isAdmin={isLoggedIn} addIncident={addIncident} editIncident={editIncident} deleteIncident={deleteIncident} />}
-          />
-          <Route path="/stats" element={<StatsDashboard data={data} />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin" element={<Navigate to="/login" />} />
-          <Route path="/admin/dash" element={<AdminDash />} />
+          <Route path="/" element={<Layout />}>
+            <Route
+              path="/"
+              element={<Map data={data} isAdmin={isLoggedIn} addIncident={addIncident} editIncident={editIncident} deleteIncident={deleteIncident} />}
+            />
+            <Route path="/stats" element={<StatsDashboard data={data} />} />
+            <Route path="/admin" element={<Navigate to="/login" />} />
+            <Route path="/admin/dash" element={<AdminDash />} />
+          </Route>
         </Routes>
       </Router>
-      <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
-      <div className="absolute bottom-0 right-64 z-[800] rounded-sm bg-white/70 px-2 leading-none hover:bg-gray-300">
-        {isLoggedIn ? (
-          <button onClick={() => signOut(auth)} className="cursor-pointer text-sm">
-            Salir
-          </button>
-        ) : (
-          <button onClick={() => (window.location.href = '/login')} className="cursor-pointer text-xs">
-            Registrarse
-          </button>
-        )}
-      </div>
     </>
   )
 }

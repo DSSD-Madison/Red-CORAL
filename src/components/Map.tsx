@@ -11,7 +11,6 @@ import YearControl from './controls/YearControl'
 import CountryControl from './controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../constants'
-import { Link } from 'react-router-dom'
 import LoadingOverlay from './LoadingOverlay'
 
 interface MapProps {
@@ -121,9 +120,9 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
   }
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-[calc(100%-1.25rem)]">
       <MapContainer
-        className="h-full w-full"
+        className="h-full w-full focus-visible:outline-none"
         center={[20, 0]}
         zoom={2}
         zoomSnap={0.1}
@@ -192,28 +191,12 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
             >
               Crear incidente
             </button>
-            <Link to="/admin/dash" className="rounded-md bg-red-dark p-2 text-white hover:bg-red-900">
-              Administrar categorías
-            </Link>
-
             <a
               href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media"
               className="block rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
             >
               Guardar copia de datos
             </a>
-
-            <a
-              href="https://net.tsuni.dev/redcoralmap.web.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-md bg-green-500 p-2 text-white hover:bg-green-600"
-            >
-              Analítica web
-            </a>
-            <Link to="/stats" className="rounded-md bg-indigo-500 p-2 text-white hover:bg-indigo-600">
-              Panel de Datos
-            </Link>
           </div>
         )}
         <div>

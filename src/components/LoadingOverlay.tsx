@@ -1,6 +1,6 @@
 const LoadingOverlay = ({ isVisible, color }: { isVisible: Boolean; color?: string }) => (
   <div
-    className={`pointer-events-none absolute inset-0 z-[500] flex w-screen items-center justify-center backdrop-blur-sm transition-opacity`}
+    className={`pointer-events-none absolute inset-0 z-[1000] flex w-screen items-center justify-center backdrop-blur-sm transition-opacity`}
     style={{ opacity: isVisible ? '100' : '0' }}
   >
     <div

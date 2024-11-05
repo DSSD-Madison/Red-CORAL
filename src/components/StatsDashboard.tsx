@@ -43,5 +43,4 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
   )
 }
 
-export default StatsDashboard;
-
+export default StatsDashboard
