@@ -45,7 +45,6 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
 
   const handleDepCheckboxChange = (con: string, dep: string, checked: boolean) => {
     const key = `${con} - ${dep}`
-    console.log(filters, key, checked)
     if (checked) {
       setFilters((filters) => ({
         ...filters,

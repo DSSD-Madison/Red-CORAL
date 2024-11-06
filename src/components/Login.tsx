@@ -16,9 +16,8 @@ const Login: React.FC<LoginProps> = ({ auth }) => {
 
     try {
       setIsLoading(true)
-      const userCredential = await signInWithEmailAndPassword(auth, 'admin@gmail.com', password)
+      await signInWithEmailAndPassword(auth, 'admin@gmail.com', password)
       setIsLoading(false)
-      console.log('User signed in:', userCredential.user)
       setError(null)
     } catch (error) {
       //@ts-ignore
