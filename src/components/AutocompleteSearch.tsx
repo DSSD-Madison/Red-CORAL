@@ -55,7 +55,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }
 
   async function getFeats(search: string) {
-    const q: AutocompleteRequest = { text: search }
+    const q: AutocompleteRequest = { text: search, lang: 'en-US' }
     if (layers) q.layers = layers
     if (countryCode && countryCode != 'world') {
       q.boundaryCountry = [countryCode]
@@ -119,7 +119,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
               <li
                 key={option.properties?.gid}
                 onClick={() => handleSelect(option)}
-                className="not-last:border-b border-gray-500 p-2 hover:cursor-pointer hover:bg-white"
+                className="border-gray-500 p-2 hover:cursor-pointer hover:bg-white not-last:border-b"
               >
                 {getName(option)}
               </li>
