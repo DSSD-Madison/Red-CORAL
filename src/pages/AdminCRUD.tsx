@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { collection, getDocs, where, query, doc, Firestore } from 'firebase/firestore'
-import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from 'utils'
-import LoadingOverlay from './LoadingOverlay'
+import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from '@/utils'
+import LoadingOverlay from '@/components/LoadingOverlay'
 import { SketchPicker } from 'react-color'
-import { Category, Type, DB } from '../types'
+import { Category, Type, DB } from '@/types'
 import { useNavigate } from 'react-router-dom'
 
 interface CrudProps {
@@ -11,7 +11,7 @@ interface CrudProps {
   data: DB
 }
 
-const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
+const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -182,7 +182,6 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
       </div>
       <div className="absolute left-0 top-0 m-4">
         {entityType == 'Types' && (
-
           <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Actividad
           </button>
@@ -320,4 +319,4 @@ const CRUDDash: React.FC<CrudProps> = ({ firestore, data }) => {
   )
 }
 
-export default CRUDDash
+export default AdminCRUD

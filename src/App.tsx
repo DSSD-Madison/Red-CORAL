@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
-import Map from 'components/Map'
-import Login from 'components/Login'
-import CRUDDash from 'components/CRUDDash'
-import StatsDashboard from 'components/StatsDashboard'
+import Map from 'pages/Map'
+import Login from 'pages/Login'
+import AdminCRUD from 'pages/AdminCRUD'
+import StatsDashboard from 'pages/StatsDashboard'
 import { getFirestore, collection, doc } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData } from 'utils'
@@ -137,7 +137,7 @@ const App: React.FC = () => {
     return (
       <>
         {!isLoggedIn && <Login auth={auth} />}
-        {isLoggedIn && <CRUDDash firestore={firestore} data={data} />}
+        {isLoggedIn && <AdminCRUD firestore={firestore} data={data} />}
       </>
     )
   }

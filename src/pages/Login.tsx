@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Auth, signInWithEmailAndPassword } from 'firebase/auth' // Import Auth type from firebase/auth
-import LoadingOverlay from './LoadingOverlay'
+import LoadingOverlay from '@/components/LoadingOverlay'
 
 interface LoginProps {
   auth: Auth
