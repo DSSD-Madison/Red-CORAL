@@ -120,3 +120,7 @@ export function filterIncidents(incidents: DB['Incidents'],
       (editID == null || id != editID)
   )
 }
+
+export function formatDateString(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })
+}
