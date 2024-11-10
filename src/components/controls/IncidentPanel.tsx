@@ -3,6 +3,7 @@ import { useMap } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 import AutocompleteSearch from 'components/AutocompleteSearch'
 import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
+import { formatDateString } from '@/utils'
 
 interface InfoPanelControlProps {
   data: DB
@@ -159,7 +160,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
                 {incident.dateString && (
                   <>
-                    <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })} <br />
+                    <span className="font-bold">Fecha:</span> {formatDateString(incident.dateString)} <br />
                   </>
                 )}
                 <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}

@@ -2,7 +2,7 @@ import L, { LatLngTuple, PointTuple } from 'leaflet'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useMap, Marker as LeafletMarker, LayerGroup, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
-import { filterIncidents } from 'utils'
+import { filterIncidents, formatDateString } from 'utils'
 
 interface IncidentLayerProps {
   data: DB
@@ -111,7 +111,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                   </p>
                 )}
                 <p>
-                  <span className="font-bold">Fecha:</span> {new Date(incident.dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })}
+                  <span className="font-bold">Fecha:</span> {formatDateString(incident.dateString)}
                 </p>
                 <hr className="my-2 border-neutral-500" />
                 <p>
