@@ -56,7 +56,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
 
-    const markerSize = (id: string): PointTuple => (id == selectedIncidentID ? [20, 20] : zoomLevel > 7 ? [15, 15] : [10, 10])
+    const markerSize = (id: string): PointTuple => (id == selectedIncidentID ? [20, 20] : zoomLevel > 12 ? [15, 15] : [10, 10])
 
     const markerSVG = (id: string, incident: Incident): string => {
       const size = markerSize(id)[0]
