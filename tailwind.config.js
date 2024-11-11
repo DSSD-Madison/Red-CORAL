@@ -37,9 +37,6 @@ export default {
       merriweather: ['Merriweather', 'sans-serif'],
       'proxima-nova': ['proxima-nova', 'sans-serif'],
     },
-    screens: {
-      md: '720px',
-    },
   },
   plugins: [
     ({ addVariant }) => {
