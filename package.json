@@ -12,6 +12,7 @@
   "dependencies": {
     "@floating-ui/react": "^0.26.27",
     "@stadiamaps/api": "^2.1.0",
+    "d3": "^7.9.0",
     "esbuild": "^0.19.8",
     "firebase": "^10.6.0",
     "leaflet": "^1.9.4",
