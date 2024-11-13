@@ -1,8 +1,7 @@
 import { filterProps } from '@/pages/StatsDashboard'
 import BaseFilter from './BaseFilter'
 import { LucideCalendar, LucideChevronDown, LucideChevronRight } from 'lucide-react'
-import { useState } from 'react'
-import { formatDateString } from '@/utils'
+import { useEffect, useState } from 'react'
 import {
   useFloating,
   offset,
@@ -15,29 +14,52 @@ import {
   useInteractions,
   FloatingFocusManager,
 } from '@floating-ui/react'
+import { formatDateString } from '@/utils'
 
-enum DateFilterOptions {
+enum DateFilterOption {
   IS = 'es',
   IS_BEFORE = 'es antes',
   IS_AFTER = 'es despues',
   IS_BETWEEN = 'está entre',
 }
-const possibleDateFilterOptions: DateFilterOptions[] = [
-  DateFilterOptions.IS,
-  DateFilterOptions.IS_BEFORE,
-  DateFilterOptions.IS_AFTER,
-  DateFilterOptions.IS_BETWEEN,
+const possibleDateFilterOptions: DateFilterOption[] = [
+  DateFilterOption.IS,
+  DateFilterOption.IS_BEFORE,
+  DateFilterOption.IS_AFTER,
+  DateFilterOption.IS_BETWEEN,
 ]
 
 const FilterDate = ({ id, dispatch }: filterProps) => {
-  const [date, setDate] = useState('')
-  const [selectedDateFilter, setSelectedDateFilter] = useState(DateFilterOptions.IS)
+  const [date1, setDate1] = useState('')
+  const [date2, setDate2] = useState('')
+  const [selectedDateFilter, setSelectedDateFilter] = useState(DateFilterOption.IS)
   const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(e.target.value)
-    dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === e.target.value } })
-  }
+  useEffect(() => {
+    console.log(date1, date2)
+
+    switch (selectedDateFilter) {
+      case DateFilterOption.IS:
+        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === date1 } })
+        break
+      case DateFilterOption.IS_BEFORE:
+        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString < date1 } })
+        break
+      case DateFilterOption.IS_AFTER:
+        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 } })
+        break
+      case DateFilterOption.IS_BETWEEN:
+        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 && incident.dateString < date2 } })
+        break
+    }
+  }, [date1, date2, selectedDateFilter])
+
+  //const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //  setDate1(e.target.value)
+  //  console.log(e.target.value)
+  //
+  //  dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === e.target.value } })
+  //}
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
   }
@@ -57,7 +79,7 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
 
   console.log('FilterDate rendered')
   return (
-    <BaseFilter icon={<LucideCalendar />} text={`Fecha: ${formatDateString(date)}`}>
+    <BaseFilter icon={<LucideCalendar />} text={`Fecha: ${formatDateString(date1)}`}>
       <div>
         <button onClick={removeThisFilter} className="text-red-600">
           Eliminar filtro
@@ -97,7 +119,9 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
       </div>
 
       {/* Input to select the date */}
-      <input type="date" onChange={handleChange} value={date} className="rounded-md border border-gray-300 p-1" />
+      <input type="date" onChange={(e) => setDate1(e.target.value)} value={date1} className="rounded-md border border-gray-300 p-1" />
+
+      {/* TODO: Second date input for "between" filter */}
     </BaseFilter>
   )
 }
