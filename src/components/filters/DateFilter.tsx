@@ -18,9 +18,9 @@ import { formatDateString } from '@/utils'
 
 enum DateFilterOption {
   IS = 'es',
-  IS_BEFORE = 'es antes',
-  IS_AFTER = 'es despues',
-  IS_BETWEEN = 'está entre',
+  IS_BEFORE = 'es anterior',
+  IS_AFTER = 'es posterior',
+  IS_BETWEEN = 'es entre',
 }
 const possibleDateFilterOptions: DateFilterOption[] = [
   DateFilterOption.IS,
@@ -49,7 +49,10 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
         dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 } })
         break
       case DateFilterOption.IS_BETWEEN:
-        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 && incident.dateString < date2 } })
+        dispatch({
+          type: 'UPDATE_FILTER',
+          payload: { id: id, operation: (incident) => date1 <= incident.dateString && incident.dateString <= date2 },
+        })
         break
     }
   }, [date1, date2, selectedDateFilter])
@@ -79,7 +82,14 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
 
   console.log('FilterDate rendered')
   return (
-    <BaseFilter icon={<LucideCalendar />} text={`Fecha: ${formatDateString(date1)}`}>
+    <BaseFilter
+      icon={<LucideCalendar />}
+      text={
+        selectedDateFilter === DateFilterOption.IS_BETWEEN
+          ? `Fecha: ${formatDateString(date1)} - ${formatDateString(date2)}`
+          : `Fecha: ${formatDateString(date1)}`
+      }
+    >
       <div>
         <button onClick={removeThisFilter} className="text-red-600">
           Eliminar filtro
@@ -118,10 +128,18 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
         </div>
       </div>
 
-      {/* Input to select the date */}
-      <input type="date" onChange={(e) => setDate1(e.target.value)} value={date1} className="rounded-md border border-gray-300 p-1" />
+      <div className="flex flex-row items-center gap-2">
+        {/* First input to select the first date */}
+        <input type="date" onChange={(e) => setDate1(e.target.value)} value={date1} className="rounded-md border border-gray-300 p-1" />
 
-      {/* TODO: Second date input for "between" filter */}
+        {/* Second input to select the second date (only used for the "between" filter) */}
+        {selectedDateFilter === DateFilterOption.IS_BETWEEN && (
+          <>
+            <span>-</span>
+            <input type="date" onChange={(e) => setDate2(e.target.value)} value={date2} className="rounded-md border border-gray-300 p-1" />
+          </>
+        )}
+      </div>
     </BaseFilter>
   )
 }
