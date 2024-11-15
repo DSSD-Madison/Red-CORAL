@@ -4,6 +4,9 @@ import { LucideCalendar } from 'lucide-react'
 import { useState } from 'react'
 import { formatDateString } from '@/utils'
 
+/**
+ * Bare minimum filter component that filters incidents based on them matching a certain date.
+ */
 const FilterDate = ({ id, dispatch }: filterProps) => {
   const [date, setDate] = useState('')
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

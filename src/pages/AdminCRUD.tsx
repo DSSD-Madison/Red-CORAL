@@ -175,11 +175,6 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
 
   return (
     <div className="relative flex h-full flex-col items-center justify-center">
-      <div className="absolute right-0 top-0 m-4">
-        <button className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md" onClick={() => navigate('/admin')}>
-          Volver al mapa
-        </button>
-      </div>
       <div className="absolute left-0 top-0 m-4">
         {entityType == 'Types' && (
           <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
@@ -193,7 +188,7 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
         )}
       </div>
       {/* Title displaying current entity type */}
-      <h2 className="mb-4 text-2xl font-bold">{entityTypesSpanish[entityType]}</h2>
+      <h2 className="mb-4 mt-16 text-2xl font-bold">{entityTypesSpanish[entityType]}</h2>
       {/* Edit form */}
       {modifyEntityId && (
         <div className="mb-4 flex flex-col items-center">
@@ -228,7 +223,7 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
         </div>
       )}
       {/* Scrollable list view */}
-      <div className="ove6rflow-x-auto mb-6 h-80 w-full max-w-4xl overflow-y-scroll">
+      <div className="mb-6 h-full w-full max-w-4xl overflow-x-auto overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
         {Object.entries(data[entityType])
           .sort((a, b) => {
             const entity1 = a[1]

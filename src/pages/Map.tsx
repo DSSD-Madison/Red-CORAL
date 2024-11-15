@@ -120,7 +120,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
   }
 
   return (
-    <div className="relative h-[calc(100%-1.25rem)]">
+    <div className="relative h-full">
       <MapContainer
         className="h-full w-full focus-visible:outline-none"
         center={[20, 0]}
