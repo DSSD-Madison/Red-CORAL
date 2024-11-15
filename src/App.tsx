@@ -116,7 +116,7 @@ const App: React.FC = () => {
 
   function Layout() {
     return (
-      <div className="relative h-screen max-h-screen">
+      <div className="relative h-screen max-h-screen pt-5">
         <Navigation isLoggedIn={isLoggedIn} auth={auth} />
         <Outlet />
         <LoadingOverlay isVisible={loadCount > 0} color={'#888888'} />
@@ -142,6 +142,15 @@ const App: React.FC = () => {
     )
   }
 
+  function Analytics() {
+    const url = import.meta.env.VITE_ANALYTICS_URL
+    return (
+      <>
+        <iframe plausible-embed src={`${url}&embed=true&theme=light`} loading="lazy" className="h-full w-full"></iframe>
+      </>
+    )
+  }
+
   return (
     <>
       <Router>
@@ -155,6 +164,7 @@ const App: React.FC = () => {
             <Route path="/stats" element={<StatsDashboard data={data} />} />
             <Route path="/admin" element={<Navigate to="/login" />} />
             <Route path="/admin/dash" element={<AdminDash />} />
+            <Route path="/admin/analytics" element={<Analytics />} />
           </Route>
         </Routes>
       </Router>

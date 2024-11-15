@@ -10,6 +10,7 @@ env:
   VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
   VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
   VITE_STADIA_KEY: ${{ secrets.VITE_STADIA_KEY }}
+  VITE_ANALYTICS_URL: ${{ secrets.VITE_ANALYTICS_URL }}
 'on': pull_request
 jobs:
   build_and_preview:
