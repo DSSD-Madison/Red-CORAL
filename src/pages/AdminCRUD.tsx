@@ -4,7 +4,6 @@ import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { SketchPicker } from 'react-color'
 import { Category, Type, DB } from '@/types'
-import { useNavigate } from 'react-router-dom'
 
 interface CrudProps {
   firestore: Firestore
@@ -12,8 +11,6 @@ interface CrudProps {
 }
 
 const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
-  const navigate = useNavigate()
-
   const [isLoading, setIsLoading] = useState(false)
   const [showAddEntity, setShowAddEntity] = useState(false)
   const [addEntityName, setAddEntityName] = useState('')
