@@ -204,8 +204,8 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
               className="mb-2 mr-2 rounded-md border border-gray-300 p-2 text-center"
             >
               <option value="">--Por favor elige una actividad--</option>
-              {Object.entries(data.Categories).map(([id, cat], index) => (
-                <option key={index} value={id}>
+              {Object.entries(data.Categories).map(([id, cat]) => (
+                <option key={id} value={id}>
                   {cat.name}
                 </option>
               ))}
@@ -241,11 +241,11 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
             }
           })
           .map(([id, entity], index, array) => (
-            <>
+            <React.Fragment key={id}>
               {entityType !== 'Categories' && (index == 0 || (entity as Type).categoryID != array[index - 1][1].categoryID) && (
                 <div className="mb-1 mt-1 font-bold">{data.Categories[(entity as Type).categoryID]?.name}</div>
               )}
-              <div key={index} className="flex items-center justify-between border-b p-2">
+              <div key={id} className="flex items-center justify-between border-b p-2">
                 {entityType === 'Categories' && <div className="h-6 w-6 rounded-full" style={{ backgroundColor: entity.color }}></div>}
                 <p>{entity.name}</p>
                 <div className="flex">
@@ -263,7 +263,7 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
                   </button>
                 </div>
               </div>
-            </>
+            </React.Fragment>
           ))}
       </div>
 
@@ -290,8 +290,8 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
             {entityType !== 'Categories' && (
               <select value={addEntitySecondProperty} onChange={(e) => setAddEntitySecondProperty(e.target.value)}>
                 <option value="">--Por favor elige una actividad--</option>
-                {Object.entries(data.Categories).map(([id, cat], index) => (
-                  <option key={index} value={id}>
+                {Object.entries(data.Categories).map(([id, cat]) => (
+                  <option key={id} value={id}>
                     {cat.name}
                   </option>
                 ))}
