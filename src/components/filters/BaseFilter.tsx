@@ -62,7 +62,7 @@ const BaseFilter = ({ icon, text, children }: { icon: any; text: string; childre
           <div
             ref={refs.setFloating}
             style={floatingStyles}
-            className="min-w-48 overflow-y-auto rounded-md border border-gray-300 bg-white px-1 py-2 shadow-lg focus-visible:outline-none"
+            className="min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 shadow-lg focus-visible:outline-none"
             {...getFloatingProps()}
           >
             <FloatingArrow fill="white" strokeWidth={1} stroke="#d1d5db" ref={arrowRef} context={context} />
