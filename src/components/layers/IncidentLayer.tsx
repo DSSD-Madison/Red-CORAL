@@ -1,5 +1,5 @@
-import L, { LatLngTuple, PointTuple } from 'leaflet'
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import L, { LatLngTuple } from 'leaflet'
+import { forwardRef, useEffect, useMemo } from 'react'
 import { useMap, Marker as LeafletMarker, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 import { filterIncidents, formatDateString } from 'utils'
@@ -20,7 +20,6 @@ interface IncidentLayerProps {
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
   ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID }, ref) => {
     const map = useMap()
-    const [zoomLevel, setZoomLevel] = useState<number>(map.getZoom())
 
     const zoomToLocation = (location: Incident['location'] | null) => {
       if (!location) return
@@ -36,17 +35,12 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     // Registering event listeners for zoom and double click events.
     useEffect(() => {
-      const zoomHandler = () => {
-        setZoomLevel(() => map.getZoom())
-      }
       const clickHandler = (e: L.LeafletMouseEvent) => {
         if (!isAdmin || (!tmpSelected && editID == null)) return
         setTmpLocation(e.latlng)
       }
-      map.addEventListener('zoomend', zoomHandler)
       map.addEventListener('dblclick', clickHandler)
       return () => {
-        map.removeEventListener('zoomend', zoomHandler)
         map.removeEventListener('dblclick', clickHandler)
       }
     }, [isAdmin, tmpSelected, editID, map])
@@ -57,14 +51,15 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
 
-    const markerSVG = (id: string, incident: Incident): string => {
+    const createMarkerSVG = (id: string, incident: Incident): string => {
       return `<svg viewBox="0 0 18 18" width="15px" height="15px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
         <use href="#marker" />
       </svg>`
     }
 
     return (
-      <MarkerClusterGroup ref={ref}>
+      // @ts-expect-error: MarkerClusterGroup typings do not include children
+      <MarkerClusterGroup ref={ref} showCoverageOnHover={false}>
         <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
           <symbol id="marker">
             <circle r="9" cx="9" cy="9" fill="currentColor" />
@@ -77,7 +72,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             icon={L.divIcon({
               iconSize: [15, 15],
               className: '',
-              html: markerSVG(id, incident),
+              html: createMarkerSVG(id, incident),
             })}
             eventHandlers={{
               click: () => {
