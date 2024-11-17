@@ -1,6 +1,6 @@
 import { formatDateString } from '@/utils'
 import { DB, Incident } from 'types'
-
+import { Link } from 'react-router-dom';
 const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Incident][] }) => {
   return (
     <div className="my-8 w-full overflow-x-auto rounded-lg border border-black p-4 md:w-full">
@@ -14,6 +14,7 @@ const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Inci
             <th className="break-words pb-2 font-normal">Descripción</th>
             <th className="break-words pb-2 font-normal">Departamento</th>
             <th className="break-words pb-2 font-normal">Municipio</th>
+            <th className="break-words pb-2 font-normal">Ubicación</th>
           </tr>
           {incidents.map(([id, incident]) => (
             <tr key={id} className="text-gray-500">
@@ -24,10 +25,17 @@ const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Inci
               <td className="lg:max-w-[33vw] max-w-[250px] break-words border-t border-black p-4 text-left">{incident.description}</td>
               <td className="break-words border-t border-black p-4 text-left">{incident.department}</td>
               <td className="break-words border-t border-black p-4 text-left">{incident.municipality}</td>
+              <td className="break-words border-t border-black p-4 text-left">
+              <Link to="/" state={{coord: incident.location }} >enlace al mapa</Link>
+             
+               </td>
+               
             </tr>
           ))}
         </tbody>
+        
       </table>
+      
     </div>
   )
 }
