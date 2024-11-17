@@ -80,7 +80,8 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
 
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
 
-  console.log('FilterDate rendered')
+  //console.log('FilterDate rendered')
+
   return (
     <BaseFilter
       icon={<LucideCalendar />}
@@ -90,42 +91,43 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
           : `Fecha: ${formatDateString(date1)}`
       }
     >
-      <div>
-        <button onClick={removeThisFilter} className="text-red-600">
-          Eliminar filtro
-        </button>
+      <button onClick={removeThisFilter} className="mb-1 text-red-600">
+        Eliminar filtro
+      </button>
 
-        {/* Dropdown to select the filter option */}
-        <div
-          onClick={() => setIsDateFilterSelectOpen(true)}
-          className="flex cursor-pointer items-center text-sm"
-          ref={refs.setReference}
-          {...getReferenceProps()}
-        >
-          {isDateFilterSelectOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}
-          <span className="text-gray-600">{selectedDateFilter}</span>
-          {isDateFilterSelectOpen && (
-            <FloatingFocusManager context={context} modal={false}>
-              <div
-                ref={refs.setFloating}
-                style={floatingStyles}
-                className="z-10 min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 focus-visible:outline-none"
-                {...getFloatingProps()}
-              >
-                <h2 className="p-1 text-sm font-semibold">Opción de filtro</h2>
-                {possibleDateFilterOptions.map((dateFilterOption) => (
-                  <button
-                    key={dateFilterOption}
-                    className="flex w-full items-center gap-2 rounded-md p-1 hover:bg-black/5"
-                    onClick={() => setSelectedDateFilter(dateFilterOption)}
-                  >
-                    <span>{dateFilterOption}</span>
-                  </button>
-                ))}
-              </div>
-            </FloatingFocusManager>
-          )}
-        </div>
+      {/* Dropdown to select the filter option */}
+      <div
+        onClick={() => setIsDateFilterSelectOpen(true)}
+        className="flex cursor-pointer items-center text-sm"
+        ref={refs.setReference}
+        {...getReferenceProps()}
+      >
+        <p className="flex flex-row items-center text-gray-600">
+          Fecha {selectedDateFilter}
+          <span>{isDateFilterSelectOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}</span>
+        </p>
+
+        {isDateFilterSelectOpen && (
+          <FloatingFocusManager context={context} modal={false}>
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              className="z-10 min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 focus-visible:outline-none"
+              {...getFloatingProps()}
+            >
+              <h2 className="p-1 text-sm font-semibold">Opción de filtro</h2>
+              {possibleDateFilterOptions.map((dateFilterOption) => (
+                <button
+                  key={dateFilterOption}
+                  className="flex w-full items-center gap-2 rounded-md p-1 hover:bg-black/5"
+                  onClick={() => setSelectedDateFilter(dateFilterOption)}
+                >
+                  <span>{dateFilterOption}</span>
+                </button>
+              ))}
+            </div>
+          </FloatingFocusManager>
+        )}
       </div>
 
       <div className="flex flex-row items-center gap-2">
