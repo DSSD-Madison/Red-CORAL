@@ -26,7 +26,7 @@ const possibleFilters = [
   {
     name: 'Fecha',
     icon: LucideCalendar,
-    component: DateFilter, // TODO: Change this to the actual component
+    component: DateFilter,
   },
   {
     name: 'Latitud/Longitud',
