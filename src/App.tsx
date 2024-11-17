@@ -1,32 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
 import 'leaflet/dist/leaflet.css'
 import Map from 'pages/Map'
 import Login from 'pages/Login'
 import AdminCRUD from 'pages/AdminCRUD'
 import StatsDashboard from 'pages/StatsDashboard'
-import { getFirestore, collection, doc } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import { collection, doc } from 'firebase/firestore'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData } from 'utils'
 import { Incident, DB } from 'types'
 import LoadingOverlay from './components/LoadingOverlay'
 import Navigation from 'components/Navigation'
+import useFirebase from './context/firebase/hook'
 
 const App: React.FC = () => {
-  const app = initializeApp({
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  })
-
-  const auth = getAuth(app)
-  const firestore = getFirestore(app)
-  const storage = getStorage(app, import.meta.env.VITE_FIREBASE_STORAGE_BUCKET)
+  const { firestore, auth, storage } = useFirebase()
 
   /**
    * Adds an incident to firestore.
