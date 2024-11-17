@@ -1,0 +1,14 @@
+# dependencies
+node_modules
+
+# build output
+dist
+
+# environment variables
+.env*
+
+# logs
+pnpm-debug.log*
+
+# macOS-specific files
+.DS_Store
