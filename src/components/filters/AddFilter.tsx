@@ -5,7 +5,6 @@ import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, Luci
 import {
   useFloating,
   offset,
-  flip,
   shift,
   autoUpdate,
   useClick,
@@ -16,32 +15,33 @@ import {
   FloatingArrow,
   arrow,
 } from '@floating-ui/react'
+import CountryFilter from './CountryFilter'
 
 const possibleFilters = [
   {
     name: 'Actividades',
     icon: LucideTags,
-    component: DateFilter,
+    component: DateFilter, // TODO: Change this to the actual component
   },
   {
     name: 'Fecha',
     icon: LucideCalendar,
-    component: DateFilter,
+    component: DateFilter, // TODO: Change this to the actual component
   },
   {
     name: 'Latitud/Longitud',
     icon: LucideMapPin,
-    component: DateFilter,
+    component: DateFilter, // TODO: Change this to the actual component
   },
   {
-    name: 'Países',
+    name: 'Áreas',
     icon: LucideGlobe,
-    component: DateFilter,
+    component: CountryFilter,
   },
   {
     name: 'Descripción',
     icon: LucideText,
-    component: DateFilter,
+    component: DateFilter, // TODO: Change this to the actual component
   },
 ]
 
