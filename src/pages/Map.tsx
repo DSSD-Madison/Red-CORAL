@@ -23,24 +23,19 @@ interface MapProps {
 }
 
 function SetInitialBounds() {
-  
   const location = useLocation()
   const map = useMap()
-  const coordinates = location.state?.coord;
-  
+  const coordinates = location.state?.coord
   useEffect(() => {
-    console.log("Hello from useEffect")
-      if (coordinates) {
+    if (coordinates) {
       // If coordinates are provided, zoom to that location
-      const coords: LatLngTuple = [coordinates.lat, coordinates.lng];
-    
-      map.flyTo(coords, 15); 
-
+      const coords: LatLngTuple = [coordinates.lat, coordinates.lng]
+      map.setView(coords, 15)
     } else {
-      // Otherwise, set to the default 
-      map.setView(INITIAL_BOUNDS, INITIAL_ZOOM);
+      // Otherwise, set to the default
+      map.setView(INITIAL_BOUNDS, INITIAL_ZOOM)
     }
-  }, [coordinates]);
+  }, [coordinates])
   return null
 }
 
