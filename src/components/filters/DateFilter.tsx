@@ -1,6 +1,6 @@
 import { filterProps } from '@/pages/StatsDashboard'
 import BaseFilter from './BaseFilter'
-import { LucideCalendar, LucideChevronDown, LucideChevronRight } from 'lucide-react'
+import { LucideCalendar, LucideChevronDown, LucideChevronRight, LucideTrash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   useFloating,
@@ -91,8 +91,8 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
           : `Fecha: ${formatDateString(date1)}`
       }
     >
-      <button onClick={removeThisFilter} className="mb-1 text-red-600">
-        Eliminar filtro
+      <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
+        <LucideTrash2 size={20} />
       </button>
 
       {/* Dropdown to select the filter option */}

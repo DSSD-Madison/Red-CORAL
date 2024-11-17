@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import DateFilter from './DateFilter'
+import FilterLocation from './FilterLocation'
 import { filterDispatchType } from '@/pages/StatsDashboard'
-import { LucideCalendar, LucidePlus } from 'lucide-react'
+import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText, MapPin } from 'lucide-react'
 import {
   useFloating,
   offset,
-  flip,
   shift,
   autoUpdate,
   useClick,
@@ -13,23 +13,53 @@ import {
   useRole,
   useInteractions,
   FloatingFocusManager,
+  FloatingArrow,
+  arrow,
 } from '@floating-ui/react'
+import CountryFilter from './CountryFilter'
 
 const possibleFilters = [
   {
+    name: 'Actividades',
+    icon: LucideTags,
+    component: DateFilter, // TODO: Change this to the actual component
+  },
+  {
     name: 'Fecha',
     icon: LucideCalendar,
-    component: DateFilter,
+    component: DateFilter, // TODO: Change this to the actual component
+  },
+  {
+    name: 'Latitud/Longitud',
+    icon: LucideMapPin,
+    component: DateFilter, // TODO: Change this to the actual component
+  },
+  {
+    name: 'Áreas',
+    icon: LucideGlobe,
+    component: CountryFilter,
+  },
+  {
+    name: 'Descripción',
+    icon: LucideText,
+    component: DateFilter, // TODO: Change this to the actual component
+  },
+  {
+    name: 'location',
+    icon: MapPin,
+    component: FilterLocation,
   },
 ]
 
 const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const arrowRef = useRef(null)
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
-    middleware: [offset(10), flip({ fallbackAxisSideDirection: 'end' }), shift()],
+    placement: 'bottom-start',
+    middleware: [offset(10), shift({ padding: 10 }), arrow({ element: arrowRef })],
     whileElementsMounted: autoUpdate,
   })
 
@@ -48,9 +78,10 @@ const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> 
           <div
             ref={refs.setFloating}
             style={floatingStyles}
-            className="min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 focus-visible:outline-none"
+            className="min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 shadow-lg focus-visible:outline-none"
             {...getFloatingProps()}
           >
+            <FloatingArrow fill="white" strokeWidth={1} stroke="#d1d5db" ref={arrowRef} context={context} />
             <h2 className="p-1 text-sm font-semibold">Añadir filtro</h2>
             {possibleFilters.map((filter) => (
               <button
