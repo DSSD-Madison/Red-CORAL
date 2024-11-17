@@ -21,16 +21,6 @@ const possibleFilters = [
     icon: LucideCalendar,
     component: DateFilter,
   },
-  {
-    name: 'Fecha2',
-    icon: LucideCalendar,
-    component: DateFilter,
-  },
-  {
-    name: 'Fecha3',
-    icon: LucideCalendar,
-    component: DateFilter,
-  },
 ]
 
 const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> }) => {
