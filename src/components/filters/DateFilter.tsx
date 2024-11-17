@@ -32,12 +32,10 @@ const possibleDateFilterOptions: DateFilterOption[] = [
 const FilterDate = ({ id, dispatch }: filterProps) => {
   const [date1, setDate1] = useState('')
   const [date2, setDate2] = useState('')
-  const [selectedDateFilter, setSelectedDateFilter] = useState(DateFilterOption.IS)
+  const [selectedDateFilter, setSelectedDateFilter] = useState(DateFilterOption.IS_BETWEEN)
   const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
 
   useEffect(() => {
-    console.log(date1, date2)
-
     switch (selectedDateFilter) {
       case DateFilterOption.IS:
         dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === date1 } })
@@ -57,12 +55,6 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
     }
   }, [date1, date2, selectedDateFilter])
 
-  //const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //  setDate1(e.target.value)
-  //  console.log(e.target.value)
-  //
-  //  dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === e.target.value } })
-  //}
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
   }
@@ -79,8 +71,6 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
   const role = useRole(context)
 
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
-
-  //console.log('FilterDate rendered')
 
   return (
     <BaseFilter
