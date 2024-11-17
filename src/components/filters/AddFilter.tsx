@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react'
 import DateFilter from './DateFilter'
-import FilterLocation from './FilterLocation'
 import { filterDispatchType } from '@/pages/StatsDashboard'
-import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText, MapPin } from 'lucide-react'
+import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
 import {
   useFloating,
   offset,
@@ -43,11 +42,6 @@ const possibleFilters = [
     name: 'Descripción',
     icon: LucideText,
     component: DateFilter, // TODO: Change this to the actual component
-  },
-  {
-    name: 'location',
-    icon: MapPin,
-    component: FilterLocation,
   },
 ]
 
