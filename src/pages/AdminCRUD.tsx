@@ -171,8 +171,10 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
   }
 
   return (
-    <div className="relative flex h-full flex-col items-center justify-center">
-      <div className="absolute left-0 top-0 m-4">
+    <div className="relative flex h-full flex-col p-4">
+      {/* Title displaying current entity type */}
+      <h2 className="text-2xl font-semibold">{entityTypesSpanish[entityType]}</h2>
+      <div className="my-4">
         {entityType == 'Types' && (
           <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Actividad
@@ -184,101 +186,57 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
           </button>
         )}
       </div>
-      {/* Title displaying current entity type */}
-      <h2 className="mb-4 mt-16 text-2xl font-bold">{entityTypesSpanish[entityType]}</h2>
-      {/* Edit form */}
-      {modifyEntityId && (
-        <div className="mb-4 flex flex-col items-center">
-          <input
-            type="text"
-            className="mb-2 mr-2 rounded-md border border-gray-300 px-3 py-2"
-            placeholder={`nuevo nombre`}
-            value={modifyEntityName}
-            onChange={(e) => setModifyEntityName(e.target.value)}
-          />
-          {entityType === 'Categories' && <SketchPicker color={modifyEntitySecondProperty} onChange={handleModifyEntityColorChange} />}
-          {entityType !== 'Categories' && (
-            <select
-              value={modifyEntitySecondProperty}
-              onChange={(e) => setModifyEntitySecondProperty(e.target.value)}
-              className="mb-2 mr-2 rounded-md border border-gray-300 p-2 text-center"
-            >
-              <option value="">--Por favor elige una actividad--</option>
-              {Object.entries(data.Categories).map(([id, cat], index) => (
-                <option key={index} value={id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <button onClick={handleModifyEntity} className="mr-2 rounded-full bg-green px-4 py-2 text-white shadow-md">
-            Guardar Cambios
-          </button>
-          <button onClick={() => setModifyEntityId(null)} className="mr-2 rounded-full bg-red px-4 py-2 text-white shadow-md">
-            Cancelar
-          </button>
-        </div>
-      )}
-      {/* Scrollable list view */}
-      <div className="mb-6 h-full w-full max-w-4xl overflow-x-auto overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
-        {Object.entries(data[entityType])
-          .sort((a, b) => {
-            const entity1 = a[1]
-            const entity2 = b[1]
-            try {
-              let catName1: string
-              let catName2: string
-              if (entityType == 'Categories') {
-                catName1 = (entity1 as Category).name
-                catName2 = (entity2 as Category).name
-              } else {
-                catName1 = data.Categories[(entity1 as Type).categoryID].name
-                catName2 = data.Categories[(entity2 as Type).categoryID].name
+      {/* Two column layout for forms */}
+      <div className="mb-4 grid min-h-0 flex-1 grid-cols-[1fr,1fr] gap-4 overflow-clip">
+        {/* Scrollable list view */}
+        <div className="mb-6 max-w-4xl overflow-x-auto overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
+          {Object.entries(data[entityType])
+            .sort((a, b) => {
+              const entity1 = a[1]
+              const entity2 = b[1]
+              try {
+                let catName1: string
+                let catName2: string
+                if (entityType == 'Categories') {
+                  catName1 = (entity1 as Category).name
+                  catName2 = (entity2 as Category).name
+                } else {
+                  catName1 = data.Categories[(entity1 as Type).categoryID].name
+                  catName2 = data.Categories[(entity2 as Type).categoryID].name
+                }
+                return catName1.localeCompare(catName2)
+              } catch (e) {
+                return 0
               }
-              return catName1.localeCompare(catName2)
-            } catch (e) {
-              return 0
-            }
-          })
-          .map(([id, entity], index, array) => (
-            <>
-              {entityType !== 'Categories' && (index == 0 || (entity as Type).categoryID != array[index - 1][1].categoryID) && (
-                <div className="mb-1 mt-1 font-bold">{data.Categories[(entity as Type).categoryID]?.name}</div>
-              )}
-              <div key={index} className="flex items-center justify-between border-b p-2">
-                {entityType === 'Categories' && <div className="h-6 w-6 rounded-full" style={{ backgroundColor: entity.color }}></div>}
-                <p>{entity.name}</p>
-                <div className="flex">
-                  <button
-                    onClick={() => {
-                      setModifyEntityId(id)
-                      setShowAddEntity(false)
-                    }}
-                    className="ml-4 rounded-full bg-red px-4 py-2 text-white shadow-md"
-                  >
-                    Editar
-                  </button>
-                  <button onClick={() => handleDeleteEntity(id)} className="ml-4 rounded-full bg-red px-4 py-2 text-white shadow-md">
-                    Eliminar
-                  </button>
+            })
+            .map(([id, entity], index, array) => (
+              <React.Fragment key={id}>
+                {entityType !== 'Categories' && (index == 0 || (entity as Type).categoryID != array[index - 1][1].categoryID) && (
+                  <div className="mb-1 mt-1 font-bold">{data.Categories[(entity as Type).categoryID]?.name}</div>
+                )}
+                <div key={id} className="flex items-center justify-between border-b p-2">
+                  {entityType === 'Categories' && <div className="h-6 w-6 rounded-full" style={{ backgroundColor: entity.color }}></div>}
+                  <p>{entity.name}</p>
+                  <div className="flex">
+                    <button
+                      onClick={() => {
+                        setModifyEntityId(id)
+                        setShowAddEntity(false)
+                      }}
+                      className="ml-4 rounded-full bg-red px-4 py-2 text-white shadow-md"
+                    >
+                      Editar
+                    </button>
+                    <button onClick={() => handleDeleteEntity(id)} className="ml-4 rounded-full bg-red px-4 py-2 text-white shadow-md">
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </>
-          ))}
-      </div>
-
-      <div className="mb-4 flex flex-col items-center">
-        <button
-          onClick={() => {
-            setModifyEntityId(null)
-            setShowAddEntity(true)
-          }}
-          className="mb-4 rounded-full bg-red px-4 py-2 text-white shadow-md"
-        >
-          Agregar
-        </button>
+              </React.Fragment>
+            ))}
+        </div>
         {showAddEntity && (
-          <div>
+          <div className="col-start-2">
             <input
               type="text"
               className="mb-2 mr-2 rounded-md border border-gray-300 px-3 py-2"
@@ -290,8 +248,8 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
             {entityType !== 'Categories' && (
               <select value={addEntitySecondProperty} onChange={(e) => setAddEntitySecondProperty(e.target.value)}>
                 <option value="">--Por favor elige una actividad--</option>
-                {Object.entries(data.Categories).map(([id, cat], index) => (
-                  <option key={index} value={id}>
+                {Object.entries(data.Categories).map(([id, cat]) => (
+                  <option key={id} value={id}>
                     {cat.name}
                   </option>
                 ))}
@@ -305,6 +263,51 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
             </button>
           </div>
         )}
+        {/* Edit form */}
+        {modifyEntityId && (
+          <div className="col-start-2 mb-4 flex flex-col items-center">
+            <input
+              type="text"
+              className="mb-2 mr-2 rounded-md border border-gray-300 px-3 py-2"
+              placeholder={`nuevo nombre`}
+              value={modifyEntityName}
+              onChange={(e) => setModifyEntityName(e.target.value)}
+            />
+            {entityType === 'Categories' && <SketchPicker color={modifyEntitySecondProperty} onChange={handleModifyEntityColorChange} />}
+            {entityType !== 'Categories' && (
+              <select
+                value={modifyEntitySecondProperty}
+                onChange={(e) => setModifyEntitySecondProperty(e.target.value)}
+                className="mb-2 mr-2 rounded-md border border-gray-300 p-2 text-center"
+              >
+                <option value="">--Por favor elige una actividad--</option>
+                {Object.entries(data.Categories).map(([id, cat]) => (
+                  <option key={id} value={id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <button onClick={handleModifyEntity} className="mr-2 rounded-full bg-green px-4 py-2 text-white shadow-md">
+              Guardar Cambios
+            </button>
+            <button onClick={() => setModifyEntityId(null)} className="mr-2 rounded-full bg-red px-4 py-2 text-white shadow-md">
+              Cancelar
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-4 flex flex-col items-center">
+        <button
+          onClick={() => {
+            setModifyEntityId(null)
+            setShowAddEntity(true)
+          }}
+          className="mb-4 rounded-full bg-red px-4 py-2 text-white shadow-md"
+        >
+          Agregar
+        </button>
       </div>
       <LoadingOverlay isVisible={isLoading} color={'#666666'} />
     </div>
