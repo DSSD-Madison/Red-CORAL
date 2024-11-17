@@ -1,8 +1,9 @@
 import L, { LatLngTuple, PointTuple } from 'leaflet'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
-import { useMap, Marker as LeafletMarker, LayerGroup, Tooltip } from 'react-leaflet'
+import { useMap, Marker as LeafletMarker, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 import { filterIncidents, formatDateString } from 'utils'
+import MarkerClusterGroup from 'react-leaflet-markercluster'
 
 interface IncidentLayerProps {
   data: DB
@@ -56,17 +57,14 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
 
-    const markerSize = (id: string): PointTuple => (id == selectedIncidentID ? [20, 20] : zoomLevel > 12 ? [15, 15] : [10, 10])
-
     const markerSVG = (id: string, incident: Incident): string => {
-      const size = markerSize(id)[0]
-      return `<svg viewBox="0 0 18 18" width="${size}px" height="${size}px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+      return `<svg viewBox="0 0 18 18" width="15px" height="15px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
         <use href="#marker" />
       </svg>`
     }
 
     return (
-      <LayerGroup ref={ref}>
+      <MarkerClusterGroup ref={ref}>
         <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
           <symbol id="marker">
             <circle r="9" cx="9" cy="9" fill="currentColor" />
@@ -77,7 +75,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             key={id}
             position={incident.location}
             icon={L.divIcon({
-              iconSize: markerSize(id),
+              iconSize: [15, 15],
               className: '',
               html: markerSVG(id, incident),
             })}
@@ -138,7 +136,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             })}
           />
         )}
-      </LayerGroup>
+      </MarkerClusterGroup>
     )
   }
 )
