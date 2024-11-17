@@ -5,13 +5,14 @@ import SearchControl from '@/components/controls/SearchControl'
 import IncidentPanel from '@/components/controls/IncidentPanel'
 import ZoomControl from '@/components/controls/ZoomControl'
 import IncidentLayer from '@/components/layers/IncidentLayer'
-import { LatLngBoundsLiteral } from 'leaflet'
+import { LatLngBoundsLiteral, LatLngTuple } from 'leaflet'
 import CategoryControl from '@/components/controls/CategoryControl'
 import YearControl from '@/components/controls/YearControl'
 import CountryControl from '@/components/controls/CountryControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
 import LoadingOverlay from '@/components/LoadingOverlay'
+import { useLocation } from 'react-router-dom'
 
 interface MapProps {
   data: DB
@@ -22,10 +23,24 @@ interface MapProps {
 }
 
 function SetInitialBounds() {
+  
+  const location = useLocation()
   const map = useMap()
+  const coordinates = location.state?.coord;
+  
   useEffect(() => {
-    map.setView(INITIAL_BOUNDS, INITIAL_ZOOM)
-  }, [])
+    console.log("Hello from useEffect")
+      if (coordinates) {
+      // If coordinates are provided, zoom to that location
+      const coords: LatLngTuple = [coordinates.lat, coordinates.lng];
+    
+      map.flyTo(coords, 15); 
+
+    } else {
+      // Otherwise, set to the default 
+      map.setView(INITIAL_BOUNDS, INITIAL_ZOOM);
+    }
+  }, [coordinates]);
   return null
 }
 
