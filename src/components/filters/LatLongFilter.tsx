@@ -12,7 +12,7 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
   return 6371 * c
 }
 
-const FilterLocation: React.FC<filterProps> = ({ id, dispatch }) => {
+const LatLongFilter: React.FC<filterProps> = ({ id, dispatch }) => {
   const [latitude, setLatitude] = useState('')
   const [longitude, setLongitude] = useState('')
   const [radius, setRadius] = useState('')
@@ -72,4 +72,4 @@ const FilterLocation: React.FC<filterProps> = ({ id, dispatch }) => {
   )
 }
 
-export default FilterLocation
+export default LatLongFilter

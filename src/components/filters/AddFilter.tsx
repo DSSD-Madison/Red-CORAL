@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import DateFilter from './DateFilter'
-import FilterLocation from './FilterLocation'
+import LatLongFilter from './LatLongFilter'
 import { filterDispatchType } from '@/pages/StatsDashboard'
 import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
 import {
@@ -32,7 +32,7 @@ const possibleFilters = [
   {
     name: 'Latitud/Longitud',
     icon: LucideMapPin,
-    component: FilterLocation,
+    component: LatLongFilter,
   },
   {
     name: 'Áreas',
