@@ -63,7 +63,7 @@ const LatLongFilter: React.FC<filterProps> = ({ id, dispatch }) => {
       />
       <input
         type="number"
-        placeholder="Radio"
+        placeholder="Radio (km)"
         value={radius}
         onChange={(e) => setRadius(e.target.value)}
         className="rounded-md border border-gray-300 p-1"
