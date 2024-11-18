@@ -1,5 +1,10 @@
+import { UserProvider } from "./contexts/user";
 import Routes from "./routes";
 
 export default function App() {
-  return <Routes />;
+  return (
+    <UserProvider>
+      <Routes />
+    </UserProvider>
+  );
 }
