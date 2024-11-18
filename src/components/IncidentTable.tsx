@@ -1,6 +1,7 @@
 import { formatDateString } from '@/utils'
 import { DB, Incident } from 'types'
 import { Link } from 'react-router-dom';
+import { LucideLink } from 'lucide-react'
 const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Incident][] }) => {
   return (
     <div className="my-8 w-full overflow-x-auto rounded-lg border border-black p-4 md:w-full">
@@ -22,20 +23,18 @@ const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Inci
               <td className="break-words border-t border-black p-4 text-left">{data.Types[incident.typeID].name}</td>
               <td className="break-words border-t border-black p-4 text-left">{data.Categories[data.Types[incident.typeID].categoryID].name}</td>
               <td className="break-words border-t border-black p-4 text-left">{formatDateString(incident.dateString)}</td>
-              <td className="lg:max-w-[33vw] max-w-[250px] break-words border-t border-black p-4 text-left">{incident.description}</td>
+              <td className="max-w-[250px] break-words border-t border-black p-4 text-left lg:max-w-[33vw]">{incident.description}</td>
               <td className="break-words border-t border-black p-4 text-left">{incident.department}</td>
               <td className="break-words border-t border-black p-4 text-left">{incident.municipality}</td>
               <td className="break-words border-t border-black p-4 text-left">
-              <Link to="/" state={{coord: incident.location }} >enlace al mapa</Link>
-             
-               </td>
-               
+                <Link to="/" state={{ coord: incident.location }} className="hover:text-blue-400">
+                  <LucideLink />
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>
-        
       </table>
-      
     </div>
   )
 }
