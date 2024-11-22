@@ -16,14 +16,12 @@ import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
- * @param db a database object
- * @returns the same database object with the filterBounds property filled in
  */
-export function calculateBounds(db: DB): DB {
-  const allYears = new Set(Object.values(db.Incidents).map((e) => new Date(e.dateString).getFullYear()))
+export function calculateBounds(incidents: { [key: string]: Incident }) {
+  const allYears = new Set(Object.values(incidents).map((e) => new Date(e.dateString).getFullYear()))
   const minYear = Math.min(...allYears)
   const maxYear = Math.max(...allYears)
-  let locations = Object.values(db.Incidents).reduce(
+  let locations = Object.values(incidents).reduce(
     (acc, curr) => {
       if (!acc[curr.country]) {
         acc[curr.country] = {}
@@ -46,14 +44,13 @@ export function calculateBounds(db: DB): DB {
     },
     {} as FilterBounds['locations']
   )
+  const totalCount = Object.values(incidents).length
   return {
-    ...db,
-    filterBounds: {
-      maxYear,
-      minYear,
-      locations,
-    },
-  } as DB
+    maxYear,
+    minYear,
+    locations,
+    totalCount
+  }
 }
 
 export function addDocWithTimestamp(ref: CollectionReference, data: any) {
@@ -101,7 +98,10 @@ export async function getData(isAdmin: boolean, storage: FirebaseStorage, firest
       }
     }
   }
-  return calculateBounds(db)
+  return {
+    ...db,
+    filterBounds: calculateBounds(db.Incidents),
+  }
 }
 
 export function filterIncidents(incidents: DB['Incidents'],

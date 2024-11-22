@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { LucideLink } from 'lucide-react'
 const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Incident][] }) => {
   return (
-    <div className="my-8 w-full overflow-x-auto rounded-lg border border-black p-4 md:w-full">
+    <div className="my-4 w-full overflow-x-auto rounded-lg border border-black p-4 md:w-full">
       <table className="w-full min-w-[800px] table-auto md:min-w-0 md:max-w-full">
         <tbody>
           <tr>
