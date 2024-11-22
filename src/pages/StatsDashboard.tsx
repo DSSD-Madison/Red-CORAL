@@ -72,7 +72,7 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
     <div className="p-4">
       <h1 className="text-2xl font-semibold">Estadísticas</h1>
       <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
-      <div className="my-4 flex grid-cols-3 flex-col gap-4 xl:grid">
+      <div className="my-4 flex flex-row flex-wrap gap-4">
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />

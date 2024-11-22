@@ -15,11 +15,11 @@ export default function DummyGraph({ incidents, bounds }: { incidents: [string, 
         svg.selectAll('*').remove()
 
         // Set dimensions
-        const width = containerRef.current?.clientWidth || 300
-        const height = containerRef.current?.clientHeight || 300
+        const width = 400
+        const height = 200
         const margin = { top: 20, right: 30, bottom: 30, left: 40 }
 
-        svg.attr('width', width).attr('height', height)
+        svg.attr('preserveAspectRatio', 'xMinYMin meet').attr('viewBox', `0 0 ${width} ${height}`)
 
         // Create scales
         const x = d3
@@ -33,7 +33,7 @@ export default function DummyGraph({ incidents, bounds }: { incidents: [string, 
           .range([height - margin.bottom, margin.top])
 
         // Create axes
-        const xTicks = width / 50
+        const xTicks = width / 100
         const yTicks = height / 50
         svg
           .append('g')
@@ -60,8 +60,8 @@ export default function DummyGraph({ incidents, bounds }: { incidents: [string, 
   }, [incidents])
 
   return (
-    <div ref={containerRef} className="h-64 w-full rounded-lg bg-neutral-100">
-      <svg ref={d3Ref}></svg>
+    <div ref={containerRef} className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-hidden rounded-lg bg-neutral-100">
+      <svg className="absolute inset-0" ref={d3Ref}></svg>
     </div>
   )
 }
