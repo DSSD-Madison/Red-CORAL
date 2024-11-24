@@ -1,7 +1,7 @@
 import { DB } from '@/types'
 import React from 'react'
 import AddFilter from './filters/AddFilter'
-import { filterDispatchType, filterType } from '@/pages/StatsDashboard'
+import { filterType, filterDispatchType } from './filters/filterReducer'
 
 type statsFilterProps = {
   data: DB

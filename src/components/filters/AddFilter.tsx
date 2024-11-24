@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import DateFilter from './DateFilter'
 import LatLongFilter from './LatLongFilter'
-import { filterDispatchType } from '@/pages/StatsDashboard'
-import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
+import { filterDispatchType, filterProps } from './filterReducer'
+import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText, LucideMerge } from 'lucide-react'
 import {
   useFloating,
   offset,
@@ -17,34 +17,78 @@ import {
   arrow,
 } from '@floating-ui/react'
 import CountryFilter from './CountryFilter'
+import BoolORFilter from './BoolORFilter'
+import BoolNOTFilter from './BoolNOTFilter'
 
-const possibleFilters = [
+interface FilterInfo {
+  name: string
+  icon: any
+  component: React.FC<filterProps>
+  description: string
+}
+
+const possibleFilters: FilterInfo[] = [
   {
     name: 'Actividades',
     icon: LucideTags,
     component: DateFilter, // TODO: Change this to the actual component
+    description: 'Filtrar por actividades y tipos de eventos',
   },
   {
     name: 'Fecha',
     icon: LucideCalendar,
     component: DateFilter,
+    description: 'Filtrar por fecha',
   },
   {
     name: 'Latitud/Longitud',
     icon: LucideMapPin,
     component: LatLongFilter,
+    description: 'Filtrar por ubicación',
   },
   {
     name: 'Áreas',
     icon: LucideGlobe,
     component: CountryFilter,
+    description: 'Filtrar por áreas geográficas',
   },
   {
     name: 'Descripción',
     icon: LucideText,
     component: DateFilter, // TODO: Change this to the actual component
+    description: 'Filtrar por palabras clave en la descripción',
   },
 ]
+
+const advancedFilters: FilterInfo[] = [
+  {
+    name: 'O (combinar)',
+    icon: LucideMerge,
+    component: BoolORFilter,
+    description: 'Combinar filtros con la operación OR',
+  },
+  {
+    name: 'NO (combinar)',
+    icon: LucideMerge,
+    component: BoolNOTFilter,
+    description: 'Combinar filtros con la operación NOT',
+  },
+]
+
+function NewFilterButton({ filter, dispatch }: { filter: FilterInfo; dispatch: React.Dispatch<filterDispatchType> }) {
+  return (
+    <button
+      className="block w-full rounded-md px-2 py-1 text-left hover:bg-black/5"
+      onClick={() => dispatch({ type: 'ADD_FILTER', payload: { component: filter.component } })}
+    >
+      <span className="flex items-center">
+        {filter.icon && <filter.icon size={12} className="mr-1" />}
+        {filter.name}
+      </span>
+      <p className="text-xs text-neutral-700">{filter.description}</p>
+    </button>
+  )
+}
 
 const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -65,28 +109,27 @@ const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> 
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
 
   return (
-    <div onClick={() => setIsOpen(true)} className="flex cursor-pointer items-center text-sm" ref={refs.setReference} {...getReferenceProps()}>
-      <LucidePlus size={16} strokeWidth={1} />
-      <span className="text-gray-600">Añadir filtro</span>
+    <div onClick={() => setIsOpen(true)} className="text-sm" ref={refs.setReference} {...getReferenceProps()}>
+      <span className="flex cursor-pointer items-center text-gray-600">
+        <LucidePlus size={16} strokeWidth={1} />
+        Añadir filtro
+      </span>
       {isOpen && (
         <FloatingFocusManager context={context} modal={false}>
           <div
             ref={refs.setFloating}
             style={floatingStyles}
-            className="z-50 min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 shadow-lg focus-visible:outline-none"
+            className="z-50 w-64 rounded-md border border-gray-300 bg-white p-2 shadow-lg focus-visible:outline-none"
             {...getFloatingProps()}
           >
             <FloatingArrow fill="white" strokeWidth={1} stroke="#d1d5db" ref={arrowRef} context={context} />
-            <h2 className="p-1 text-sm font-semibold">Añadir filtro</h2>
+            <h2 className="p-1 text-sm font-semibold">Filtros básicos</h2>
             {possibleFilters.map((filter) => (
-              <button
-                key={filter.name}
-                className="flex w-full items-center gap-2 rounded-md p-1 hover:bg-black/5"
-                onClick={() => dispatch({ type: 'ADD_FILTER', payload: { component: filter.component } })}
-              >
-                {filter.icon && <filter.icon size={12} />}
-                <span>{filter.name}</span>
-              </button>
+              <NewFilterButton key={filter.name} filter={filter} dispatch={dispatch} />
+            ))}
+            <h2 className="p-1 text-sm font-semibold">Filtros avanzados</h2>
+            {advancedFilters.map((filter) => (
+              <NewFilterButton key={filter.name} filter={filter} dispatch={dispatch} />
             ))}
           </div>
         </FloatingFocusManager>

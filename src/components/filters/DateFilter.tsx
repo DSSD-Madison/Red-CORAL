@@ -1,4 +1,4 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from './filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideCalendar, LucideChevronDown, LucideChevronRight, LucideTrash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
