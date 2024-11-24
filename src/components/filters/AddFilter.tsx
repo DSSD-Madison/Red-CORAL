@@ -17,8 +17,8 @@ import {
   arrow,
 } from '@floating-ui/react'
 import CountryFilter from './CountryFilter'
-import ORFilter from './ORFilter'
-import NOTFilter from './NOTFilter'
+import BoolORFilter from './BoolORFilter'
+import BoolNOTFilter from './BoolNOTFilter'
 
 interface FilterInfo {
   name: string
@@ -64,13 +64,13 @@ const advancedFilters: FilterInfo[] = [
   {
     name: 'O (combinar)',
     icon: LucideMerge,
-    component: ORFilter,
+    component: BoolORFilter,
     description: 'Combinar filtros con la operación OR',
   },
   {
     name: 'NO (combinar)',
     icon: LucideMerge,
-    component: NOTFilter,
+    component: BoolNOTFilter,
     description: 'Combinar filtros con la operación NOT',
   },
 ]
@@ -78,12 +78,11 @@ const advancedFilters: FilterInfo[] = [
 function NewFilterButton({ filter, dispatch }: { filter: FilterInfo; dispatch: React.Dispatch<filterDispatchType> }) {
   return (
     <button
-      key={filter.name}
       className="block w-full rounded-md px-2 py-1 text-left hover:bg-black/5"
       onClick={() => dispatch({ type: 'ADD_FILTER', payload: { component: filter.component } })}
     >
-      <span>
-        {filter.icon && <filter.icon size={12} className="mr-1 inline align-baseline" />}
+      <span className="flex items-center">
+        {filter.icon && <filter.icon size={12} className="mr-1" />}
         {filter.name}
       </span>
       <p className="text-xs text-neutral-700">{filter.description}</p>
@@ -111,9 +110,8 @@ const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> 
 
   return (
     <div onClick={() => setIsOpen(true)} className="text-sm" ref={refs.setReference} {...getReferenceProps()}>
-      <span className="cursor-pointer text-gray-600">
-        {' '}
-        <LucidePlus size={16} strokeWidth={1} className="inline align-baseline" />
+      <span className="flex cursor-pointer items-center text-gray-600">
+        <LucidePlus size={16} strokeWidth={1} />
         Añadir filtro
       </span>
       {isOpen && (
@@ -121,17 +119,17 @@ const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> 
           <div
             ref={refs.setFloating}
             style={floatingStyles}
-            className="z-50 min-w-48 rounded-md border border-gray-300 bg-white p-2 shadow-lg focus-visible:outline-none"
+            className="z-50 w-64 rounded-md border border-gray-300 bg-white p-2 shadow-lg focus-visible:outline-none"
             {...getFloatingProps()}
           >
             <FloatingArrow fill="white" strokeWidth={1} stroke="#d1d5db" ref={arrowRef} context={context} />
             <h2 className="p-1 text-sm font-semibold">Filtros básicos</h2>
             {possibleFilters.map((filter) => (
-              <NewFilterButton filter={filter} dispatch={dispatch} />
+              <NewFilterButton key={filter.name} filter={filter} dispatch={dispatch} />
             ))}
             <h2 className="p-1 text-sm font-semibold">Filtros avanzados</h2>
             {advancedFilters.map((filter) => (
-              <NewFilterButton filter={filter} dispatch={dispatch} />
+              <NewFilterButton key={filter.name} filter={filter} dispatch={dispatch} />
             ))}
           </div>
         </FloatingFocusManager>

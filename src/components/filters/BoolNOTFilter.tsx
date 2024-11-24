@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer } from 'react'
-import { filterProps, filterReducer } from './filterReducer'
+import { filterProps, filterReducer, filterType } from './filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideMerge, LucideTrash2 } from 'lucide-react'
 import { Incident } from '@/types'
@@ -7,27 +7,28 @@ import AddFilter from './AddFilter'
 
 /**
  * Represents a filter that itself contains filters.
- * It manipulates the operations of the filters it contains using an OR operation, and
+ * It manipulates the operations of the filters it contains using a NOT operation, and
  * passes that operation to the parent dispatcher.
  */
-const NOTFilter: React.FC<filterProps> = ({ id, data, dispatch }) => {
+const BoolNOTFilter: React.FC<filterProps> = ({ id, data, dispatch }) => {
   const [internalFilters, dispatchInternalFilters] = useReducer(filterReducer, { index: 0, filters: [] })
-
-  useEffect(() => {
-    let orOperation = (incident: Incident) => internalFilters.filters.every((filter) => (filter.operation ? !filter.operation(incident) : true))
-    if (internalFilters.filters.length === 0) {
-      orOperation = () => true
+  const updateParent = (state: { filters: filterType[] }) => {
+    let notOperation = (incident: Incident) => state.filters.every((filter) => (filter.operation ? !filter.operation(incident) : true))
+    if (state.filters.length === 0) {
+      notOperation = () => true
     }
 
     dispatch({
       type: 'UPDATE_FILTER',
       payload: {
         id: id,
-        operation: orOperation,
+        operation: notOperation,
       },
     })
-  }, [internalFilters, id, dispatch])
-
+  }
+  useEffect(() => {
+    updateParent(internalFilters)
+  }, [internalFilters])
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id } })
   }
@@ -58,4 +59,4 @@ const NOTFilter: React.FC<filterProps> = ({ id, data, dispatch }) => {
   )
 }
 
-export default NOTFilter
+export default BoolNOTFilter
