@@ -42,13 +42,17 @@ export function Component() {
   return (
     <>
       <h1>Sign in to Red CORAL</h1>
-      {actionData?.error.internal && <p>{actionData.error.internal}</p>}
+      {"error" in actionData && actionData?.error.internal && (
+        <p>{actionData.error.internal}</p>
+      )}
       <Form method="POST">
         <fieldset disabled={navigation.state === "loading"}>
           <div>
             <label htmlFor="password">Password</label>
             <input id="password" name="password" type="password" />
-            {actionData?.error.password && <p>{actionData.error.password}</p>}
+            {"error" in actionData && actionData?.error.password && (
+              <p>{actionData.error.password}</p>
+            )}
           </div>
           <button type="submit">Continue</button>
         </fieldset>
