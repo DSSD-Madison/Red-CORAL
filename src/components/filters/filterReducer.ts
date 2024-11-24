@@ -1,6 +1,8 @@
 import { DB, Incident } from "@/types";
 
-export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
+export type filterDispatchType = { type: 'ADD_FILTER'; payload: Partial<filterType> } |
+{ type: 'REMOVE_FILTER'; payload: { id: number } } |
+{ type: 'UPDATE_FILTER'; payload: Partial<filterType> | { id: number, update: ((curState: filterType) => filterType) } }
 
 export type filterProps = {
   id: number
@@ -13,7 +15,7 @@ export type filterProps = {
 export type filterType = {
   id: number
   component: React.FC<filterProps>
-  state?: any
+  state: { [key: string]: any }
   operation?: (incident: Incident) => boolean
 }
 
@@ -37,15 +39,21 @@ export const filterReducer = (state: filterState, action: filterDispatchType) =>
   switch (action.type) {
     case 'ADD_FILTER':
       const id = state.index
-      const newFilter = { id, ...action.payload } as filterType
+      const newFilter = { id, state: {}, ...action.payload } as filterType
       newState = { index: state.index + 1, filters: [...state.filters, newFilter] }
       break
     case 'REMOVE_FILTER':
       newState = { ...state, filters: state.filters.filter((filter) => filter.id !== action.payload.id) }
       break
     case 'UPDATE_FILTER':
-      newState = { ...state, filters: state.filters.map((filter) => (filter.id === action.payload.id ? { ...filter, ...action.payload } : filter)) }
+      if ('update' in action.payload) {
+        // @ts-expect-error - For some reason, TypeScript doesn't like this
+        newState = { ...state, filters: state.filters.map((filter) => filter.id === action.payload.id ? action.payload.update(filter) : filter) }
+      } else {
+        newState = { ...state, filters: state.filters.map((filter) => filter.id === action.payload.id ? { ...filter, ...action.payload } : filter) }
+      }
       break
   }
+  console.log(newState);
   return newState
 }

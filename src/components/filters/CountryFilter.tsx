@@ -1,13 +1,22 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from './filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideGlobe, LucideTrash2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Incident } from '@/types'
 
-const CountryFilter = ({ id, data, dispatch }: filterProps) => {
-  const [hiddenCountries, setHiddenCountries] = useState<string[]>([])
-  const [hiddenDepartments, setHiddenDepartments] = useState<string[]>([])
-  const [hiddenMunicipalities, setHiddenMunicipalities] = useState<string[]>([])
+const CountryFilter = ({ id, data, state, dispatch }: filterProps) => {
+  function stateWrapper<T>(key: string, defaultValue: T): [T, (func: (state: T) => T) => void] {
+    const value = state?.[key] ?? defaultValue
+    const setValue = (func: (state: T) => T) => {
+      const prev = state[key] ?? defaultValue
+      const newState = func(prev)
+      dispatch({ type: 'UPDATE_FILTER', payload: { id, update: (filter) => ({ ...filter, state: { ...filter.state, [key]: newState } }) } })
+    }
+    return [value, setValue]
+  }
+  const [hiddenCountries, setHiddenCountries] = stateWrapper<string[]>('hiddenCountries', [])
+  const [hiddenDepartments, setHiddenDepartments] = stateWrapper<string[]>('hiddenDepartments', [])
+  const [hiddenMunicipalities, setHiddenMunicipalities] = stateWrapper<string[]>('hiddenMunicipalities', [])
 
   const departmentsByCountry = useMemo(() => {
     return Object.entries(data.filterBounds.locations).reduce(
