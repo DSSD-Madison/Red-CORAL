@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from './filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideMapPin, LucideTrash2 } from 'lucide-react'
 

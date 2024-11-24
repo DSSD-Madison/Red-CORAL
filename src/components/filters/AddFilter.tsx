@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import DateFilter from './DateFilter'
 import LatLongFilter from './LatLongFilter'
-import { filterDispatchType } from '@/pages/StatsDashboard'
+import { filterDispatchType, filterProps } from './filterReducer'
 import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
 import {
   useFloating,
