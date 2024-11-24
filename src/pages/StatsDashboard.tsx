@@ -5,6 +5,7 @@ import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
 import DummyGraph from '@/components/graphs/DummyGraph'
+import LineGraph from '@/components/graphs/LineGraph'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
 
@@ -74,7 +75,7 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
       <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
       <div className="my-4 flex flex-row flex-wrap gap-4">
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
-        <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+        <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
       </div>
       <IncidentTable data={data} incidents={filteredIncidents} />
