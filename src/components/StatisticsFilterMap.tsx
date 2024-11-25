@@ -2,13 +2,14 @@ import { LatLngBoundsLiteral, LatLngTuple } from 'leaflet'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import ZoomControl from '@/components/controls/ZoomControl'
 import IncidentLayer from '@/components/layers/IncidentLayer'
-import { DB, MarkerFilters } from '@/types'
+import { DB, Incident, MarkerFilters } from '@/types'
 import { useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
 
 interface StatisticsFilterMapProps {
   data: DB
+  incidents: [string, Incident][]
 }
 
 function SetInitialBounds() {
@@ -28,7 +29,7 @@ function SetInitialBounds() {
   return null
 }
 
-export default function StatisticsFilterMap({ data }: StatisticsFilterMapProps) {
+export default function StatisticsFilterMap({ data, incidents }: StatisticsFilterMapProps) {
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -45,6 +46,11 @@ export default function StatisticsFilterMap({ data }: StatisticsFilterMapProps) 
     hideDepartments: [],
     hideMunicipalities: [],
   }
+
+  // Create a shallow copy of the database and inject filtered incidents into it
+  const filteredData: DB = { Types: {}, Categories: {}, Incidents: {}, filterBounds: { minYear: 0, maxYear: 0, locations: {} } }
+  Object.assign(filteredData, data)
+  filteredData.Incidents = Object.fromEntries(incidents)
 
   // HACK: The height modifier is a little ugly to prevent the map from overflowing the screen at the bottom. Is there a better way to do this?
   return (
@@ -69,7 +75,7 @@ export default function StatisticsFilterMap({ data }: StatisticsFilterMapProps) 
           url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
         />
         <IncidentLayer
-          data={data}
+          data={filteredData}
           selectedIncidentID={null}
           setSelectedIncidentID={() => {}}
           ref={null}

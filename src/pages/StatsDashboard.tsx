@@ -80,7 +80,7 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
       </div>
       <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
       {isShowingMap ? (
-        <StatisticsFilterMap data={data} />
+        <StatisticsFilterMap data={data} incidents={filteredIncidents} />
       ) : (
         <>
           <div className="my-4 flex flex-row flex-wrap gap-4">
