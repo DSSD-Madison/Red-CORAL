@@ -1,10 +1,11 @@
 // StatsDashboard.tsx
 import { DB, Incident } from 'types'
-import React, { useMemo, useReducer } from 'react'
+import React, { useMemo, useReducer, useState } from 'react'
 import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
 import DummyGraph from '@/components/graphs/DummyGraph'
+import StatisticsFilterMap from '@/components/StatisticsFilterMap'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
 
@@ -61,6 +62,7 @@ const filterReducer = (state: filterState, action: filterDispatchType) => {
 }
 
 const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
+  const [isShowingMap, setIsShowingMap] = useState(false)
   const incidents: [string, Incident][] = Object.entries(data.Incidents)
   const [filters, dispatchFilters] = useReducer(filterReducer, { index: 0, filters: [] })
   const filteredIncidents = useMemo(() => {
@@ -69,15 +71,26 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
   const filteredBounds = calculateBounds(Object.fromEntries(filteredIncidents))
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-semibold">Estadísticas</h1>
-      <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
-      <div className="my-4 flex flex-row flex-wrap gap-4">
-        <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
-        <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
-        <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+    <div className="h-full p-4">
+      <div className="flow-row flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Estadísticas</h1>
+        <button className="m-1 rounded-md px-2 py-1 hover:bg-black hover:bg-opacity-10" onClick={() => setIsShowingMap(!isShowingMap)}>
+          {isShowingMap ? 'Ocultar Mapa' : 'Mostrar Mapa'}
+        </button>
       </div>
-      <IncidentTable data={data} incidents={filteredIncidents} />
+      <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
+      {isShowingMap ? (
+        <StatisticsFilterMap data={data} incidents={filteredIncidents} />
+      ) : (
+        <>
+          <div className="my-4 flex flex-row flex-wrap gap-4">
+            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+          </div>
+          <IncidentTable data={data} incidents={filteredIncidents} />
+        </>
+      )}
     </div>
   )
 }
