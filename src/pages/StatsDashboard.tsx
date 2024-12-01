@@ -5,6 +5,7 @@ import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
 import DummyGraph from '@/components/graphs/DummyGraph'
+import PieChart from '@/components/graphs/PieChart'
 import StatisticsFilterMap from '@/components/StatisticsFilterMap'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
@@ -71,12 +72,14 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
   const filteredBounds = calculateBounds(Object.fromEntries(filteredIncidents))
 
   return (
+
     <div className="h-full p-4">
       <div className="flow-row flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
         <button className="m-1 rounded-md px-2 py-1 hover:bg-black hover:bg-opacity-10" onClick={() => setIsShowingMap(!isShowingMap)}>
           {isShowingMap ? 'Ocultar Mapa' : 'Mostrar Mapa'}
         </button>
+
       </div>
       <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
       {isShowingMap ? (
@@ -84,7 +87,7 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
       ) : (
         <>
           <div className="my-4 flex flex-row flex-wrap gap-4">
-            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+          <PieChart data={data} incidents={filteredIncidents}></PieChart>
             <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
             <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
           </div>
