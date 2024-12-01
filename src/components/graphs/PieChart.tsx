@@ -1,7 +1,8 @@
+import { DB, Incident } from '@/types'
 import * as d3 from 'd3'
 import { useRef, useEffect } from 'react'
 
-export default function PieChart({ incidents, data }) {
+export default function PieChart({ incidents, data }: { incidents: [string, Incident][]; data: DB }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const d3Ref = useRef<SVGSVGElement | null>(null)
 
@@ -14,7 +15,8 @@ export default function PieChart({ incidents, data }) {
   })
   let categories = Object.values(data.Categories).map((c) => c.name) //we want in this format: ["drugs", "robbery"]
 
-  let cleanData = [] //should end up having this format for the pie chart: [{label: "drugs", value: 10} , {}]
+  type Category = { label: string; value: number }
+  let cleanData: Category[] = [] //should end up having this format for the pie chart: [{label: "drugs", value: 10} , {}]
 
   let totalValue = 0
   //creates cleanData
@@ -23,7 +25,7 @@ export default function PieChart({ incidents, data }) {
     let value = 0
 
     // for each category count how many incidents were in the category (Creating the value number)
-    categoryEntries.forEach((c) => {
+    categoryEntries.forEach(() => {
       value++
       totalValue++
     })
@@ -54,7 +56,7 @@ export default function PieChart({ incidents, data }) {
         const radius = Math.min(width, height) / 2
 
         const pie = d3
-          .pie()
+          .pie<Category>()
           .sort(null)
           .value(function (d) {
             return d.value
@@ -63,10 +65,13 @@ export default function PieChart({ incidents, data }) {
         //helper function for color
         //reduce() iterates over the Categories array and builds an object "acc" so that
         //acc will be similar to a dictionary in the form: {"drugs": "black", "robbery": "white"}
-        const labelColorMap = Object.values(data.Categories).reduce((acc, category) => {
-          acc[category.name] = category.color
-          return acc
-        }, {})
+        const labelColorMap = Object.values(data.Categories).reduce(
+          (acc, category) => {
+            acc[category.name] = category.color
+            return acc
+          },
+          {} as Record<string, string>
+        )
 
         const color = d3
           .scaleOrdinal()
@@ -89,8 +94,8 @@ export default function PieChart({ incidents, data }) {
           .enter()
           .append('path')
           .attr('class', 'slice')
-          .style('fill', (d) => color(d.data.label))
-          .attr('d', arc)
+          .style('fill', (d) => color(d.data.label) as string)
+          .attr('d', arc as any)
 
         slice.exit().remove()
 
@@ -105,14 +110,14 @@ export default function PieChart({ incidents, data }) {
           .data(cleanData)
           .enter()
           .append('g')
-          .attr('transform', (d, i) => `translate(0, ${i * 20})`) // Position each legend item
+          .attr('transform', (_, i) => `translate(0, ${i * 20})`) // Position each legend item
 
         // Add colored rectangles
         legendItems
           .append('rect')
           .attr('width', 12)
           .attr('height', 12)
-          .attr('fill', (d) => color(d.label))
+          .attr('fill', (d) => color(d.label) as string)
 
         // Add text labels
         legendItems
