@@ -32,6 +32,7 @@ export default function PieChart({ incidents, data }: { incidents: [string, Inci
 
     cleanData.push({ label: category, value: value })
   })
+  cleanData = cleanData.filter((d) => d.value > 0).sort((a, b) => d3.descending(a.value, b.value))
 
   useEffect(() => {
     function render() {
