@@ -75,7 +75,6 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
       <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
       <div className="my-4 flex flex-row flex-wrap gap-4">
         <PieChart data={data} incidents={filteredIncidents}></PieChart>
-       
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
       </div>

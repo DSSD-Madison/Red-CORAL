@@ -5,37 +5,32 @@ export default function PieChart({incidents, data}) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const d3Ref = useRef<SVGSVGElement | null>(null)
 
-
+  //gets label and color for each incident
   const parsedData = incidents.map((incident) => {
     return {
-      "label": data.Categories[data.Types[incident[1].typeID].categoryID].name
+      "label": data.Categories[data.Types[incident[1].typeID].categoryID].name,
+      "color": data.Categories[data.Types[incident[1].typeID].categoryID].color
     }
-  }
-  )
-
-  
-  let cleanData =[] //should end up having this format: [{label: "drugs", value: 10} , {}]
-
+  })
   let categories = Object.values(data.Categories).map((c)=>c.name) //we want in this format: ["drugs", "robbery"]
-  
+ 
+  let cleanData =[] //should end up having this format for the pie chart: [{label: "drugs", value: 10} , {}]
 
-categories.forEach(category => {
+
+  let totalValue = 0;
+  //creates cleanData
+  categories.forEach(category => {
   let categoryEntries = parsedData.filter( c => c.label == category); 
   let value = 0;
 
-  // for each category count how many incidents were in the category
+  // for each category count how many incidents were in the category (Creating the value number)
   categoryEntries.forEach(c => {
       value++;
+      totalValue++;
   });
 
   cleanData.push({label: category, value: value})
 });
-
-
- 
-
-
-
 
   useEffect(() => {
     function render() {
@@ -48,15 +43,16 @@ categories.forEach(category => {
         const width = 400
         const height = 200
     
-
         svg.attr('preserveAspectRatio', 'xMinYMin meet').attr('viewBox', `0 0 ${width} ${height}`)
 
         const g = svg.append("g");
-
         g.append("g").attr("class", "slices");
         g.append("g").attr("class", "labels");
         g.append("g").attr("class", "lines");
-       
+
+        g.attr("transform", "translate(" + width / 4 + "," + height / 2 + ")");
+          
+          
         const radius = Math.min(width, height) / 2;
 
         const pie = d3
@@ -66,84 +62,74 @@ categories.forEach(category => {
             return d.value;
           });
 
-          const color = d3
-  .scaleOrdinal()
-  .domain(incidents.map((d) => d.label))
-  .range(
-    incidents.map((cleanData) => {
-
-      //TODO: replace with color within category
-      const color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-      return color;
-    })
-  );
-
-  const arc = d3
-  .arc()
-  .outerRadius(radius * 0.8)
-  .innerRadius(radius * 0.4);
-
-const outerArc = d3
-  .arc()
-  .innerRadius(radius * 0.9)
-  .outerRadius(radius * 0.9);
-
-g.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-const key = function(d) {
-  return d.cleanData.label;
-};
-
-///console.log(incidents);
-    /* ------- PIE SLICES -------*/
-
-    const pieData = pie(cleanData);
-
- 
+        //helper function for color
+        //reduce() iterates over the Categories array and builds an object "acc" so that 
+        //acc will be similar to a dictionary in the form: {"drugs": "black", "robbery": "white"}
+        const labelColorMap = Object.values(data.Categories).reduce((acc, category) => {
+          acc[category.name] = category.color; 
+          return acc;
+        }, {});
+          
+        const color = d3
+          .scaleOrdinal()
+          .domain(cleanData.map((d) => d.label))
+          .range(cleanData.map((d) => labelColorMap[d.label]));
+          
+        const arc = d3
+          .arc()
+          .outerRadius(radius * 0.8)
+          .innerRadius(radius * 0.4);
+       
+          
+        /* ------- PIE SLICES -------*/
+          
+        const pieData = pie(cleanData);
+          
         // Draw slices
         const slice = g
-          .select('.slices')
-          .selectAll('path.slice')
-          .data(pieData);
+            .select('.slices')
+            .selectAll('path.slice')
+            .data(pieData);
 
-          slice
+        slice
           .enter()
           .append('path')
           .attr('class', 'slice')
           .style('fill', (d) => color(d.data.label))
           .attr('d', arc);
 
-        // Exit old elements
+        
         slice.exit().remove();
 
-         /* ------- TEXT LABELS -------*/
+        /* ------- LEGEND ------- */
+        const legend = svg
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${width - 200}, 20)`); // Position legend to the right of the pie chart
 
-         function midAngle(d) {
-          return d.startAngle + (d.endAngle - d.startAngle) / 2;
-        }
+        const legendItems = legend
+        .selectAll(".legend-item")
+        .data(cleanData)
+        .enter()
+        .append("g")
+        .attr("transform", (d, i) => `translate(0, ${i * 20})`); // Position each legend item
 
-         var text = g.select(".labels").selectAll("text")
-         .data(pie(cleanData));
-       
-         text.enter()
-         .append("text")
-         .attr("dy", ".35em")
-         .text(function(d) {
-           return d.data.label; // Use the label from cleanData
-         })
-         .attr("transform", function(d) {
-           const pos = outerArc.centroid(d); // Calculate position
-           return `translate(${pos})`;
-         })
-         .style("text-anchor", function(d) {
-           return midAngle(d) < Math.PI ? "start" : "end"; // Align text based on the angle
-         });
-       
-       
-        
+        // Add colored rectangles
+        legendItems
+        .append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", (d) => color(d.label));
 
-text.exit()
-		.remove();
+        // Add text labels
+        legendItems
+        .append("text")
+        .attr("x", 18) // Position text next to rectangle
+        .attr("y", 10) // Vertically align text with rectangle
+        .text((d) => `${d.label} (${Math.floor((d.value / totalValue) * 100)}%)`)
+        .style("font-size", "12px")
+        .attr("fill", "#000");
+
       }
     }
     addEventListener('resize', render)
