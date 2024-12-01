@@ -6,6 +6,7 @@ import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
 import DummyGraph from '@/components/graphs/DummyGraph'
 import LineGraph from '@/components/graphs/LineGraph'
+import PieChart from '@/components/graphs/PieChart'
 import StatisticsFilterMap from '@/components/StatisticsFilterMap'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
@@ -85,7 +86,7 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
       ) : (
         <>
           <div className="mx-auto my-4 grid max-w-[500px] gap-4 lg:max-w-full lg:grid-cols-3">
-            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+            <PieChart data={data} incidents={filteredIncidents}></PieChart>
             <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
             <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
           </div>
