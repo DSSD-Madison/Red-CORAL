@@ -5,6 +5,7 @@ import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
 import DummyGraph from '@/components/graphs/DummyGraph'
+import LineGraph from '@/components/graphs/LineGraph'
 import PieChart from '@/components/graphs/PieChart'
 import StatisticsFilterMap from '@/components/StatisticsFilterMap'
 
@@ -72,23 +73,21 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
   const filteredBounds = calculateBounds(Object.fromEntries(filteredIncidents))
 
   return (
-
     <div className="h-full p-4">
       <div className="flow-row flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
         <button className="m-1 rounded-md px-2 py-1 hover:bg-black hover:bg-opacity-10" onClick={() => setIsShowingMap(!isShowingMap)}>
           {isShowingMap ? 'Ocultar Mapa' : 'Mostrar Mapa'}
         </button>
-
       </div>
       <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
       {isShowingMap ? (
         <StatisticsFilterMap data={data} incidents={filteredIncidents} />
       ) : (
         <>
-          <div className="my-4 flex flex-row flex-wrap gap-4">
-          <PieChart data={data} incidents={filteredIncidents}></PieChart>
-            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+          <div className="mx-auto my-4 grid max-w-[500px] gap-4 lg:max-w-full lg:grid-cols-3">
+            <PieChart data={data} incidents={filteredIncidents}></PieChart>
+            <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
             <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
           </div>
           <IncidentTable data={data} incidents={filteredIncidents} />
