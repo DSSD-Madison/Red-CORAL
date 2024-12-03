@@ -17,12 +17,13 @@ import {
   arrow,
 } from '@floating-ui/react'
 import CountryFilter from './CountryFilter'
+import CategoryFilter from './CategoryFilter'
 
 const possibleFilters = [
   {
     name: 'Actividades',
     icon: LucideTags,
-    component: DateFilter, // TODO: Change this to the actual component
+    component: CategoryFilter,
   },
   {
     name: 'Fecha',

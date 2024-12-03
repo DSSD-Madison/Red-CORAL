@@ -68,6 +68,26 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
     }
   }
 
+  const selectAllCountries = (selectAll: boolean) => {
+    if (selectAll) {
+      setHiddenCountries([])
+      setHiddenDepartments([])
+      setHiddenMunicipalities([])
+    } else {
+      setHiddenCountries(Object.keys(data.filterBounds.locations))
+      setHiddenDepartments(
+        Object.entries(data.filterBounds.locations).flatMap(([country, departments]) =>
+          Object.keys(departments).map((dept) => `${country} - ${dept}`)
+        )
+      )
+      setHiddenMunicipalities(
+        Object.entries(data.filterBounds.locations).flatMap(([country, departments]) =>
+          Object.entries(departments).flatMap(([dept, municipalities]) => municipalities.map((muni) => `${country} - ${dept} - ${muni}`))
+        )
+      )
+    }
+  }
+
   const applyFilters = () => {
     const incidentNotHidden = (incident: Incident) =>
       !hiddenCountries.includes(incident.country) &&
@@ -113,6 +133,12 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
         <LucideTrash2 size={20} />
       </button>
       <div className="p-2">
+        <button onClick={() => selectAllCountries(true)} className="mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
+          Seleccionar todo
+        </button>
+        <button onClick={() => selectAllCountries(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
+          Deseleccionar todo
+        </button>
         {Object.entries(data.filterBounds.locations).map(([country, departments]) => (
           <details key={country}>
             <summary>
