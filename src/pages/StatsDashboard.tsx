@@ -4,7 +4,7 @@ import React, { useMemo, useReducer, useState } from 'react'
 import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
-import DummyGraph from '@/components/graphs/DummyGraph'
+import IncidentsStats from '@/components/graphs/IncidentsStats'
 import LineGraph from '@/components/graphs/LineGraph'
 import PieChart from '@/components/graphs/PieChart'
 import StatisticsFilterMap from '@/components/StatisticsFilterMap'
@@ -88,7 +88,7 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
           <div className="mx-auto my-4 grid max-w-[500px] gap-4 lg:max-w-full lg:grid-cols-3">
             <PieChart data={data} incidents={filteredIncidents}></PieChart>
             <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
-            <DummyGraph incidents={filteredIncidents} bounds={filteredBounds} />
+            <IncidentsStats data={data} incidents={filteredIncidents} bounds={filteredBounds} />
           </div>
           <IncidentTable data={data} incidents={filteredIncidents} />
         </>
