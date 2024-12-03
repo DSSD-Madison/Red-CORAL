@@ -87,12 +87,12 @@ const CategoryFilter = ({ id, data, dispatch }: filterProps) => {
   }
 
   return (
-    <BaseFilter icon={<LucideTags />} text={'Categorías: ' + filterString.join(', ')}>
+    <BaseFilter icon={<LucideTags />} text={'Categorías: ' + filterString.join(', ')} scrollOverflow={true}>
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>
       <div className="p-2">
-        <button onClick={() => selectAllCategories(true)} className="mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
+        <button onClick={() => selectAllCategories(true)} className="mb-2 mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
           Seleccionar todo
         </button>
         <button onClick={() => selectAllCategories(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
