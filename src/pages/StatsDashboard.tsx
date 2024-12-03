@@ -8,6 +8,7 @@ import IncidentsStats from '@/components/graphs/IncidentsStats'
 import LineGraph from '@/components/graphs/LineGraph'
 import PieChart from '@/components/graphs/PieChart'
 import StatisticsFilterMap from '@/components/StatisticsFilterMap'
+import { LucideMap } from 'lucide-react'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
 
@@ -76,7 +77,11 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
     <div className="h-full p-4">
       <div className="flow-row flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
-        <button className="m-1 rounded-md px-2 py-1 hover:bg-black hover:bg-opacity-10" onClick={() => setIsShowingMap(!isShowingMap)}>
+        <button
+          className="m-1 flex items-center rounded-md px-2 py-1 hover:bg-black hover:bg-opacity-10"
+          onClick={() => setIsShowingMap(!isShowingMap)}
+        >
+          <LucideMap size={20} className="mr-1" />
           {isShowingMap ? 'Ocultar Mapa' : 'Mostrar Mapa'}
         </button>
       </div>
