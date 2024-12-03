@@ -1,7 +1,6 @@
 // StatsDashboard.tsx
 import { DB, Incident } from 'types'
 import React, { useMemo, useReducer, useState } from 'react'
-import React, { useMemo, useReducer, useState } from 'react'
 import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
 import { calculateBounds } from '@/utils'
