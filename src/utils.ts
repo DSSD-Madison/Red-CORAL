@@ -122,5 +122,9 @@ export function filterIncidents(incidents: DB['Incidents'],
 }
 
 export function formatDateString(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    return 'Fecha inválida'
+  }
+  return date.toLocaleDateString('es-ES', { timeZone: 'UTC' })
 }
