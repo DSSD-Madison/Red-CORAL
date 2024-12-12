@@ -13,12 +13,13 @@ import {
   arrow,
   size,
 } from '@floating-ui/react'
+import { LucideChevronDown, LucideChevronRight } from 'lucide-react'
 
 /**
  * Represents a filter chip that can be clicked to open a dropdown with more options. Handles the dropdown state and visibility.
  */
 const BaseFilter = ({ icon, text, children, scrollOverflow }: { icon: any; text: string; children: ReactNode; scrollOverflow?: boolean }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const arrowRef = useRef(null)
 
   const { refs, floatingStyles, context } = useFloating({
@@ -56,6 +57,7 @@ const BaseFilter = ({ icon, text, children, scrollOverflow }: { icon: any; text:
       >
         <icon.type size={16} strokeWidth={1} />
         <span>{text}</span>
+        <span>{isOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}</span>
       </div>
       {isOpen && (
         <FloatingFocusManager context={context} modal={false}>
