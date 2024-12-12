@@ -36,6 +36,9 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
   const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
 
   useEffect(() => {
+    if (!date1) {
+      return
+    }
     switch (selectedDateFilter) {
       case DateFilterOption.IS:
         dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === date1 } })
@@ -47,6 +50,9 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
         dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 } })
         break
       case DateFilterOption.IS_BETWEEN:
+        if (!date2) {
+          return
+        }
         dispatch({
           type: 'UPDATE_FILTER',
           payload: { id: id, operation: (incident) => date1 <= incident.dateString && incident.dateString <= date2 },

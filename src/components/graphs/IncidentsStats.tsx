@@ -2,6 +2,44 @@ import { DB, Incident } from '@/types'
 import { calculateBounds } from '@/utils'
 import { useMemo } from 'react'
 
+export function calculateIncidentStats(data: DB, incidents: [string, Incident][]) {
+  const totalincidents = incidents.length
+
+  const countriesSet = new Set<string>()
+  const departmentsSet = new Set<string>()
+  const municipalitiesSet = new Set<string>()
+  const dates: Date[] = []
+  const typesSet = new Set<string>()
+
+  incidents.forEach(([_, incident]) => {
+    countriesSet.add(incident.country)
+    departmentsSet.add(incident.department)
+    municipalitiesSet.add(incident.municipality)
+    dates.push(new Date(incident.dateString))
+    typesSet.add(incident.typeID as string)
+  })
+
+  const earliestDate = new Date(Math.min(...dates.map((date) => date.getTime())))
+  const latestDate = new Date(Math.max(...dates.map((date) => date.getTime())))
+
+  const categoriesSet = new Set<string>()
+  typesSet.forEach((typeID) => {
+    const categoryID = data.Types[typeID].categoryID
+    categoriesSet.add(categoryID as string)
+  })
+
+  return {
+    totalincidents,
+    countriesCount: countriesSet.size,
+    departmentsCount: departmentsSet.size,
+    municipalitiesCount: municipalitiesSet.size,
+    earliestDate,
+    latestDate,
+    categoriesCount: categoriesSet.size,
+    typesCount: typesSet.size,
+  }
+}
+
 export default function IncidentsStats({
   data,
   incidents,
@@ -11,43 +49,7 @@ export default function IncidentsStats({
   incidents: [string, Incident][]
   bounds: ReturnType<typeof calculateBounds>
 }) {
-  const stats = useMemo(() => {
-    const totalincidents = bounds.totalCount
-
-    const countriesSet = new Set<string>()
-    const departmentsSet = new Set<string>()
-    const municipalitiesSet = new Set<string>()
-    const dates: Date[] = []
-    const typesSet = new Set<string>()
-
-    incidents.forEach(([_, incident]) => {
-      countriesSet.add(incident.country)
-      departmentsSet.add(incident.department)
-      municipalitiesSet.add(incident.municipality)
-      dates.push(new Date(incident.dateString))
-      typesSet.add(incident.typeID as string)
-    })
-
-    const earliestDate = new Date(Math.min(...dates.map((date) => date.getTime())))
-    const latestDate = new Date(Math.max(...dates.map((date) => date.getTime())))
-
-    const categoriesSet = new Set<string>()
-    typesSet.forEach((typeID) => {
-      const categoryID = data.Types[typeID].categoryID
-      categoriesSet.add(categoryID as string)
-    })
-
-    return {
-      totalincidents,
-      countriesCount: countriesSet.size,
-      departmentsCount: departmentsSet.size,
-      municipalitiesCount: municipalitiesSet.size,
-      earliestDate,
-      latestDate,
-      categoriesCount: categoriesSet.size,
-      typesCount: typesSet.size,
-    }
-  }, [incidents, bounds])
+  const stats = useMemo(() => calculateIncidentStats(data, incidents), [incidents, data])
 
   return (
     <div className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-y-auto rounded-lg bg-neutral-100 p-2">
