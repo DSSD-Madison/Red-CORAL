@@ -15,8 +15,6 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react'
 import { formatDateString } from '@/utils'
-import { calculateBounds } from '@/utils'
-import { DB, Incident } from '@/types'
 
 enum DateFilterOption {
   IS = 'es',
@@ -31,19 +29,16 @@ const possibleDateFilterOptions: DateFilterOption[] = [
   DateFilterOption.IS_BETWEEN,
 ]
 
-const FilterDate = ({ id, data, dispatch }: filterProps) => {
+const FilterDate = ({ id, dispatch }: filterProps) => {
   const [date1, setDate1] = useState('')
   const [date2, setDate2] = useState('')
   const [selectedDateFilter, setSelectedDateFilter] = useState(DateFilterOption.IS_BETWEEN)
   const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
 
   useEffect(() => {
-    if (!date1 && !date2) {
-      const bounds = calculateBounds(data.Incidents)
-      setDate1(bounds.earliestDate.toISOString().split('T')[0])
-      setDate2(bounds.latestDate.toISOString().split('T')[0])
+    if (!date1) {
+      return
     }
-
     switch (selectedDateFilter) {
       case DateFilterOption.IS:
         dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === date1 } })
@@ -55,6 +50,9 @@ const FilterDate = ({ id, data, dispatch }: filterProps) => {
         dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 } })
         break
       case DateFilterOption.IS_BETWEEN:
+        if (!date2) {
+          return
+        }
         dispatch({
           type: 'UPDATE_FILTER',
           payload: { id: id, operation: (incident) => date1 <= incident.dateString && incident.dateString <= date2 },
