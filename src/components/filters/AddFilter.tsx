@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import DateFilter from './DateFilter'
+import DescFilter from './DescFilter'
 import LatLongFilter from './LatLongFilter'
 import { filterDispatchType, filterProps } from '@/pages/StatsDashboard'
 import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
@@ -54,7 +55,7 @@ const possibleFilters: FilterInfo[] = [
   {
     name: 'Descripción',
     icon: LucideText,
-    component: DateFilter, // TODO: Change this to the actual component
+    component: DescFilter,
     description: 'Filtrar por palabras clave en la descripción',
   },
 ]
