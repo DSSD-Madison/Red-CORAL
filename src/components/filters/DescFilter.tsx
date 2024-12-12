@@ -26,7 +26,7 @@ const FilterDesc = ({ id, dispatch }: filterProps) => {
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>
-      <input type="text" onChange={(e) => setSearch(e.target.value)} value={search} className="rounded-md border border-gray-300 p-1" />
+      <input type="text" onChange={(e) => setSearch(e.target.value)} value={search} className="mr-6 rounded-md border border-gray-300 p-1" />
     </BaseFilter>
   )
 }
