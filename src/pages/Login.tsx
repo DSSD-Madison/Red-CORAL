@@ -33,7 +33,7 @@ const Login: React.FC<LoginProps> = ({ auth }) => {
   return (
     <div className="flex h-full w-full items-center justify-center">
       <div className="rounded-lg border border-gray-500 p-10 text-center">
-        <img src="banner.png" alt="logo de Red CORAL" className="mb-10 w-80" />
+        <img src="banner.png" alt="logo de Red CORAL" className="mx-auto mb-10 w-80" />
         <h2 className="mb-10 text-3xl font-bold">Inicio de sesión de administrador</h2>
         <form onSubmit={handleSignin} className="w-full text-left">
           <label htmlFor="password" className="mb-1 block text-sm">
