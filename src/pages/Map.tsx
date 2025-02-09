@@ -15,10 +15,6 @@ import LoadingOverlay from '@/components/LoadingOverlay'
 import { useLocation } from 'react-router-dom'
 import { useDB } from '../context/DBContext'
 
-interface MapProps {
-  isAdmin: boolean
-}
-
 function SetInitialBounds() {
   const location = useLocation()
   const map = useMap()
@@ -36,8 +32,8 @@ function SetInitialBounds() {
   return null
 }
 
-const Map: React.FC<MapProps> = ({ isAdmin }) => {
-  const { db: data, addIncident, deleteIncident, editIncident } = useDB()
+const Map: React.FC = () => {
+  const { addIncident, deleteIncident, editIncident, isLoggedIn: isAdmin, db } = useDB()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -46,7 +42,7 @@ const Map: React.FC<MapProps> = ({ isAdmin }) => {
     [90, 180],
   ]
 
-  const [selectedIncidentID, setSelectedIncidentID] = useState<keyof typeof data.Incidents | null>(null)
+  const [selectedIncidentID, setSelectedIncidentID] = useState<string | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
     hideTypes: [],
@@ -59,7 +55,7 @@ const Map: React.FC<MapProps> = ({ isAdmin }) => {
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
   const [location, setLocation] = useState<Incident['location'] | null>(null)
-  const [editID, setEditID] = useState<keyof typeof data.Incidents | null>(null)
+  const [editID, setEditID] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   async function submitIncident(
@@ -69,14 +65,14 @@ const Map: React.FC<MapProps> = ({ isAdmin }) => {
     country: Incident['country'],
     department: Incident['department'],
     municipality: Incident['municipality'],
-    incidentID: keyof typeof data.Incidents | null
+    incidentID: string | null
   ): Promise<boolean> {
     if (!dateString) {
-      alert('Please enter a date for the incident')
+      alert('Por, favor, selecciona una fecha para el incidente')
       return false
     }
 
-    if (!Object.keys(data.Types).some((id) => id == typeID)) {
+    if (!Object.keys(db.Types).some((id) => id == typeID)) {
       alert('Tipo de evento no válido, algo salió mal')
       return false
     }
@@ -149,7 +145,7 @@ const Map: React.FC<MapProps> = ({ isAdmin }) => {
           url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
         />
         <IncidentLayer
-          data={data}
+          data={db}
           selectedIncidentID={selectedIncidentID}
           setSelectedIncidentID={setSelectedIncidentID}
           ref={markersLayer}

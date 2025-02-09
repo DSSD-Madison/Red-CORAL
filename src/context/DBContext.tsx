@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app'
 import { getAuth, Auth } from 'firebase/auth'
 import { getFirestore, Firestore, collection, doc } from 'firebase/firestore'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
-import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData } from 'utils'
+import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData, calculateBounds } from 'utils'
 import { Incident, DB } from 'types'
 
 interface DBContextType {
@@ -66,7 +66,14 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   async function addIncident(incident: Incident): Promise<boolean> {
     try {
       const ref = await addDocWithTimestamp(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
-      data.Incidents[ref.id] = incident
+      setData((data) => ({
+        ...data,
+        Incidents: {
+          ...data.Incidents,
+          [ref.id]: incident,
+        },
+        filterBounds: calculateBounds(data.Incidents),
+      }))
       return true
     } catch (e) {
       console.error(e)
@@ -81,7 +88,13 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
     try {
       await setDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
-      data.Incidents[incidentID] = incident
+      setData((data) => ({
+        ...data,
+        Incidents: {
+          ...data.Incidents,
+          [incidentID]: incident,
+        },
+      }))
       return true
     } catch (e) {
       console.error(e)
@@ -97,7 +110,11 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
     try {
       await deleteDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`))
-      delete data.Incidents[incidentID]
+      setData((data) => {
+        const newData = { ...data }
+        delete newData.Incidents[incidentID]
+        return newData
+      })
       return true
     } catch (e) {
       console.error(e)

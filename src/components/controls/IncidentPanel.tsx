@@ -7,7 +7,7 @@ import { formatDateString, typeIDtoCategory, typeIDtoTypeName } from '@/utils'
 import { useDB } from '@/context/DBContext'
 
 interface InfoPanelControlProps {
-  incidentID: keyof DB['Incidents'] | null
+  incidentID: string | null
   onClose: () => void
   submitIncident: (
     dateString: Incident['dateString'],
@@ -16,7 +16,7 @@ interface InfoPanelControlProps {
     description: Incident['description'],
     department: Incident['department'],
     municipality: Incident['municipality'],
-    incidentID: keyof DB['Incidents'] | null
+    incidentID: string | null
   ) => Promise<boolean>
   location: Incident['location'] | null
   setLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
@@ -24,8 +24,8 @@ interface InfoPanelControlProps {
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   isAdmin: boolean
   deleteSelectedIncident: () => void
-  editID: keyof DB['Incidents'] | null
-  setEditID: React.Dispatch<React.SetStateAction<keyof DB['Incidents'] | null>>
+  editID: string | null
+  setEditID: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
