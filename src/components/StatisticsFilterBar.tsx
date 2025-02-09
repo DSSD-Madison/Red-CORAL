@@ -1,7 +1,6 @@
 import React from 'react'
 import AddFilter from './filters/AddFilter'
 import { filterDispatchType, filterType } from '@/pages/StatsDashboard'
-import { calculateBounds } from '@/utils'
 
 type statsFilterProps = {
   filters: filterType[]

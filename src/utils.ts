@@ -13,7 +13,6 @@ import {
   where,
 } from 'firebase/firestore'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
-import { useDB } from './context/DBContext'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
