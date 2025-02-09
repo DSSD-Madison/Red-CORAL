@@ -1,4 +1,4 @@
-import { DB, FilterBounds, Incident, MarkerFilters } from 'types'
+import { Category, DB, FilterBounds, Incident, MarkerFilters } from 'types'
 import {
   addDoc,
   setDoc,
@@ -13,6 +13,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
+import { useDB } from './context/DBContext'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
@@ -127,4 +128,12 @@ export function formatDateString(dateString: string): string {
     return 'Fecha inválida'
   }
   return date.toLocaleDateString('es-ES', { timeZone: 'UTC' })
+}
+
+export function typeIDtoTypeName(data: DB, typeID: string): string {
+  return data.Types[typeID].name
+}
+
+export function typeIDtoCategory(data: DB, typeID: string): Category {
+  return data.Categories[data.Types[typeID].categoryID];
 }

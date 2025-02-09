@@ -1,12 +1,14 @@
-import { formatDateString } from '@/utils'
-import { DB, Incident } from 'types'
-import { Link } from 'react-router-dom';
+import { formatDateString, typeIDtoCategory, typeIDtoTypeName } from '@/utils'
+import { Incident } from 'types'
+import { Link } from 'react-router-dom'
 import { LucideLink } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
+import { useDB } from '@/context/DBContext'
 
 const INCIDENT_INCREMENT = 10
 
-const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Incident][] }) => {
+const IncidentTable = ({ incidents }: { incidents: [string, Incident][] }) => {
+  const { db } = useDB()
   const [visibleCount, setVisibleCount] = useState(10)
   const tableContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -37,8 +39,8 @@ const IncidentTable = ({ data, incidents }: { data: DB; incidents: [string, Inci
           {incidents.slice(0, visibleCount).map(([id, incident]) => (
             <tr key={id} className="text-gray-500">
               <td className="break-words border-t border-black p-4 text-left">{incident.country}</td>
-              <td className="break-words border-t border-black p-4 text-left">{data.Types[incident.typeID].name}</td>
-              <td className="break-words border-t border-black p-4 text-left">{data.Categories[data.Types[incident.typeID].categoryID].name}</td>
+              <td className="break-words border-t border-black p-4 text-left">{typeIDtoTypeName(db, incident.typeID)}</td>
+              <td className="break-words border-t border-black p-4 text-left">{typeIDtoCategory(db, incident.typeID).name}</td>
               <td className="break-words border-t border-black p-4 text-left">{formatDateString(incident.dateString)}</td>
               <td className="max-w-[250px] break-words border-t border-black p-4 text-left lg:max-w-[33vw]">{incident.description}</td>
               <td className="break-words border-t border-black p-4 text-left">{incident.department}</td>

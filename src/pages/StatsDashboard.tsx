@@ -1,5 +1,5 @@
 // StatsDashboard.tsx
-import { DB, Incident } from 'types'
+import { Incident } from 'types'
 import React, { useMemo, useReducer, useState } from 'react'
 import IncidentTable from '@/components/IncidentTable'
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
@@ -9,12 +9,12 @@ import LineGraph from '@/components/graphs/LineGraph'
 import PieChart from '@/components/graphs/PieChart'
 import StatisticsFilterMap from '@/components/StatisticsFilterMap'
 import { LucideMap } from 'lucide-react'
+import { useDB } from '@/context/DBContext'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
 
 export type filterProps = {
   id: number
-  data: DB
   dispatch: React.Dispatch<filterDispatchType>
   operation?: (incident: Incident) => boolean
   state?: any
@@ -30,10 +30,6 @@ export type filterType = {
 type filterState = {
   index: number
   filters: filterType[]
-}
-
-interface StatsDashboardProps {
-  data: DB
 }
 
 /**
@@ -64,10 +60,11 @@ const filterReducer = (state: filterState, action: filterDispatchType) => {
   return newState
 }
 
-const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
+const StatsDashboard: React.FC = () => {
+  const { db } = useDB()
   const [isShowingMap, setIsShowingMap] = useState(false)
   const [filters, dispatchFilters] = useReducer(filterReducer, { index: 0, filters: [] })
-  const incidents: [string, Incident][] = Object.entries(data.Incidents)
+  const incidents: [string, Incident][] = Object.entries(db.Incidents)
   const sortedIncidents = useMemo(
     () =>
       incidents.sort(
@@ -93,17 +90,17 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ data }) => {
           {isShowingMap ? 'Ocultar Mapa' : 'Mostrar Mapa'}
         </button>
       </div>
-      <StatisticsFilterBar data={data} filters={filters.filters} dispatchFilters={dispatchFilters} />
+      <StatisticsFilterBar filters={filters.filters} dispatchFilters={dispatchFilters} />
       {isShowingMap ? (
-        <StatisticsFilterMap data={data} incidents={filteredIncidents} />
+        <StatisticsFilterMap incidents={filteredIncidents} />
       ) : (
         <>
           <div className="mx-auto my-4 grid max-w-[500px] gap-4 lg:max-w-full lg:grid-cols-3">
-            <PieChart data={data} incidents={filteredIncidents}></PieChart>
+            <PieChart incidents={filteredIncidents}></PieChart>
             <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
-            <IncidentsStats data={data} incidents={filteredIncidents} bounds={filteredBounds} />
+            <IncidentsStats incidents={filteredIncidents} bounds={filteredBounds} />
           </div>
-          <IncidentTable data={data} incidents={filteredIncidents} />
+          <IncidentTable incidents={filteredIncidents} />
         </>
       )}
     </div>

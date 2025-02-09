@@ -1,8 +1,9 @@
+import { useDB } from '@/context/DBContext'
 import { DB, Incident } from '@/types'
 import { calculateBounds } from '@/utils'
 import { useMemo } from 'react'
 
-export function calculateIncidentStats(data: DB, incidents: [string, Incident][]) {
+export function calculateIncidentStats(types: DB['Types'], incidents: [string, Incident][]) {
   const totalincidents = incidents.length
 
   const countriesSet = new Set<string>()
@@ -24,7 +25,7 @@ export function calculateIncidentStats(data: DB, incidents: [string, Incident][]
 
   const categoriesSet = new Set<string>()
   typesSet.forEach((typeID) => {
-    const categoryID = data.Types[typeID].categoryID
+    const categoryID = types[typeID].categoryID
     categoriesSet.add(categoryID as string)
   })
 
@@ -40,16 +41,9 @@ export function calculateIncidentStats(data: DB, incidents: [string, Incident][]
   }
 }
 
-export default function IncidentsStats({
-  data,
-  incidents,
-  bounds,
-}: {
-  data: DB
-  incidents: [string, Incident][]
-  bounds: ReturnType<typeof calculateBounds>
-}) {
-  const stats = useMemo(() => calculateIncidentStats(data, incidents), [incidents, data])
+export default function IncidentsStats({ incidents, bounds }: { incidents: [string, Incident][]; bounds: ReturnType<typeof calculateBounds> }) {
+  const { db } = useDB()
+  const stats = useMemo(() => calculateIncidentStats(db.Types, incidents), [incidents, db])
 
   return (
     <div className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-y-auto rounded-lg bg-neutral-100 p-2">

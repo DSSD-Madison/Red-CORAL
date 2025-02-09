@@ -3,13 +3,15 @@ import BaseFilter from './BaseFilter'
 import { LucideTags, LucideTrash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Incident } from '@/types'
+import { useDB } from '@/context/DBContext'
 
-const CategoryFilter = ({ id, data, dispatch }: filterProps) => {
+const CategoryFilter = ({ id, dispatch }: filterProps) => {
+  const { db } = useDB()
   const [hiddenCategories, setHiddenCategories] = useState<string[]>([])
   const [hiddenTypes, setHiddenTypes] = useState<string[]>([])
 
   const typesByCategory = useMemo(() => {
-    return Object.entries(data.Types).reduce(
+    return Object.entries(db.Types).reduce(
       (acc, [typeID, type]) => {
         if (!acc[type.categoryID]) {
           acc[type.categoryID] = []
@@ -19,7 +21,7 @@ const CategoryFilter = ({ id, data, dispatch }: filterProps) => {
       },
       {} as { [key: string]: { typeID: string; name: string }[] }
     )
-  }, [data.Types])
+  }, [db.Types])
 
   const handleCategoryChange = (categoryID: string, makeVisible: boolean) => {
     // Clobber the state of its descendants
@@ -49,14 +51,14 @@ const CategoryFilter = ({ id, data, dispatch }: filterProps) => {
       setHiddenCategories([])
       setHiddenTypes([])
     } else {
-      setHiddenCategories(Object.keys(data.Categories))
-      setHiddenTypes(Object.keys(data.Types))
+      setHiddenCategories(Object.keys(db.Categories))
+      setHiddenTypes(Object.keys(db.Types))
     }
   }
 
   const applyFilters = () => {
     const incidentNotHidden = (incident: Incident) =>
-      !hiddenCategories.includes(data.Types[incident.typeID as string].categoryID as string) && !hiddenTypes.includes(incident.typeID as string)
+      !hiddenCategories.includes(db.Types[incident.typeID as string].categoryID as string) && !hiddenTypes.includes(incident.typeID as string)
 
     dispatch({
       type: 'UPDATE_FILTER',
@@ -98,7 +100,7 @@ const CategoryFilter = ({ id, data, dispatch }: filterProps) => {
         <button onClick={() => selectAllCategories(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
           Deseleccionar todo
         </button>
-        {Object.entries(data.Categories).map(([categoryID, category]) => (
+        {Object.entries(db.Categories).map(([categoryID, category]) => (
           <details key={categoryID}>
             <summary>
               <input

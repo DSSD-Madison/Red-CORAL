@@ -1,19 +1,21 @@
-import { DB, Incident } from '@/types'
+import { useDB } from '@/context/DBContext'
+import { Incident } from '@/types'
 import * as d3 from 'd3'
 import { useRef, useEffect } from 'react'
 
-export default function PieChart({ incidents, data }: { incidents: [string, Incident][]; data: DB }) {
+export default function PieChart({ incidents }: { incidents: [string, Incident][] }) {
+  const { db } = useDB()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const d3Ref = useRef<SVGSVGElement | null>(null)
 
   //gets label and color for each incident
   const parsedData = incidents.map((incident) => {
     return {
-      label: data.Categories[data.Types[incident[1].typeID].categoryID].name,
-      color: data.Categories[data.Types[incident[1].typeID].categoryID].color,
+      label: db.Categories[db.Types[incident[1].typeID].categoryID].name,
+      color: db.Categories[db.Types[incident[1].typeID].categoryID].color,
     }
   })
-  let categories = Object.values(data.Categories).map((c) => c.name) //we want in this format: ["drugs", "robbery"]
+  let categories = Object.values(db.Categories).map((c) => c.name) //we want in this format: ["drugs", "robbery"]
 
   type Category = { label: string; value: number }
   let cleanData: Category[] = [] //should end up having this format for the pie chart: [{label: "drugs", value: 10} , {}]
@@ -66,7 +68,7 @@ export default function PieChart({ incidents, data }: { incidents: [string, Inci
         //helper function for color
         //reduce() iterates over the Categories array and builds an object "acc" so that
         //acc will be similar to a dictionary in the form: {"drugs": "black", "robbery": "white"}
-        const labelColorMap = Object.values(data.Categories).reduce(
+        const labelColorMap = Object.values(db.Categories).reduce(
           (acc, category) => {
             acc[category.name] = category.color
             return acc

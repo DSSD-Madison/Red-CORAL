@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { collection, getDocs, where, query, doc, Firestore } from 'firebase/firestore'
+import { collection, getDocs, where, query, doc } from 'firebase/firestore'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from '@/utils'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { SketchPicker } from 'react-color'
-import { Category, Type, DB } from '@/types'
+import { Category, Type } from '@/types'
+import { useDB } from '../context/DBContext'
 
-interface CrudProps {
-  firestore: Firestore
-  data: DB
-}
-
-const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
+const AdminCRUD: React.FC = () => {
+  const { firestore, db: data } = useDB()
   const [isLoading, setIsLoading] = useState(false)
   const [showAddEntity, setShowAddEntity] = useState(false)
   const [addEntityName, setAddEntityName] = useState('')

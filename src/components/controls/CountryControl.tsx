@@ -1,13 +1,14 @@
+import { useDB } from '@/context/DBContext'
 import React, { useEffect, useRef, useState } from 'react'
-import { DB, MarkerFilters } from 'types'
+import { MarkerFilters } from 'types'
 
 interface FilterControlProps {
-  data: DB
   filters: MarkerFilters
   setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
 }
 
-const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilters }) => {
+const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) => {
+  const { db } = useDB()
   const [isDropdownVisible, setDropdownVisible] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -25,7 +26,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
   }, [])
 
   const visibleDepartments = Object.fromEntries(
-    Object.entries(data.filterBounds.locations).filter(([country]) => !filters.hideCountries.includes(country))
+    Object.entries(db.filterBounds.locations).filter(([country]) => !filters.hideCountries.includes(country))
   )
 
   const handleConCheckboxChange = (key: string, checked: boolean) => {
@@ -67,7 +68,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
     } else {
       setFilters((filters) => ({
         ...filters,
-        hideCountries: Object.keys(data.filterBounds.locations),
+        hideCountries: Object.keys(db.filterBounds.locations),
       }))
     }
   }
@@ -119,7 +120,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ data, filters, setFilter
               </div>
             </div>
             <div className="h-max overflow-y-auto">
-              {Object.keys(data.filterBounds.locations)
+              {Object.keys(db.filterBounds.locations)
                 .sort()
                 .map((country) => (
                   <div key={country} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">

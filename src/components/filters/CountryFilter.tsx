@@ -3,21 +3,23 @@ import BaseFilter from './BaseFilter'
 import { LucideGlobe, LucideTrash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Incident } from '@/types'
+import { useDB } from '@/context/DBContext'
 
-const CountryFilter = ({ id, data, dispatch }: filterProps) => {
+const CountryFilter = ({ id, dispatch }: filterProps) => {
+  const { db } = useDB()
   const [hiddenCountries, setHiddenCountries] = useState<string[]>([])
   const [hiddenDepartments, setHiddenDepartments] = useState<string[]>([])
   const [hiddenMunicipalities, setHiddenMunicipalities] = useState<string[]>([])
 
   const departmentsByCountry = useMemo(() => {
-    return Object.entries(data.filterBounds.locations).reduce(
+    return Object.entries(db.filterBounds.locations).reduce(
       (acc, [country, departments]) => {
         acc[country] = Object.keys(departments)
         return acc
       },
       {} as Record<string, string[]>
     )
-  }, [data.filterBounds.locations])
+  }, [db.filterBounds.locations])
 
   const handleCountryChange = (country: string, makeVisible: boolean) => {
     // Clobber the state of its decendants
@@ -51,16 +53,13 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
     if (makeVisible && !hiddenMunicipalities.includes(key)) {
       // Then show the department but hide every other municipality in it
       handleDepartmentChange(country, department, true)
-      setHiddenMunicipalities((prev) => [
-        ...prev,
-        ...data.filterBounds.locations[country][department].map((m) => `${country} - ${department} - ${m}`),
-      ])
+      setHiddenMunicipalities((prev) => [...prev, ...db.filterBounds.locations[country][department].map((m) => `${country} - ${department} - ${m}`)])
     }
     // If all municipalities would be hidden, hide the department instead
     if (
       !makeVisible &&
       hiddenMunicipalities.filter((m) => m.startsWith(`${country} - ${department}`)).length + 1 ===
-        data.filterBounds.locations[country][department].length
+        db.filterBounds.locations[country][department].length
     ) {
       handleDepartmentChange(country, department, false)
     } else {
@@ -74,14 +73,12 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
       setHiddenDepartments([])
       setHiddenMunicipalities([])
     } else {
-      setHiddenCountries(Object.keys(data.filterBounds.locations))
+      setHiddenCountries(Object.keys(db.filterBounds.locations))
       setHiddenDepartments(
-        Object.entries(data.filterBounds.locations).flatMap(([country, departments]) =>
-          Object.keys(departments).map((dept) => `${country} - ${dept}`)
-        )
+        Object.entries(db.filterBounds.locations).flatMap(([country, departments]) => Object.keys(departments).map((dept) => `${country} - ${dept}`))
       )
       setHiddenMunicipalities(
-        Object.entries(data.filterBounds.locations).flatMap(([country, departments]) =>
+        Object.entries(db.filterBounds.locations).flatMap(([country, departments]) =>
           Object.entries(departments).flatMap(([dept, municipalities]) => municipalities.map((muni) => `${country} - ${dept} - ${muni}`))
         )
       )
@@ -139,7 +136,7 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
         <button onClick={() => selectAllCountries(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
           Deseleccionar todo
         </button>
-        {Object.entries(data.filterBounds.locations).map(([country, departments]) => (
+        {Object.entries(db.filterBounds.locations).map(([country, departments]) => (
           <details key={country}>
             <summary>
               <input

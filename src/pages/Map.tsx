@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import { DB, Incident, MarkerFilters } from 'types'
+import { Incident, MarkerFilters } from 'types'
 import SearchControl from '@/components/controls/SearchControl'
 import IncidentPanel from '@/components/controls/IncidentPanel'
 import ZoomControl from '@/components/controls/ZoomControl'
@@ -13,13 +13,10 @@ import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { useLocation } from 'react-router-dom'
+import { useDB } from '../context/DBContext'
 
 interface MapProps {
-  data: DB
   isAdmin: boolean
-  addIncident: (incident: Incident) => Promise<boolean>
-  deleteIncident: (incidentID: keyof DB['Incidents']) => Promise<boolean>
-  editIncident: (incidentID: keyof DB['Incidents'], incident: Incident) => Promise<boolean>
 }
 
 function SetInitialBounds() {
@@ -39,7 +36,8 @@ function SetInitialBounds() {
   return null
 }
 
-const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+const Map: React.FC<MapProps> = ({ isAdmin }) => {
+  const { db: data, addIncident, deleteIncident, editIncident } = useDB()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -48,7 +46,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     [90, 180],
   ]
 
-  const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
+  const [selectedIncidentID, setSelectedIncidentID] = useState<keyof typeof data.Incidents | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
     hideTypes: [],
@@ -61,7 +59,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
   const [location, setLocation] = useState<Incident['location'] | null>(null)
-  const [editID, setEditID] = useState<keyof DB['Incidents'] | null>(null)
+  const [editID, setEditID] = useState<keyof typeof data.Incidents | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   async function submitIncident(
@@ -71,7 +69,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     country: Incident['country'],
     department: Incident['department'],
     municipality: Incident['municipality'],
-    incidentID: keyof DB['Incidents'] | null
+    incidentID: keyof typeof data.Incidents | null
   ): Promise<boolean> {
     if (!dateString) {
       alert('Please enter a date for the incident')
@@ -163,7 +161,6 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
           editID={editID}
         />
         <IncidentPanel
-          data={data}
           incidentID={selectedIncidentID}
           onClose={onClose}
           submitIncident={submitIncident}
@@ -178,12 +175,12 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         />
         <Control prepend position="topleft">
           <div className="leaflet-bar">
-            <CategoryControl data={data} filters={filters} setFilters={setFilters} />
-            <CountryControl data={data} filters={filters} setFilters={setFilters} />
+            <CategoryControl filters={filters} setFilters={setFilters} />
+            <CountryControl filters={filters} setFilters={setFilters} />
           </div>
         </Control>
         <Control position="bottomleft">
-          <YearControl data={data} filters={filters} setFilters={setFilters} />
+          <YearControl filters={filters} setFilters={setFilters} />
           <SearchControl />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
