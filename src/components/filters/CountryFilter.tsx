@@ -161,7 +161,7 @@ const CountryFilter = ({ id, dispatch }: filterProps) => {
                   </summary>
                   <ul>
                     {departments[department].map((municipality) => (
-                      <li key={municipality} className="pl-4">
+                      <li key={municipality} className="pl-6">
                         <input
                           type="checkbox"
                           checked={

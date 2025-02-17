@@ -1,8 +1,9 @@
-import L, { LatLngTuple, PointTuple } from 'leaflet'
-import { forwardRef, useEffect, useMemo, useState } from 'react'
-import { useMap, Marker as LeafletMarker, LayerGroup, Tooltip } from 'react-leaflet'
+import L, { LatLngTuple } from 'leaflet'
+import { forwardRef, useEffect, useMemo } from 'react'
+import { useMap, Marker as LeafletMarker, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 import { filterIncidents, formatDateString, typeIDtoCategory, typeIDtoTypeName } from 'utils'
+import MarkerClusterGroup from 'react-leaflet-markercluster'
 
 interface IncidentLayerProps {
   data: DB
@@ -14,12 +15,12 @@ interface IncidentLayerProps {
   tmpSelected: boolean
   filters: MarkerFilters
   editID: keyof DB['Incidents'] | null
+  doNotGroup?: boolean
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
-  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID }, ref) => {
+  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID, doNotGroup }, ref) => {
     const map = useMap()
-    const [zoomLevel, setZoomLevel] = useState<number>(map.getZoom())
 
     const zoomToLocation = (location: Incident['location'] | null) => {
       if (!location) return
@@ -35,17 +36,12 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     // Registering event listeners for zoom and double click events.
     useEffect(() => {
-      const zoomHandler = () => {
-        setZoomLevel(() => map.getZoom())
-      }
       const clickHandler = (e: L.LeafletMouseEvent) => {
         if (!isAdmin || (!tmpSelected && editID == null)) return
         setTmpLocation(e.latlng)
       }
-      map.addEventListener('zoomend', zoomHandler)
       map.addEventListener('dblclick', clickHandler)
       return () => {
-        map.removeEventListener('zoomend', zoomHandler)
         map.removeEventListener('dblclick', clickHandler)
       }
     }, [isAdmin, tmpSelected, editID, map])
@@ -56,17 +52,15 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
 
-    const markerSize = (id: string): PointTuple => (id == selectedIncidentID ? [20, 20] : zoomLevel > 12 ? [15, 15] : [10, 10])
-
-    const markerSVG = (id: string, incident: Incident): string => {
-      const size = markerSize(id)[0]
-      return `<svg viewBox="0 0 18 18" width="${size}px" height="${size}px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+    const createMarkerSVG = (id: string, incident: Incident): string => {
+      return `<svg viewBox="0 0 18 18" width="15px" height="15px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
         <use href="#marker" />
       </svg>`
     }
 
     return (
-      <LayerGroup ref={ref}>
+      // @ts-expect-error: MarkerClusterGroup typings do not include children
+      <MarkerClusterGroup ref={ref} showCoverageOnHover={false} disableClusteringAtZoom={doNotGroup ? 0 : 13} spiderfyOnMaxZoom={false}>
         <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
           <symbol id="marker">
             <circle r="9" cx="9" cy="9" fill="currentColor" />
@@ -77,9 +71,9 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             key={id}
             position={incident.location}
             icon={L.divIcon({
-              iconSize: markerSize(id),
+              iconSize: [15, 15],
               className: '',
-              html: markerSVG(id, incident),
+              html: createMarkerSVG(id, incident),
             })}
             eventHandlers={{
               click: () => {
@@ -138,7 +132,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             })}
           />
         )}
-      </LayerGroup>
+      </MarkerClusterGroup>
     )
   }
 )
