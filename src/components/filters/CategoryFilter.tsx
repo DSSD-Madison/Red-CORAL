@@ -1,14 +1,20 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideTags, LucideTrash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Incident } from '@/types'
 import { useDB } from '@/context/DBContext'
 
-const CategoryFilter = ({ id, dispatch }: filterProps) => {
+interface CategoryFilterState extends filterProps {
+  state?: {
+    hiddenCategories: string[]
+    hiddenTypes: string[]
+  }
+}
+
+const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
   const { db } = useDB()
-  const [hiddenCategories, setHiddenCategories] = useState<string[]>([])
-  const [hiddenTypes, setHiddenTypes] = useState<string[]>([])
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>(state?.hiddenCategories || [])
+  const [hiddenTypes, setHiddenTypes] = useState<string[]>(state?.hiddenTypes || [])
 
   const typesByCategory = useMemo(() => {
     return Object.entries(db.Types).reduce(
@@ -54,19 +60,6 @@ const CategoryFilter = ({ id, dispatch }: filterProps) => {
       setHiddenCategories(Object.keys(db.Categories))
       setHiddenTypes(Object.keys(db.Types))
     }
-  }
-
-  const applyFilters = () => {
-    const incidentNotHidden = (incident: Incident) =>
-      !hiddenCategories.includes(db.Types[incident.typeID as string].categoryID as string) && !hiddenTypes.includes(incident.typeID as string)
-
-    dispatch({
-      type: 'UPDATE_FILTER',
-      payload: {
-        id: id,
-        operation: incidentNotHidden,
-      },
-    })
   }
 
   const removeThisFilter = () => {
@@ -128,7 +121,18 @@ const CategoryFilter = ({ id, dispatch }: filterProps) => {
             </div>
           </details>
         ))}
-        <button onClick={applyFilters} className="mt-4 rounded bg-blue-500 px-2 py-1 text-white">
+        <button
+          onClick={() =>
+            dispatch({
+              type: 'UPDATE_FILTER',
+              payload: {
+                id: id,
+                state: { hiddenCategories, hiddenTypes },
+              },
+            })
+          }
+          className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
+        >
           Aplicar
         </button>
       </div>
