@@ -1,15 +1,22 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideGlobe, LucideTrash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Incident } from '@/types'
 import { useDB } from '@/context/DBContext'
 
-const CountryFilter = ({ id, dispatch }: filterProps) => {
+interface CountryFilterState extends filterProps {
+  state?: {
+    hiddenCountries: string[]
+    hiddenDepartments: string[]
+    hiddenMunicipalities: string[]
+  }
+}
+
+const CountryFilter = ({ id, dispatch, state }: CountryFilterState) => {
   const { db } = useDB()
-  const [hiddenCountries, setHiddenCountries] = useState<string[]>([])
-  const [hiddenDepartments, setHiddenDepartments] = useState<string[]>([])
-  const [hiddenMunicipalities, setHiddenMunicipalities] = useState<string[]>([])
+  const [hiddenCountries, setHiddenCountries] = useState<string[]>(state?.hiddenCountries || [])
+  const [hiddenDepartments, setHiddenDepartments] = useState<string[]>(state?.hiddenDepartments || [])
+  const [hiddenMunicipalities, setHiddenMunicipalities] = useState<string[]>(state?.hiddenMunicipalities || [])
 
   const departmentsByCountry = useMemo(() => {
     return Object.entries(db.filterBounds.locations).reduce(
@@ -83,21 +90,6 @@ const CountryFilter = ({ id, dispatch }: filterProps) => {
         )
       )
     }
-  }
-
-  const applyFilters = () => {
-    const incidentNotHidden = (incident: Incident) =>
-      !hiddenCountries.includes(incident.country) &&
-      !hiddenDepartments.includes(`${incident.country} - ${incident.department}`) &&
-      !hiddenMunicipalities.includes(`${incident.country} - ${incident.department} - ${incident.municipality}`)
-
-    dispatch({
-      type: 'UPDATE_FILTER',
-      payload: {
-        id: id,
-        operation: incidentNotHidden,
-      },
-    })
   }
 
   const removeThisFilter = () => {
@@ -181,7 +173,18 @@ const CountryFilter = ({ id, dispatch }: filterProps) => {
             </div>
           </details>
         ))}
-        <button onClick={applyFilters} className="mt-4 rounded bg-blue-500 px-2 py-1 text-white">
+        <button
+          onClick={() =>
+            dispatch({
+              type: 'UPDATE_FILTER',
+              payload: {
+                id: id,
+                state: { hiddenCountries, hiddenDepartments, hiddenMunicipalities },
+              },
+            })
+          }
+          className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
+        >
           Aplicar
         </button>
       </div>

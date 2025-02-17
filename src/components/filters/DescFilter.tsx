@@ -1,21 +1,15 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideCalendar, LucideTrash2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
-const FilterDesc = ({ id, dispatch }: filterProps) => {
-  const [search, setSearch] = useState('')
-
-  useEffect(() => {
-    const lowercaseSearch = search.toLowerCase()
-    dispatch({
-      type: 'UPDATE_FILTER',
-      payload: {
-        id: id,
-        operation: (incident) => incident.description.toLowerCase().includes(lowercaseSearch),
-      },
-    })
-  }, [search])
+interface DescFilterState extends filterProps {
+  state?: {
+    search: string
+  }
+}
+const FilterDesc = ({ id, dispatch, state }: DescFilterState) => {
+  const [search, setSearch] = useState(state?.search || '')
 
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
@@ -27,6 +21,20 @@ const FilterDesc = ({ id, dispatch }: filterProps) => {
         <LucideTrash2 size={20} />
       </button>
       <input type="text" onChange={(e) => setSearch(e.target.value)} value={search} className="mr-6 rounded-md border border-gray-300 p-1" />
+      <button
+        onClick={() =>
+          dispatch({
+            type: 'UPDATE_FILTER',
+            payload: {
+              id: id,
+              state: { search: search },
+            },
+          })
+        }
+        className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
+      >
+        Aplicar
+      </button>
     </BaseFilter>
   )
 }

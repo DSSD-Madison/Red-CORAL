@@ -1,8 +1,5 @@
 import { useRef, useState } from 'react'
-import DateFilter from './DateFilter'
-import DescFilter from './DescFilter'
-import LatLongFilter from './LatLongFilter'
-import { filterDispatchType, filterProps } from '@/pages/StatsDashboard'
+import { filterDispatchType, filterType } from '@/filters/filterReducer'
 import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
 import {
   useFloating,
@@ -17,46 +14,43 @@ import {
   FloatingArrow,
   arrow,
 } from '@floating-ui/react'
-import CountryFilter from './CountryFilter'
-import CategoryFilter from './CategoryFilter'
-
 interface FilterInfo {
   name: string
   icon: any
-  component: React.FC<filterProps>
   description: string
+  type: filterType['type']
 }
 
 const possibleFilters: FilterInfo[] = [
   {
     name: 'Actividades',
     icon: LucideTags,
-    component: CategoryFilter,
     description: 'Filtrar por actividades y tipos de eventos',
+    type: 'category',
   },
   {
     name: 'Fecha',
     icon: LucideCalendar,
-    component: DateFilter,
     description: 'Filtrar por fecha',
+    type: 'date',
   },
   {
     name: 'Latitud/Longitud',
     icon: LucideMapPin,
-    component: LatLongFilter,
     description: 'Filtrar por ubicación',
+    type: 'latlong',
   },
   {
     name: 'Áreas',
     icon: LucideGlobe,
-    component: CountryFilter,
     description: 'Filtrar por áreas geográficas',
+    type: 'country',
   },
   {
     name: 'Descripción',
     icon: LucideText,
-    component: DescFilter,
     description: 'Filtrar por palabras clave en la descripción',
+    type: 'desc',
   },
 ]
 
@@ -64,7 +58,7 @@ function NewFilterButton({ filter, dispatch }: { filter: FilterInfo; dispatch: R
   return (
     <button
       className="block w-full rounded-md px-2 py-1 text-left hover:bg-black/5"
-      onClick={() => dispatch({ type: 'ADD_FILTER', payload: { component: filter.component } })}
+      onClick={() => dispatch({ type: 'ADD_FILTER', payload: { type: filter.type } })}
     >
       <span className="flex items-center">
         {filter.icon && <filter.icon size={12} className="mr-1" />}
