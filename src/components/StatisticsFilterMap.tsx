@@ -85,6 +85,7 @@ export default function StatisticsFilterMap({ incidents }: StatisticsFilterMapPr
           tmpSelected={false}
           filters={filters}
           editID={null}
+          doNotGroup={true}
         />
         <ZoomControl zoomLevel={2} setFilters={() => {}} />
         <SetInitialBounds />

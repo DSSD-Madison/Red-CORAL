@@ -15,10 +15,11 @@ interface IncidentLayerProps {
   tmpSelected: boolean
   filters: MarkerFilters
   editID: keyof DB['Incidents'] | null
+  doNotGroup?: boolean
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
-  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID }, ref) => {
+  ({ data, selectedIncidentID, setSelectedIncidentID, isAdmin, tmpLocation, setTmpLocation, tmpSelected, filters, editID, doNotGroup }, ref) => {
     const map = useMap()
 
     const zoomToLocation = (location: Incident['location'] | null) => {
@@ -59,7 +60,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     return (
       // @ts-expect-error: MarkerClusterGroup typings do not include children
-      <MarkerClusterGroup ref={ref} showCoverageOnHover={false}>
+      <MarkerClusterGroup ref={ref} showCoverageOnHover={false} disableClusteringAtZoom={doNotGroup ? 0 : 13} spiderfyOnMaxZoom={false}>
         <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
           <symbol id="marker">
             <circle r="9" cx="9" cy="9" fill="currentColor" />
