@@ -2,13 +2,13 @@ import L, { LatLngTuple } from 'leaflet'
 import { forwardRef, useEffect, useMemo } from 'react'
 import { useMap, Marker as LeafletMarker, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
-import { filterIncidents, formatDateString } from 'utils'
+import { filterIncidents, formatDateString, typeIDtoCategory, typeIDtoTypeName } from 'utils'
 import MarkerClusterGroup from 'react-leaflet-markercluster'
 
 interface IncidentLayerProps {
   data: DB
   selectedIncidentID: keyof DB['Incidents'] | null
-  setSelectedIncidentID: React.Dispatch<React.SetStateAction<keyof DB['Incidents'] | null>>
+  setSelectedIncidentID: React.Dispatch<React.SetStateAction<string | null>>
   isAdmin: boolean
   tmpLocation: Incident['location'] | null
   setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
@@ -108,11 +108,11 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                 </p>
                 <hr className="my-2 border-neutral-500" />
                 <p>
-                  <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}
+                  <span className="font-bold">Actividad:</span> {typeIDtoCategory(data, incident.typeID).name}
                   <span className="ml-1 inline-block h-[1em] w-[1em] rounded-full" style={{ backgroundColor: typeColors[incident.typeID] }} />
                 </p>
                 <p>
-                  <span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}
+                  <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(data, incident.typeID)}
                 </p>
               </div>
             </Tooltip>

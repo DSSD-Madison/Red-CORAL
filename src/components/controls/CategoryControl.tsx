@@ -1,13 +1,14 @@
+import { useDB } from '@/context/DBContext'
 import React, { useEffect, useRef, useState } from 'react'
-import { DB, MarkerFilters } from 'types'
+import { MarkerFilters } from 'types'
 
 interface YearControlProps {
-  data: DB
   filters: MarkerFilters
   setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
 }
 
-const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) => {
+const CategoryControl: React.FC<YearControlProps> = ({ filters, setFilters }) => {
+  const { db } = useDB()
   const [isDropdownVisible, setDropdownVisible] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -24,7 +25,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
     }
   }, [])
 
-  const typesByCategory = Object.entries(data.Types).reduce(
+  const typesByCategory = Object.entries(db.Types).reduce(
     (acc, [typeID, type]) => {
       if (!acc[type.categoryID]) {
         acc[type.categoryID] = []
@@ -60,7 +61,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
     } else {
       setFilters((filters) => ({
         ...filters,
-        hideCategories: Object.keys(data.Categories),
+        hideCategories: Object.keys(db.Categories),
       }))
     }
   }
@@ -128,7 +129,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
               </div>
             </div>
             <div className="h-max overflow-y-auto">
-              {Object.entries(data.Categories)
+              {Object.entries(db.Categories)
                 .sort(([_, { name: name1 }], [__, { name: name2 }]) => name1.localeCompare(name2))
                 .map(([id, { name, color }]) => (
                   <div key={id} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
@@ -165,7 +166,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ data, filters, setFilters
               </div>
             </div>
             <div className="h-[calc(100%-2rem)] overflow-y-auto px-1">
-              {Object.entries(data.Categories)
+              {Object.entries(db.Categories)
                 .filter(([catID]) => !filters.hideCategories.includes(catID))
                 .sort(([_, { name: name1 }], [__, { name: name2 }]) => name1.localeCompare(name2))
                 .map(([catID, { name: catName, color: catColor }]) => (
