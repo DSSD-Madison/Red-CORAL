@@ -70,10 +70,10 @@ export default function IncidentsStats({ incidents, bounds }: { incidents: [stri
       <hr className="my-2 rounded-full border border-neutral-300" />
       <div className="mt-2 grid grid-cols-2">
         <span>
-          <strong>Desde:</strong> {stats.earliestDate.toLocaleDateString('es-ES')}
+          <strong>Desde:</strong> {stats.earliestDate.toLocaleDateString('es-ES', { timeZone: 'UTC' })}
         </span>
         <span>
-          <strong>Hasta:</strong> {stats.latestDate.toLocaleDateString('es-ES')}
+          <strong>Hasta:</strong> {stats.latestDate.toLocaleDateString('es-ES', { timeZone: 'UTC' })}
         </span>
       </div>
       <hr className="my-2 rounded-full border border-neutral-300" />
