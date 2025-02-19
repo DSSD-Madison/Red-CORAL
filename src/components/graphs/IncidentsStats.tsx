@@ -79,7 +79,7 @@ export default function IncidentsStats({ incidents, bounds }: { incidents: [stri
       <hr className="my-2 rounded-full border border-neutral-300" />
       <div className="grid grid-cols-2">
         <span>
-          <strong>Categorías:</strong> {stats.categoriesCount}
+          <strong>Actividades:</strong> {stats.categoriesCount}
         </span>
         <span>
           <strong>Tipos:</strong> {stats.typesCount}
