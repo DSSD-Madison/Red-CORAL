@@ -23,7 +23,7 @@ const IncidentTable = ({ incidents }: { incidents: [string, Incident][] }) => {
   }, [])
 
   return (
-    <div ref={tableContainerRef} className="my-4 w-full overflow-x-auto rounded-lg border border-black p-4 md:w-full">
+    <div ref={tableContainerRef} className="w-full overflow-x-auto rounded-lg border border-gray-300 p-4 md:w-full">
       <table className="w-full min-w-[800px] table-auto md:min-w-0 md:max-w-full">
         <tbody>
           <tr>

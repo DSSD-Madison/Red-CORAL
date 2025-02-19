@@ -51,7 +51,8 @@ const BaseFilter = ({ icon, text, children, scrollOverflow }: { icon: any; text:
     <>
       <div
         onClick={() => setIsOpen(true)}
-        className={'flex items-center gap-2 rounded-full border border-gray-300 px-3' + (isOpen ? ' border-blue-600 text-blue-600' : '')}
+        className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 transition-all hover:shadow-md
+          ${isOpen ? ' border-blue-600 bg-blue-100 text-blue-600 shadow-md' : 'border-gray-300 hover:bg-gray-100'}`}
         ref={refs.setReference}
         {...getReferenceProps()}
       >
