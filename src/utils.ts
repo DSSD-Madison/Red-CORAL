@@ -136,3 +136,7 @@ export function typeIDtoTypeName(data: DB, typeID: string): string {
 export function typeIDtoCategory(data: DB, typeID: string): Category {
   return data.Categories[data.Types[typeID].categoryID];
 }
+
+export function typeIDtoCategoryID(data: DB, typeID: string): keyof DB['Categories'] {
+  return data.Types[typeID].categoryID
+}

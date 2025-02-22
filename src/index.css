@@ -29,3 +29,19 @@ body {
   transition-timing-function: linear;
   transition-duration: 100ms;
 }
+
+.marker-pie {
+  background-clip: padding-box;
+  border-radius: 100%;
+}
+.marker-pie div {
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+}
+
+.leaflet-bar a {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+}

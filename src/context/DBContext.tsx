@@ -34,6 +34,10 @@ const auth = getAuth(app)
 const firestore = getFirestore(app)
 const storage = getStorage(app, import.meta.env.VITE_FIREBASE_STORAGE_BUCKET)
 
+// exporting DB outside of React to be used in other files
+// fixed the issue of DB being undefined in the marker cluster icon functions
+export let db: DB
+
 export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   const [data, setData] = useState<DB>({
     Categories: {},
@@ -125,8 +129,9 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   async function fetchData(isAdmin: boolean) {
     setIsLoading(() => true)
     getData(isAdmin, storage, firestore)
-      .then((db) => {
-        setData(db)
+      .then((fetchedData) => {
+        setData(fetchedData)
+        db = fetchedData
       })
       .catch((e) => {
         console.error(e)
@@ -136,6 +141,10 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
         setIsLoading(() => false)
       })
   }
+
+  useEffect(() => {
+    db = data
+  }, [data])
 
   const value: DBContextType = {
     db: data,

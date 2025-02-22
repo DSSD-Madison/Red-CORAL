@@ -9,6 +9,7 @@ import { LatLngBoundsLiteral, LatLngTuple } from 'leaflet'
 import CategoryControl from '@/components/controls/CategoryControl'
 import YearControl from '@/components/controls/YearControl'
 import CountryControl from '@/components/controls/CountryControl'
+import MarkerTypeControl from '@/components/controls/MarkerTypeControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
 import LoadingOverlay from '@/components/LoadingOverlay'
@@ -54,6 +55,7 @@ const Map: React.FC = () => {
   })
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
+  const [markerDisplayType, setMarkerDisplayType] = useState<'single' | 'group' | 'groupPie'>('groupPie')
   const [location, setLocation] = useState<Incident['location'] | null>(null)
   const [editID, setEditID] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -88,7 +90,6 @@ const Map: React.FC = () => {
         alert('No se pudo editar el incidente')
         return false
       }
-      setIsLoading(false)
       alert('Incidente editado con éxito')
     } else {
       if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
@@ -96,14 +97,14 @@ const Map: React.FC = () => {
         alert('No se pudo crear el incidente')
         return false
       }
-      setIsLoading(false)
       alert('Incidente creado con éxito')
     }
+    setIsLoading(false)
     return true
   }
 
   async function deleteSelectedIncident() {
-    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') == false) {
+    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') === false) {
       return
     }
     setIsLoading(true)
@@ -155,6 +156,7 @@ const Map: React.FC = () => {
           tmpSelected={tmpSelected}
           filters={filters}
           editID={editID}
+          markerType={markerDisplayType}
         />
         <IncidentPanel
           incidentID={selectedIncidentID}
@@ -173,6 +175,7 @@ const Map: React.FC = () => {
           <div className="leaflet-bar">
             <CategoryControl filters={filters} setFilters={setFilters} />
             <CountryControl filters={filters} setFilters={setFilters} />
+            <MarkerTypeControl markerType={markerDisplayType} setMarkerType={setMarkerDisplayType} />
           </div>
         </Control>
         <Control position="bottomleft">
