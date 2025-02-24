@@ -47,14 +47,14 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
         const width = 400
         const height = 200
 
-        svg.attr('preserveAspectRatio', 'xMinYMin meet').attr('viewBox', `0 0 ${width} ${height}`)
+        svg.attr('viewBox', `0 0 ${width} ${height}`)
 
         const g = svg.append('g')
         g.append('g').attr('class', 'slices')
         g.append('g').attr('class', 'labels')
         g.append('g').attr('class', 'lines')
 
-        g.attr('transform', 'translate(' + width / 4 + ',' + (10 + height / 2) + ')')
+        g.attr('transform', 'translate(' + width / 4 + ',' + height / 2 + ')')
 
         const radius = Math.min(width, height) / 2
 
@@ -138,9 +138,9 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
   }, [incidents])
 
   return (
-    <div ref={containerRef} className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-hidden rounded-lg bg-neutral-100">
-      <h2 className="absolute left-2 top-2">Categorías de incidentes</h2>
-      <svg className="absolute inset-0" ref={d3Ref}></svg>
+    <div ref={containerRef} className="relative min-w-[270px] flex-1 rounded-lg bg-neutral-100">
+      <h2 className="ml-2 mt-2">Categorías de incidentes</h2>
+      <svg width="400" className="aspect-[2] w-full" ref={d3Ref}></svg>
     </div>
   )
 }
