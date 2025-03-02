@@ -3,11 +3,11 @@ import { useMap } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 import AutocompleteSearch from 'components/AutocompleteSearch'
 import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
-import { formatDateString } from '@/utils'
+import { formatDateString, typeIDtoCategory, typeIDtoTypeName } from '@/utils'
+import { useDB } from '@/context/DBContext'
 
 interface InfoPanelControlProps {
-  data: DB
-  incidentID: keyof DB['Incidents'] | null
+  incidentID: string | null
   onClose: () => void
   submitIncident: (
     dateString: Incident['dateString'],
@@ -16,7 +16,7 @@ interface InfoPanelControlProps {
     description: Incident['description'],
     department: Incident['department'],
     municipality: Incident['municipality'],
-    incidentID: keyof DB['Incidents'] | null
+    incidentID: string | null
   ) => Promise<boolean>
   location: Incident['location'] | null
   setLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
@@ -24,12 +24,11 @@ interface InfoPanelControlProps {
   setTmpSelected: React.Dispatch<React.SetStateAction<boolean>>
   isAdmin: boolean
   deleteSelectedIncident: () => void
-  editID: keyof DB['Incidents'] | null
-  setEditID: React.Dispatch<React.SetStateAction<keyof DB['Incidents'] | null>>
+  editID: string | null
+  setEditID: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
-  data,
   incidentID,
   onClose,
   submitIncident,
@@ -42,6 +41,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   setEditID,
 }) => {
   const map = useMap()
+  const { db } = useDB()
   const [description, setDescription] = useState<Incident['description']>('')
   const [country, setCountry] = useState<Incident['country']>('')
   const [countryCode, setCountryCode] = useState<string>('')
@@ -50,7 +50,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const [department, setDepartment] = useState<Incident['department']>('')
   const [departmentBounds, setDepartmentBounds] = useState<number[] | undefined>(undefined)
   const [dateString, setDateString] = useState<Incident['dateString']>('')
-  const [typeID, setTypeID] = useState<keyof DB['Types']>('')
+  const [typeID, setTypeID] = useState<string>('')
   const [catID, setCatID] = useState<keyof DB['Categories']>('')
 
   const disableZoom = () => {
@@ -95,7 +95,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
     }
   }
 
-  const incident = incidentID ? data.Incidents[incidentID] : null
+  const incident = incidentID ? db.Incidents[incidentID] : null
 
   useEffect(() => {
     if (editID != null) {
@@ -103,7 +103,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
         setDescription(incident.description)
         setDateString(incident.dateString)
         setTypeID(incident.typeID)
-        setCatID(data.Types[incident.typeID].categoryID)
+        setCatID(db.Types[incident.typeID].categoryID)
         setCountry(incident.country)
         setLocation(incident.location)
         setCountry(incident.country)
@@ -163,9 +163,9 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     <span className="font-bold">Fecha:</span> {formatDateString(incident.dateString)} <br />
                   </>
                 )}
-                <span className="font-bold">Actividad:</span> {data.Categories[data.Types[incident.typeID].categoryID].name}
+                <span className="font-bold">Actividad:</span> {typeIDtoCategory(db, incident.typeID).name}
                 <br />
-                <span className="font-bold">Tipo de evento:</span> {data.Types[incident.typeID].name}
+                <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(db, incident.typeID)}
               </div>
               <span className="font-bold">Descripción:</span>
               <div className="mb-6 break-words text-shade-01">{incident.description}</div>
@@ -270,7 +270,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   className="mb-2 w-full rounded-md bg-white/70 p-2"
                 >
                   <option value="">--Por favor elige una actividad--</option>
-                  {Object.entries(data.Categories).map(([id, category]) => (
+                  {Object.entries(db.Categories).map(([id, category]) => (
                     <option key={id} value={id}>
                       {category.name}
                     </option>
@@ -281,7 +281,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 <br />
                 <select value={typeID} onChange={(e) => setTypeID(e.target.value)} className="mb-2 w-full rounded-md bg-white/70 p-2">
                   <option value="">--Por favor elige un tipo de evento--</option>
-                  {Object.entries(data.Types).map(
+                  {Object.entries(db.Types).map(
                     ([id, type]) =>
                       type.categoryID == catID && (
                         <option key={id} value={id}>

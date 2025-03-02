@@ -1,4 +1,4 @@
-import { DB, FilterBounds, Incident, MarkerFilters } from 'types'
+import { Category, DB, FilterBounds, Incident, MarkerFilters } from 'types'
 import {
   addDoc,
   setDoc,
@@ -122,5 +122,21 @@ export function filterIncidents(incidents: DB['Incidents'],
 }
 
 export function formatDateString(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('es-ES', { timeZone: 'UTC' })
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    return 'Fecha inválida'
+  }
+  return date.toLocaleDateString('es-ES', { timeZone: 'UTC' })
+}
+
+export function typeIDtoTypeName(data: DB, typeID: string): string {
+  return data.Types[typeID].name
+}
+
+export function typeIDtoCategory(data: DB, typeID: string): Category {
+  return data.Categories[data.Types[typeID].categoryID];
+}
+
+export function typeIDtoCategoryID(data: DB, typeID: string): keyof DB['Categories'] {
+  return data.Types[typeID].categoryID
 }

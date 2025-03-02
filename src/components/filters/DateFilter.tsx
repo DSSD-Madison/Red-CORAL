@@ -1,7 +1,7 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideCalendar, LucideChevronDown, LucideChevronRight, LucideTrash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   useFloating,
   offset,
@@ -22,6 +22,7 @@ enum DateFilterOption {
   IS_AFTER = 'es posterior',
   IS_BETWEEN = 'es entre',
 }
+
 const possibleDateFilterOptions: DateFilterOption[] = [
   DateFilterOption.IS,
   DateFilterOption.IS_BEFORE,
@@ -29,31 +30,20 @@ const possibleDateFilterOptions: DateFilterOption[] = [
   DateFilterOption.IS_BETWEEN,
 ]
 
-const FilterDate = ({ id, dispatch }: filterProps) => {
-  const [date1, setDate1] = useState('')
-  const [date2, setDate2] = useState('')
-  const [selectedDateFilter, setSelectedDateFilter] = useState(DateFilterOption.IS_BETWEEN)
-  const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
+interface DateFilterState extends filterProps {
+  state?: {
+    date1: string
+    date2: string
+    selectedDateFilter: DateFilterOption
+    isDateFilterSelectOpen: boolean
+  }
+}
 
-  useEffect(() => {
-    switch (selectedDateFilter) {
-      case DateFilterOption.IS:
-        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString === date1 } })
-        break
-      case DateFilterOption.IS_BEFORE:
-        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString < date1 } })
-        break
-      case DateFilterOption.IS_AFTER:
-        dispatch({ type: 'UPDATE_FILTER', payload: { id: id, operation: (incident) => incident.dateString > date1 } })
-        break
-      case DateFilterOption.IS_BETWEEN:
-        dispatch({
-          type: 'UPDATE_FILTER',
-          payload: { id: id, operation: (incident) => date1 <= incident.dateString && incident.dateString <= date2 },
-        })
-        break
-    }
-  }, [date1, date2, selectedDateFilter])
+const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
+  const [date1, setDate1] = useState(state?.date1 || '')
+  const [date2, setDate2] = useState(state?.date2 || '')
+  const [selectedDateFilter, setSelectedDateFilter] = useState(state?.selectedDateFilter || DateFilterOption.IS_BETWEEN)
+  const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(state?.isDateFilterSelectOpen || false)
 
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
@@ -132,6 +122,20 @@ const FilterDate = ({ id, dispatch }: filterProps) => {
           </>
         )}
       </div>
+      <button
+        onClick={() =>
+          dispatch({
+            type: 'UPDATE_FILTER',
+            payload: {
+              id: id,
+              state: { date1, date2, selectedDateFilter, isDateFilterSelectOpen },
+            },
+          })
+        }
+        className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
+      >
+        Aplicar
+      </button>
     </BaseFilter>
   )
 }

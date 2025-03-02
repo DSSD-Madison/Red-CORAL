@@ -6,9 +6,9 @@ import { DB, Incident, MarkerFilters } from '@/types'
 import { useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
+import { useDB } from '@/context/DBContext'
 
 interface StatisticsFilterMapProps {
-  data: DB
   incidents: [string, Incident][]
 }
 
@@ -29,7 +29,8 @@ function SetInitialBounds() {
   return null
 }
 
-export default function StatisticsFilterMap({ data, incidents }: StatisticsFilterMapProps) {
+export default function StatisticsFilterMap({ incidents }: StatisticsFilterMapProps) {
+  const { db } = useDB()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -49,12 +50,11 @@ export default function StatisticsFilterMap({ data, incidents }: StatisticsFilte
 
   // Create a shallow copy of the database and inject filtered incidents into it
   const filteredData: DB = { Types: {}, Categories: {}, Incidents: {}, filterBounds: { minYear: 0, maxYear: 0, locations: {} } }
-  Object.assign(filteredData, data)
+  Object.assign(filteredData, db)
   filteredData.Incidents = Object.fromEntries(incidents)
 
-  // HACK: The height modifier is a little ugly to prevent the map from overflowing the screen at the bottom. Is there a better way to do this?
   return (
-    <div className="relative mt-4 h-[calc(100%-5.5rem)]">
+    <div className="relative h-[calc(100vh-128px)] w-full grow overflow-hidden rounded-lg border border-gray-300">
       <MapContainer
         className="z-0 h-full w-full focus-visible:outline-none"
         center={[20, 0]}
@@ -85,6 +85,7 @@ export default function StatisticsFilterMap({ data, incidents }: StatisticsFilte
           tmpSelected={false}
           filters={filters}
           editID={null}
+          markerType="single"
         />
         <ZoomControl zoomLevel={2} setFilters={() => {}} />
         <SetInitialBounds />

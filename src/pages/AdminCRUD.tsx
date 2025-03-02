@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { collection, getDocs, where, query, doc, Firestore } from 'firebase/firestore'
+import { collection, getDocs, where, query, doc } from 'firebase/firestore'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp } from '@/utils'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { SketchPicker } from 'react-color'
-import { Category, Type, DB } from '@/types'
+import { Category, Type } from '@/types'
+import { useDB } from '../context/DBContext'
 
-interface CrudProps {
-  firestore: Firestore
-  data: DB
-}
-
-const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
+const AdminCRUD: React.FC = () => {
+  const { firestore, db: data } = useDB()
   const [isLoading, setIsLoading] = useState(false)
   const [showAddEntity, setShowAddEntity] = useState(false)
   const [addEntityName, setAddEntityName] = useState('')
@@ -171,25 +168,25 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
   }
 
   return (
-    <div className="relative flex h-full flex-col p-4">
+    <div className="relative flex h-full flex-col gap-2 px-4 py-2">
       {/* Title displaying current entity type */}
       <h2 className="text-2xl font-semibold">{entityTypesSpanish[entityType]}</h2>
-      <div className="my-4">
+      <div>
         {entityType == 'Types' && (
-          <button onClick={() => toggleEntityType('Categories')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
+          <button onClick={() => toggleEntityType('Categories')} className="mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Actividad
           </button>
         )}
         {entityType == 'Categories' && (
-          <button onClick={() => toggleEntityType('Types')} className="mb-4 mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
+          <button onClick={() => toggleEntityType('Types')} className="mr-2 rounded-full bg-shade-01 px-4 py-2 text-white shadow-md">
             Cambiar a Tipo de Evento
           </button>
         )}
       </div>
       {/* Two column layout for forms */}
-      <div className="mb-4 grid min-h-0 flex-1 grid-cols-[1fr,1fr] gap-4 overflow-clip">
+      <div className="min-h-0 flex-1 grid-cols-[1fr,1fr] gap-4 overflow-auto md:grid md:overflow-hidden">
         {/* Scrollable list view */}
-        <div className="mb-6 max-w-4xl overflow-x-auto overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
+        <div className="max-w-4xl overflow-auto" style={{ scrollbarGutter: 'stable' }}>
           {Object.entries(data[entityType])
             .sort((a, b) => {
               const entity1 = a[1]
@@ -236,7 +233,7 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
             ))}
         </div>
         {showAddEntity && (
-          <div className="col-start-2">
+          <div className="col-start-2 max-h-full overflow-auto">
             <input
               type="text"
               className="mb-2 mr-2 rounded-md border border-gray-300 px-3 py-2"
@@ -265,10 +262,10 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
         )}
         {/* Edit form */}
         {modifyEntityId && (
-          <div className="col-start-2 mb-4 flex flex-col items-center">
+          <div className="col-start-2 mb-4 flex max-h-full flex-col items-center gap-2 overflow-auto">
             <input
               type="text"
-              className="mb-2 mr-2 rounded-md border border-gray-300 px-3 py-2"
+              className="rounded-md border border-gray-300 px-3 py-2"
               placeholder={`nuevo nombre`}
               value={modifyEntityName}
               onChange={(e) => setModifyEntityName(e.target.value)}
@@ -278,7 +275,7 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
               <select
                 value={modifyEntitySecondProperty}
                 onChange={(e) => setModifyEntitySecondProperty(e.target.value)}
-                className="mb-2 mr-2 rounded-md border border-gray-300 p-2 text-center"
+                className="rounded-md border border-gray-300 p-2 text-center"
               >
                 <option value="">--Por favor elige una actividad--</option>
                 {Object.entries(data.Categories).map(([id, cat]) => (
@@ -288,23 +285,23 @@ const AdminCRUD: React.FC<CrudProps> = ({ firestore, data }) => {
                 ))}
               </select>
             )}
-            <button onClick={handleModifyEntity} className="mr-2 rounded-full bg-green px-4 py-2 text-white shadow-md">
+            <button onClick={handleModifyEntity} className="rounded-full bg-green px-4 py-2 text-white shadow-md">
               Guardar Cambios
             </button>
-            <button onClick={() => setModifyEntityId(null)} className="mr-2 rounded-full bg-red px-4 py-2 text-white shadow-md">
+            <button onClick={() => setModifyEntityId(null)} className="rounded-full bg-red px-4 py-2 text-white shadow-md">
               Cancelar
             </button>
           </div>
         )}
       </div>
 
-      <div className="mb-4 flex flex-col items-center">
+      <div className="flex flex-col items-center">
         <button
           onClick={() => {
             setModifyEntityId(null)
             setShowAddEntity(true)
           }}
-          className="mb-4 rounded-full bg-red px-4 py-2 text-white shadow-md"
+          className="rounded-full bg-red px-4 py-2 text-white shadow-md"
         >
           Agregar
         </button>

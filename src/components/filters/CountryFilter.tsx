@@ -1,23 +1,32 @@
-import { filterProps } from '@/pages/StatsDashboard'
+import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
 import { LucideGlobe, LucideTrash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Incident } from '@/types'
+import { useDB } from '@/context/DBContext'
 
-const CountryFilter = ({ id, data, dispatch }: filterProps) => {
-  const [hiddenCountries, setHiddenCountries] = useState<string[]>([])
-  const [hiddenDepartments, setHiddenDepartments] = useState<string[]>([])
-  const [hiddenMunicipalities, setHiddenMunicipalities] = useState<string[]>([])
+interface CountryFilterState extends filterProps {
+  state?: {
+    hiddenCountries: string[]
+    hiddenDepartments: string[]
+    hiddenMunicipalities: string[]
+  }
+}
+
+const CountryFilter = ({ id, dispatch, state }: CountryFilterState) => {
+  const { db } = useDB()
+  const [hiddenCountries, setHiddenCountries] = useState<string[]>(state?.hiddenCountries || [])
+  const [hiddenDepartments, setHiddenDepartments] = useState<string[]>(state?.hiddenDepartments || [])
+  const [hiddenMunicipalities, setHiddenMunicipalities] = useState<string[]>(state?.hiddenMunicipalities || [])
 
   const departmentsByCountry = useMemo(() => {
-    return Object.entries(data.filterBounds.locations).reduce(
+    return Object.entries(db.filterBounds.locations).reduce(
       (acc, [country, departments]) => {
         acc[country] = Object.keys(departments)
         return acc
       },
       {} as Record<string, string[]>
     )
-  }, [data.filterBounds.locations])
+  }, [db.filterBounds.locations])
 
   const handleCountryChange = (country: string, makeVisible: boolean) => {
     // Clobber the state of its decendants
@@ -51,16 +60,13 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
     if (makeVisible && !hiddenMunicipalities.includes(key)) {
       // Then show the department but hide every other municipality in it
       handleDepartmentChange(country, department, true)
-      setHiddenMunicipalities((prev) => [
-        ...prev,
-        ...data.filterBounds.locations[country][department].map((m) => `${country} - ${department} - ${m}`),
-      ])
+      setHiddenMunicipalities((prev) => [...prev, ...db.filterBounds.locations[country][department].map((m) => `${country} - ${department} - ${m}`)])
     }
     // If all municipalities would be hidden, hide the department instead
     if (
       !makeVisible &&
       hiddenMunicipalities.filter((m) => m.startsWith(`${country} - ${department}`)).length + 1 ===
-        data.filterBounds.locations[country][department].length
+        db.filterBounds.locations[country][department].length
     ) {
       handleDepartmentChange(country, department, false)
     } else {
@@ -68,19 +74,22 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
     }
   }
 
-  const applyFilters = () => {
-    const incidentNotHidden = (incident: Incident) =>
-      !hiddenCountries.includes(incident.country) &&
-      !hiddenDepartments.includes(`${incident.country} - ${incident.department}`) &&
-      !hiddenMunicipalities.includes(`${incident.country} - ${incident.department} - ${incident.municipality}`)
-
-    dispatch({
-      type: 'UPDATE_FILTER',
-      payload: {
-        id: id,
-        operation: incidentNotHidden,
-      },
-    })
+  const selectAllCountries = (selectAll: boolean) => {
+    if (selectAll) {
+      setHiddenCountries([])
+      setHiddenDepartments([])
+      setHiddenMunicipalities([])
+    } else {
+      setHiddenCountries(Object.keys(db.filterBounds.locations))
+      setHiddenDepartments(
+        Object.entries(db.filterBounds.locations).flatMap(([country, departments]) => Object.keys(departments).map((dept) => `${country} - ${dept}`))
+      )
+      setHiddenMunicipalities(
+        Object.entries(db.filterBounds.locations).flatMap(([country, departments]) =>
+          Object.entries(departments).flatMap(([dept, municipalities]) => municipalities.map((muni) => `${country} - ${dept} - ${muni}`))
+        )
+      )
+    }
   }
 
   const removeThisFilter = () => {
@@ -108,12 +117,18 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
   }
 
   return (
-    <BaseFilter icon={<LucideGlobe />} text={'Áreas: ' + filterString.join(', ')}>
+    <BaseFilter icon={<LucideGlobe />} text={'Áreas: ' + filterString.join(', ')} scrollOverflow={true}>
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>
       <div className="p-2">
-        {Object.entries(data.filterBounds.locations).map(([country, departments]) => (
+        <button onClick={() => selectAllCountries(true)} className="mb-2 mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
+          Seleccionar todo
+        </button>
+        <button onClick={() => selectAllCountries(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
+          Deseleccionar todo
+        </button>
+        {Object.entries(db.filterBounds.locations).map(([country, departments]) => (
           <details key={country}>
             <summary>
               <input
@@ -138,7 +153,7 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
                   </summary>
                   <ul>
                     {departments[department].map((municipality) => (
-                      <li key={municipality} className="pl-4">
+                      <li key={municipality} className="pl-6">
                         <input
                           type="checkbox"
                           checked={
@@ -158,7 +173,18 @@ const CountryFilter = ({ id, data, dispatch }: filterProps) => {
             </div>
           </details>
         ))}
-        <button onClick={applyFilters} className="mt-4 rounded bg-blue-500 px-2 py-1 text-white">
+        <button
+          onClick={() =>
+            dispatch({
+              type: 'UPDATE_FILTER',
+              payload: {
+                id: id,
+                state: { hiddenCountries, hiddenDepartments, hiddenMunicipalities },
+              },
+            })
+          }
+          className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
+        >
           Aplicar
         </button>
       </div>

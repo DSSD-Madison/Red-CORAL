@@ -1,7 +1,9 @@
-import { Auth, signOut } from 'firebase/auth'
+import { useDB } from '@/context/DBContext'
+import { signOut } from 'firebase/auth'
 import { Link, useLocation } from 'react-router-dom'
 
-const Navigation = ({ isLoggedIn, auth }: { isLoggedIn: boolean; auth: Auth }) => {
+const Navigation = () => {
+  const { isLoggedIn, auth } = useDB()
   const { pathname } = useLocation()
   const NavLink = ({ to, text }: { to: string; text: string }) => (
     <Link to={to} className={`px-2 py-1 hover:bg-black/10 ${pathname === to && 'font-bold'}`}>

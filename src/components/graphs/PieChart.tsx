@@ -1,19 +1,21 @@
-import { DB, Incident } from '@/types'
+import { useDB } from '@/context/DBContext'
+import { Incident } from '@/types'
 import * as d3 from 'd3'
 import { useRef, useEffect } from 'react'
 
-export default function PieChart({ incidents, data }: { incidents: [string, Incident][]; data: DB }) {
+export default function PieChart({ incidents }: { incidents: [string, Incident][] }) {
+  const { db } = useDB()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const d3Ref = useRef<SVGSVGElement | null>(null)
 
   //gets label and color for each incident
   const parsedData = incidents.map((incident) => {
     return {
-      label: data.Categories[data.Types[incident[1].typeID].categoryID].name,
-      color: data.Categories[data.Types[incident[1].typeID].categoryID].color,
+      label: db.Categories[db.Types[incident[1].typeID].categoryID].name,
+      color: db.Categories[db.Types[incident[1].typeID].categoryID].color,
     }
   })
-  let categories = Object.values(data.Categories).map((c) => c.name) //we want in this format: ["drugs", "robbery"]
+  let categories = Object.values(db.Categories).map((c) => c.name) //we want in this format: ["drugs", "robbery"]
 
   type Category = { label: string; value: number }
   let cleanData: Category[] = [] //should end up having this format for the pie chart: [{label: "drugs", value: 10} , {}]
@@ -45,7 +47,7 @@ export default function PieChart({ incidents, data }: { incidents: [string, Inci
         const width = 400
         const height = 200
 
-        svg.attr('preserveAspectRatio', 'xMinYMin meet').attr('viewBox', `0 0 ${width} ${height}`)
+        svg.attr('viewBox', `0 0 ${width} ${height}`)
 
         const g = svg.append('g')
         g.append('g').attr('class', 'slices')
@@ -66,7 +68,7 @@ export default function PieChart({ incidents, data }: { incidents: [string, Inci
         //helper function for color
         //reduce() iterates over the Categories array and builds an object "acc" so that
         //acc will be similar to a dictionary in the form: {"drugs": "black", "robbery": "white"}
-        const labelColorMap = Object.values(data.Categories).reduce(
+        const labelColorMap = Object.values(db.Categories).reduce(
           (acc, category) => {
             acc[category.name] = category.color
             return acc
@@ -136,8 +138,9 @@ export default function PieChart({ incidents, data }: { incidents: [string, Inci
   }, [incidents])
 
   return (
-    <div ref={containerRef} className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-hidden rounded-lg bg-neutral-100">
-      <svg className="absolute inset-0" ref={d3Ref}></svg>
+    <div ref={containerRef} className="relative min-w-[270px] flex-1 rounded-lg bg-neutral-100">
+      <h2 className="ml-2 mt-2">Categorías de incidentes</h2>
+      <svg width="400" className="aspect-[2] w-full" ref={d3Ref}></svg>
     </div>
   )
 }

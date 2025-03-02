@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import { DB, Incident, MarkerFilters } from 'types'
+import { Incident, MarkerFilters } from 'types'
 import SearchControl from '@/components/controls/SearchControl'
 import IncidentPanel from '@/components/controls/IncidentPanel'
 import ZoomControl from '@/components/controls/ZoomControl'
@@ -9,18 +9,12 @@ import { LatLngBoundsLiteral, LatLngTuple } from 'leaflet'
 import CategoryControl from '@/components/controls/CategoryControl'
 import YearControl from '@/components/controls/YearControl'
 import CountryControl from '@/components/controls/CountryControl'
+import MarkerTypeControl from '@/components/controls/MarkerTypeControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { useLocation } from 'react-router-dom'
-
-interface MapProps {
-  data: DB
-  isAdmin: boolean
-  addIncident: (incident: Incident) => Promise<boolean>
-  deleteIncident: (incidentID: keyof DB['Incidents']) => Promise<boolean>
-  editIncident: (incidentID: keyof DB['Incidents'], incident: Incident) => Promise<boolean>
-}
+import { useDB } from '../context/DBContext'
 
 function SetInitialBounds() {
   const location = useLocation()
@@ -39,7 +33,8 @@ function SetInitialBounds() {
   return null
 }
 
-const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, editIncident }) => {
+const Map: React.FC = () => {
+  const { addIncident, deleteIncident, editIncident, isLoggedIn: isAdmin, db } = useDB()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -48,7 +43,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     [90, 180],
   ]
 
-  const [selectedIncidentID, setSelectedIncidentID] = useState<keyof DB['Incidents'] | null>(null)
+  const [selectedIncidentID, setSelectedIncidentID] = useState<string | null>(null)
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
     hideTypes: [],
@@ -60,8 +55,9 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
   })
   const [tmpSelected, setTmpSelected] = useState<boolean>(false)
   const markersLayer = useRef(null)
+  const [markerDisplayType, setMarkerDisplayType] = useState<'single' | 'group' | 'groupPie'>('groupPie')
   const [location, setLocation] = useState<Incident['location'] | null>(null)
-  const [editID, setEditID] = useState<keyof DB['Incidents'] | null>(null)
+  const [editID, setEditID] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   async function submitIncident(
@@ -71,14 +67,14 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
     country: Incident['country'],
     department: Incident['department'],
     municipality: Incident['municipality'],
-    incidentID: keyof DB['Incidents'] | null
+    incidentID: string | null
   ): Promise<boolean> {
     if (!dateString) {
-      alert('Please enter a date for the incident')
+      alert('Por, favor, selecciona una fecha para el incidente')
       return false
     }
 
-    if (!Object.keys(data.Types).some((id) => id == typeID)) {
+    if (!Object.keys(db.Types).some((id) => id == typeID)) {
       alert('Tipo de evento no válido, algo salió mal')
       return false
     }
@@ -94,7 +90,6 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         alert('No se pudo editar el incidente')
         return false
       }
-      setIsLoading(false)
       alert('Incidente editado con éxito')
     } else {
       if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
@@ -102,14 +97,14 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         alert('No se pudo crear el incidente')
         return false
       }
-      setIsLoading(false)
       alert('Incidente creado con éxito')
     }
+    setIsLoading(false)
     return true
   }
 
   async function deleteSelectedIncident() {
-    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') == false) {
+    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') === false) {
       return
     }
     setIsLoading(true)
@@ -151,7 +146,7 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
           url={`https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${apiKey}`}
         />
         <IncidentLayer
-          data={data}
+          data={db}
           selectedIncidentID={selectedIncidentID}
           setSelectedIncidentID={setSelectedIncidentID}
           ref={markersLayer}
@@ -161,9 +156,9 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
           tmpSelected={tmpSelected}
           filters={filters}
           editID={editID}
+          markerType={markerDisplayType}
         />
         <IncidentPanel
-          data={data}
           incidentID={selectedIncidentID}
           onClose={onClose}
           submitIncident={submitIncident}
@@ -178,12 +173,13 @@ const Map: React.FC<MapProps> = ({ data, isAdmin, addIncident, deleteIncident, e
         />
         <Control prepend position="topleft">
           <div className="leaflet-bar">
-            <CategoryControl data={data} filters={filters} setFilters={setFilters} />
-            <CountryControl data={data} filters={filters} setFilters={setFilters} />
+            <CategoryControl filters={filters} setFilters={setFilters} />
+            <CountryControl filters={filters} setFilters={setFilters} />
+            <MarkerTypeControl markerType={markerDisplayType} setMarkerType={setMarkerDisplayType} />
           </div>
         </Control>
         <Control position="bottomleft">
-          <YearControl data={data} filters={filters} setFilters={setFilters} />
+          <YearControl filters={filters} setFilters={setFilters} />
           <SearchControl />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />

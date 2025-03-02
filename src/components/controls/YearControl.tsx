@@ -1,18 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { DB, MarkerFilters } from 'types'
+import { MarkerFilters } from 'types'
 import RangeSlider from 'react-range-slider-input'
 import 'react-range-slider-input/dist/style.css'
+import { useDB } from '@/context/DBContext'
 
 interface YearControlProps {
-  data: DB
   filters: MarkerFilters
   setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
 }
 
-const YearControl: React.FC<YearControlProps> = ({ data, filters, setFilters }) => {
+const YearControl: React.FC<YearControlProps> = ({ filters, setFilters }) => {
+  const { db } = useDB()
   const [isDropdownVisible, setDropdownVisible] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { minYear, maxYear } = data.filterBounds
+  const { minYear, maxYear } = db.filterBounds
 
   const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
