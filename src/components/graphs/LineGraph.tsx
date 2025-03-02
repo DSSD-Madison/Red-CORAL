@@ -17,9 +17,9 @@ export default function LineGraph({ incidents, bounds }: { incidents: [string, I
 
         const width = 400
         const height = 200
-        const margin = { top: 45, right: 30, bottom: 30, left: 40 }
+        const margin = { top: 5, right: 30, bottom: 30, left: 40 }
 
-        svg.attr('preserveAspectRatio', 'xMinYMin meet').attr('viewBox', `0 0 ${width} ${height}`)
+        svg.attr('viewBox', `0 0 ${width} ${height}`)
 
         // Modify the grouping logic based on groupBy
         const groupedData = Array.from(
@@ -93,20 +93,18 @@ export default function LineGraph({ incidents, bounds }: { incidents: [string, I
   }, [incidents, bounds, groupBy])
 
   return (
-    <div ref={containerRef} className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-hidden rounded-lg bg-neutral-100">
-      <svg className="absolute inset-0" ref={d3Ref}></svg>
-      <h2 className="m-2">Incidentes a lo largo del tiempo</h2>
-      <select
-        value={groupBy}
-        className="absolute right-2 top-2 rounded-full border border-black bg-transparent px-2"
-        onChange={(e) => setGroupBy(e.target.value as any)}
-      >
-        <option value="year">Año</option>
-        <option value="quarter">Trimestre</option>
-        <option value="month">Mes</option>
-        <option value="week">Semana</option>
-        <option value="day">Día</option>
-      </select>
+    <div ref={containerRef} className="relative min-w-[250px] flex-1 rounded-lg bg-neutral-100">
+      <div className="flex items-center justify-between p-2">
+        <h2>Incidentes a lo largo del tiempo</h2>
+        <select value={groupBy} className="rounded-full border border-black bg-transparent px-2" onChange={(e) => setGroupBy(e.target.value as any)}>
+          <option value="year">Año</option>
+          <option value="quarter">Trimestre</option>
+          <option value="month">Mes</option>
+          <option value="week">Semana</option>
+          <option value="day">Día</option>
+        </select>
+      </div>
+      <svg width="400" className="aspect-[2] w-full" ref={d3Ref}></svg>
     </div>
   )
 }

@@ -46,7 +46,7 @@ export default function IncidentsStats({ incidents, bounds }: { incidents: [stri
   const stats = useMemo(() => calculateIncidentStats(db.Types, incidents), [incidents, db])
 
   return (
-    <div className="relative aspect-[2/1] min-w-[300px] flex-grow overflow-y-auto rounded-lg bg-neutral-100 p-2 text-sm">
+    <div className="relative min-w-max flex-1 rounded-lg bg-neutral-100 p-2">
       <h2>Estadísticas de incidentes</h2>
       <p>
         <span className="font-bold">{bounds.totalCount}</span> incidentes reportados

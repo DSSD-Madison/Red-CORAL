@@ -51,7 +51,7 @@ const StatsDashboard: React.FC = () => {
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
       </div>
       <StatisticsFilterBar filters={filters.filters} dispatchFilters={dispatchFilters} />
-      <div className="grid max-w-[500px] gap-4 xl:max-w-full xl:grid-cols-3">
+      <div className="flex w-full flex-wrap gap-4">
         <PieChart incidents={filteredIncidents}></PieChart>
         <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <IncidentsStats incidents={filteredIncidents} bounds={filteredBounds} />
