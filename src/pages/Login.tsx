@@ -7,6 +7,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ auth }) => {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -16,7 +17,7 @@ const Login: React.FC<LoginProps> = ({ auth }) => {
 
     try {
       setIsLoading(true)
-      await signInWithEmailAndPassword(auth, 'admin@gmail.com', password)
+      await signInWithEmailAndPassword(auth, username, password)
       setIsLoading(false)
       setError(null)
     } catch (error) {
@@ -36,19 +37,27 @@ const Login: React.FC<LoginProps> = ({ auth }) => {
         <img src="banner.png" alt="Red CORAL logo" className="mb-10 w-80" />
         <h2 className="mb-10 text-3xl font-bold">Admin Login</h2>
         <form onSubmit={handleSignin} className="w-full text-left">
-          <label htmlFor="password" className="mb-1 block text-sm">
-            Password
+          <label htmlFor="username" className="mb-1 block text-sm">
+            Username
           </label>
-          <div className="mb-2 flex justify-between gap-2">
+          <div className="mb-2 flex flex-col gap-2">
+            <input
+              type="text"
+              className="w-full rounded-md border border-gray-500 px-2 py-1"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              id="username"
+            />
             <input
               type="password"
-              className="flex-grow rounded-md border border-gray-500 px-2 py-1"
+              className="w-full rounded-md border border-gray-500 px-2 py-1"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               id="password"
             />
-            <button type="submit" className="rounded-md border-0 bg-harvard-putty px-2 py-1 hover:bg-harvard-slate">
+            <button type="submit" className="w-full rounded-md border-0 bg-harvard-putty px-2 py-1 hover:bg-harvard-slate">
               Sign In
             </button>
           </div>
