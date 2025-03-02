@@ -23,8 +23,10 @@ const ViewButton: React.FC<any> = ({ currentView, setCurrentView, view, label })
   )
 }
 
+
 const StatsDashboard: React.FC = () => {
   const { db } = useDB()
+
   const [filters, dispatchFilters] = useReducer(filterReducer, initialFilterState)
   const [currentView, setCurrentView] = useState<'incidents' | 'municipalities' | 'departments' | 'activities' | 'types' | 'map'>('incidents')
   const incidents: [string, Incident][] = Object.entries(db.Incidents)
@@ -40,7 +42,7 @@ const StatsDashboard: React.FC = () => {
     [sortedIncidents, filters]
   )
   const filteredBounds = calculateBounds(Object.fromEntries(filteredIncidents))
-
+  
   return (
     <div className="flex min-h-full flex-col gap-2 p-4">
       <div className="flow-row flex items-center justify-between">

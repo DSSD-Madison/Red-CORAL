@@ -26,8 +26,52 @@ type reducerType = {
 }
 
 export const initialFilterState: reducerType = {
-  index: 0,
-  filters: [],
+  "index": 6,
+  "filters": [
+      {
+          "id": 0,
+          "type": "category",
+          "state": {
+              "hiddenCategories": [],
+              "hiddenTypes": []
+          }
+      },
+      {
+          "id": 1,
+          "type": "date",
+          "state": {
+              "date1": "",
+              "date2": "",
+              "selectedDateFilter": "es entre",
+              "isDateFilterSelectOpen": false
+          }
+      },
+      {
+          "id": 3,
+          "type": "latlong",
+          "state": {
+              "latitude": "",
+              "longitude": "",
+              "radius": ""
+          }
+      },
+      {
+          "id": 4,
+          "type": "country",
+          "state": {
+              "hiddenCountries": [],
+              "hiddenDepartments": [],
+              "hiddenMunicipalities": []
+          }
+      },
+      {
+          "id": 5,
+          "type": "desc",
+          "state": {
+              "search": ""
+          }
+      }
+  ]
 }
 
 export const filterReducer = (state: reducerType, action: filterDispatchType): reducerType => {
@@ -75,6 +119,9 @@ filterOperations['country'] = (incident: Incident, state: any) => {
 filterOperations['date'] = (incident: Incident, state: any) => {
   if (!state) return true
   const { date1, date2, selectedDateFilter } = state
+  if (!date1) {
+    return true
+  }
   switch (selectedDateFilter) {
     case 'es':
       return incident.dateString === date1
@@ -84,7 +131,7 @@ filterOperations['date'] = (incident: Incident, state: any) => {
       return incident.dateString > date1
     case 'es entre':
       if (!date2) {
-        return false
+        return true
       }
       return date1 <= incident.dateString && incident.dateString <= date2
     default:
