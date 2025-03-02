@@ -26,8 +26,52 @@ type reducerType = {
 }
 
 export const initialFilterState: reducerType = {
-  index: 0,
-  filters: [],
+  "index": 6,
+  "filters": [
+      {
+          "id": 0,
+          "type": "category",
+          "state": {
+              "hiddenCategories": [],
+              "hiddenTypes": []
+          }
+      },
+      {
+          "id": 1,
+          "type": "date",
+          "state": {
+              "date1": "",
+              "date2": "",
+              "selectedDateFilter": "es entre",
+              "isDateFilterSelectOpen": false
+          }
+      },
+      {
+          "id": 3,
+          "type": "latlong",
+          "state": {
+              "latitude": "",
+              "longitude": "",
+              "radius": ""
+          }
+      },
+      {
+          "id": 4,
+          "type": "country",
+          "state": {
+              "hiddenCountries": [],
+              "hiddenDepartments": [],
+              "hiddenMunicipalities": []
+          }
+      },
+      {
+          "id": 5,
+          "type": "desc",
+          "state": {
+              "search": ""
+          }
+      }
+  ]
 }
 
 export const filterReducer = (state: reducerType, action: filterDispatchType): reducerType => {
