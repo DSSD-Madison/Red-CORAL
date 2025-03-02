@@ -119,6 +119,9 @@ filterOperations['country'] = (incident: Incident, state: any) => {
 filterOperations['date'] = (incident: Incident, state: any) => {
   if (!state) return true
   const { date1, date2, selectedDateFilter } = state
+  if (!date1) {
+    return true
+  }
   switch (selectedDateFilter) {
     case 'es':
       return incident.dateString === date1
@@ -128,7 +131,7 @@ filterOperations['date'] = (incident: Incident, state: any) => {
       return incident.dateString > date1
     case 'es entre':
       if (!date2) {
-        return false
+        return true
       }
       return date1 <= incident.dateString && incident.dateString <= date2
     default:

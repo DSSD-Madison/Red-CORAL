@@ -26,10 +26,8 @@ const ViewButton: React.FC<any> = ({ currentView, setCurrentView, view, label })
 
 const StatsDashboard: React.FC = () => {
   const { db } = useDB()
-  
-  const [filters, dispatchFilters] = useReducer(filterReducer, initialFilterState)
-  console.log(filters)
 
+  const [filters, dispatchFilters] = useReducer(filterReducer, initialFilterState)
   const [currentView, setCurrentView] = useState<'incidents' | 'municipalities' | 'departments' | 'activities' | 'types' | 'map'>('incidents')
   const incidents: [string, Incident][] = Object.entries(db.Incidents)
   const sortedIncidents = useMemo(
