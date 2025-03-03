@@ -1,6 +1,6 @@
 // StatsDashboard.tsx
 import { Incident } from 'types'
-import React, { useMemo, useReducer, useState } from 'react'
+import React, { useEffect, useMemo, useReducer, useState } from 'react'
 import IncidentTable from '@/components/IncidentTable'
 import ThingTable from '@/components/ThingTable' // <-- new import
 import StatisticsFilterBar from '@/components/StatisticsFilterBar'
@@ -23,11 +23,24 @@ const ViewButton: React.FC<any> = ({ currentView, setCurrentView, view, label })
   )
 }
 
+function getFilterState() {
+  const local = localStorage.getItem('filterState')
+  console.log(local)
+  if (local) {
+    return JSON.parse(local)
+  }
+  return initialFilterState
+}
 
 const StatsDashboard: React.FC = () => {
   const { db } = useDB()
+  const [filters, dispatchFilters] = useReducer(filterReducer, getFilterState())
 
-  const [filters, dispatchFilters] = useReducer(filterReducer, initialFilterState)
+  useEffect(() => {
+    if (filters === initialFilterState) return
+    localStorage.setItem('filterState', JSON.stringify(filters))
+  }, [filters])
+
   const [currentView, setCurrentView] = useState<'incidents' | 'municipalities' | 'departments' | 'activities' | 'types' | 'map'>('incidents')
   const incidents: [string, Incident][] = Object.entries(db.Incidents)
   const sortedIncidents = useMemo(
