@@ -58,8 +58,9 @@ const StatsDashboard: React.FC = () => {
   
   return (
     <div className="flex min-h-full flex-col gap-2 p-4">
-      <div className="flow-row flex items-center justify-between">
+      <div className="flex-row flex items-start justify-between">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
+        <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
       </div>
       <StatisticsFilterBar filters={filters.filters} dispatchFilters={dispatchFilters} />
       <div className="flex w-full flex-wrap gap-4">
