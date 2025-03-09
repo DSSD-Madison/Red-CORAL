@@ -48,9 +48,9 @@ const NOTFilter = ({ id, dispatch, state }: NOTFilterState) => {
     <BaseFilter
       icon={<CircleOff />}
       text={
-        eState.filters.length == 0
+        eState.filters.length === 0
           ? 'NO'
-          : eState.filters.length == 1
+          : eState.filters.length === 1
             ? 'NO: ' + eState.filters.length + ' filtro'
             : 'NO: ' + eState.filters.length + ' filtros'
       }

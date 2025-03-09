@@ -48,9 +48,9 @@ const ORFilter = ({ id, dispatch, state }: ORFilterState) => {
     <BaseFilter
       icon={<Blend />}
       text={
-        eState.filters.length == 0
+        eState.filters.length === 0
           ? 'O'
-          : eState.filters.length == 1
+          : eState.filters.length === 1
             ? 'O: ' + eState.filters.length + ' filtro'
             : 'O: ' + eState.filters.length + ' filtros'
       }

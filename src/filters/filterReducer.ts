@@ -102,6 +102,8 @@ export const filterComponents: Record<filterType["type"], React.FC<filterProps>>
   or: ORFilter
 }
 
+// filters return true if the incident should be shown, false if it should be hidden, and undefined if the filter isn't initialized yet
+// if one uninitialized filter returns true for everything, that produces bad behavior in the NOT (false for everything) and OR filters (true for everything)
 export const filterOperations: Record<filterType["type"], (incident: Incident, state: any, db: DB) => boolean | undefined> = {
   category: (incident: Incident, state: any, db: DB) => {
     if (!state) return undefined
@@ -160,11 +162,13 @@ export const filterOperations: Record<filterType["type"], (incident: Incident, s
     return true
   },
   not: (incident: Incident, state: NOTFilterState["state"], db: DB) => {
-    if (!state) return undefined
+    if (!state || state.filters.length === 0) return undefined
+    // return false if any of the filters return true
     return state.filters.some((filter) => filterOperations[filter.type](incident, filter.state, db) !== true)
   },
   or: (incident: Incident, state: ORFilterState["state"], db: DB) => {
-    if (!state) return undefined
+    if (!state || state.filters.length === 0) return undefined
+    // return true if any of the filters return true
     return state.filters.some((filter) => filterOperations[filter.type](incident, filter.state, db) !== false)
   }
 }
