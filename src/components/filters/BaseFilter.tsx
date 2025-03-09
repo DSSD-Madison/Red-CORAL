@@ -30,8 +30,9 @@ const BaseFilter = ({ icon, text, children, scrollOverflow }: { icon: any; text:
       offset(10),
       shift({ padding: 10 }),
       size({
-        apply({ availableHeight, elements }) {
+        apply({ availableWidth, availableHeight, elements }) {
           Object.assign(elements.floating.style, {
+            maxWidth: `${Math.max(0, availableWidth - 20)}px`,
             maxHeight: `${Math.max(0, availableHeight - 10)}px`,
           })
         },

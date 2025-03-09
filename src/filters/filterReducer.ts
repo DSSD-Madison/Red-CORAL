@@ -5,6 +5,8 @@ import CountryFilter from '@/components/filters/CountryFilter'
 import DateFilter from '@/components/filters/DateFilter'
 import DescFilter from '@/components/filters/DescFilter'
 import LatLongFilter, { calculateDistance } from '@/components/filters/LatLongFilter'
+import NOTFilter, { NOTFilterState } from '@/components/filters/NOTFilter'
+import ORFilter, { ORFilterState } from '@/components/filters/ORFilter'
 
 export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
 
@@ -16,7 +18,7 @@ export type filterProps = {
 
 export type filterType = {
   id: number
-  type: 'category' | 'country' | 'date' | 'desc' | 'latlong'
+  type: 'category' | 'country' | 'date' | 'desc' | 'latlong' | 'not' | 'or'
   state?: any
 }
 
@@ -26,7 +28,7 @@ type reducerType = {
 }
 
 export const initialFilterState: reducerType = {
-  "index": 6,
+  "index": 5,
   "filters": [
       {
           "id": 0,
@@ -47,7 +49,7 @@ export const initialFilterState: reducerType = {
           }
       },
       {
-          "id": 3,
+        "id": 2,
           "type": "latlong",
           "state": {
               "latitude": "",
@@ -56,7 +58,7 @@ export const initialFilterState: reducerType = {
           }
       },
       {
-          "id": 4,
+        "id": 3,
           "type": "country",
           "state": {
               "hiddenCountries": [],
@@ -65,7 +67,7 @@ export const initialFilterState: reducerType = {
           }
       },
       {
-          "id": 5,
+        "id": 4,
           "type": "desc",
           "state": {
               "search": ""
@@ -90,72 +92,78 @@ export const filterReducer = (state: reducerType, action: filterDispatchType): r
   }
 }
 
-export const filterComponents: { [key: string]: React.FC<filterProps> } = {
+export const filterComponents: Record<filterType["type"], React.FC<filterProps>> = {
   category: CategoryFilter,
   country: CountryFilter,
   date: DateFilter,
   desc: DescFilter,
   latlong: LatLongFilter,
+  not: NOTFilter,
+  or: ORFilter
 }
 
-export const filterOperations: { [key: string]: (incident: Incident, state: any, db: DB) => boolean } = {}
-
-filterOperations['category'] = (incident: Incident, state: any, db: DB) => {
-  if (!state) return true
-  const { hiddenCategories, hiddenTypes } = state
-  return !hiddenCategories.includes(db.Types[incident.typeID as string].categoryID as string) && !hiddenTypes.includes(incident.typeID as string)
-}
-
-filterOperations['country'] = (incident: Incident, state: any) => {
-  if (!state) return true
-  const { hiddenCountries, hiddenDepartments, hiddenMunicipalities } = state
-  return (
-    !hiddenCountries.includes(incident.country) &&
-    !hiddenDepartments.includes(`${incident.country} - ${incident.department}`) &&
-    !hiddenMunicipalities.includes(`${incident.country} - ${incident.department} - ${incident.municipality}`)
-  )
-}
-
-filterOperations['date'] = (incident: Incident, state: any) => {
-  if (!state) return true
-  const { date1, date2, selectedDateFilter } = state
-  if (!date1) {
-    return true
-  }
-  switch (selectedDateFilter) {
-    case 'es':
-      return incident.dateString === date1
-    case 'es anterior':
-      return incident.dateString < date1
-    case 'es posterior':
-      return incident.dateString > date1
-    case 'es entre':
-      if (!date2) {
-        return true
-      }
-      return date1 <= incident.dateString && incident.dateString <= date2
-    default:
+export const filterOperations: Record<filterType["type"], (incident: Incident, state: any, db: DB) => boolean | undefined> = {
+  category: (incident: Incident, state: any, db: DB) => {
+    if (!state) return undefined
+    const { hiddenCategories, hiddenTypes } = state
+    return !hiddenCategories.includes(db.Types[incident.typeID as string].categoryID as string) && !hiddenTypes.includes(incident.typeID as string)
+  },
+  country: (incident: Incident, state: any) => {
+    if (!state) return undefined
+    const { hiddenCountries, hiddenDepartments, hiddenMunicipalities } = state
+    return (
+      !hiddenCountries.includes(incident.country) &&
+      !hiddenDepartments.includes(`${incident.country} - ${incident.department}`) &&
+      !hiddenMunicipalities.includes(`${incident.country} - ${incident.department} - ${incident.municipality}`)
+    )
+  },
+  date: (incident: Incident, state: any) => {
+    if (!state) return undefined
+    const { date1, date2, selectedDateFilter } = state
+    if (!date1) {
       return true
+    }
+    switch (selectedDateFilter) {
+      case 'es':
+        return incident.dateString === date1
+      case 'es anterior':
+        return incident.dateString < date1
+      case 'es posterior':
+        return incident.dateString > date1
+      case 'es entre':
+        if (!date2) {
+          return true
+        }
+        return date1 <= incident.dateString && incident.dateString <= date2
+      default:
+        return true
+    }
+  },
+  desc: (incident: Incident, state: any) => {
+    if (!state) return undefined
+    const { search } = state
+    return incident.description.toLowerCase().includes(search.toLowerCase())
+  },
+  latlong: (incident: Incident, state: any) => {
+    if (!state) return undefined
+    const { latitude, longitude, radius } = state
+    const lat = parseFloat(latitude)
+    const lon = parseFloat(longitude)
+    const rad = parseFloat(radius)
+
+    if (!isNaN(lat) && !isNaN(lon) && !isNaN(rad)) {
+      if (!incident.location) return undefined
+      const { lat: incLat, lng: incLon } = incident.location
+      return calculateDistance(lat, lon, incLat, incLon) <= rad
+    }
+    return true
+  },
+  not: (incident: Incident, state: NOTFilterState["state"], db: DB) => {
+    if (!state) return undefined
+    return state.filters.some((filter) => filterOperations[filter.type](incident, filter.state, db) !== true)
+  },
+  or: (incident: Incident, state: ORFilterState["state"], db: DB) => {
+    if (!state) return undefined
+    return state.filters.some((filter) => filterOperations[filter.type](incident, filter.state, db) !== false)
   }
-}
-
-filterOperations['desc'] = (incident: Incident, state: any) => {
-  if (!state) return true
-  const { search } = state
-  return incident.description.toLowerCase().includes(search.toLowerCase())
-}
-
-filterOperations['latlong'] = (incident: Incident, state: any) => {
-  if (!state) return true
-  const { latitude, longitude, radius } = state
-  const lat = parseFloat(latitude)
-  const lon = parseFloat(longitude)
-  const rad = parseFloat(radius)
-
-  if (!isNaN(lat) && !isNaN(lon) && !isNaN(rad)) {
-    if (!incident.location) return false
-    const { lat: incLat, lng: incLon } = incident.location
-    return calculateDistance(lat, lon, incLat, incLon) <= rad
-  }
-  return true
 }

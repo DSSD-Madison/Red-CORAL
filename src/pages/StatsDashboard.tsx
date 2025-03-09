@@ -25,7 +25,6 @@ const ViewButton: React.FC<any> = ({ currentView, setCurrentView, view, label })
 
 function getFilterState() {
   const local = localStorage.getItem('filterState')
-  console.log(local)
   if (local) {
     return JSON.parse(local)
   }
@@ -51,14 +50,17 @@ const StatsDashboard: React.FC = () => {
     [incidents]
   )
   const filteredIncidents = useMemo(
-    () => sortedIncidents.filter(([, incident]) => filters.filters.every((filter) => filterOperations[filter.type](incident, filter.state, db))),
+    () =>
+      sortedIncidents.filter(([, incident]) =>
+        filters.filters.every((filter) => filterOperations[filter.type](incident, filter.state, db) !== false)
+      ),
     [sortedIncidents, filters]
   )
   const filteredBounds = calculateBounds(Object.fromEntries(filteredIncidents))
-  
+
   return (
     <div className="flex min-h-full flex-col gap-2 p-4">
-      <div className="flex-row flex items-start justify-between">
+      <div className="flex flex-row items-start justify-between">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
         <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
       </div>
