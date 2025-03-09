@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { filterDispatchType, filterType } from '@/filters/filterReducer'
-import { LucideCalendar, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
+import { LucideBlend, LucideCalendar, LucideCircleOff, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
 import {
   useFloating,
   offset,
@@ -51,6 +51,18 @@ const possibleFilters: FilterInfo[] = [
     icon: LucideText,
     description: 'Filtrar por palabras clave en la descripción',
     type: 'desc',
+  },
+  {
+    name: 'NO',
+    icon: LucideCircleOff,
+    description: 'Negar los filtros dentro de este filtro',
+    type: 'not',
+  },
+  {
+    name: 'O',
+    icon: LucideBlend,
+    description: 'Unir los filtros dentro de este filtro',
+    type: 'or',
   },
 ]
 
