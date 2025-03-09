@@ -21,6 +21,7 @@ enum DateFilterOption {
   IS_BEFORE = 'es anterior',
   IS_AFTER = 'es posterior',
   IS_BETWEEN = 'es entre',
+  YEARS = 'años',
 }
 
 const possibleDateFilterOptions: DateFilterOption[] = [
@@ -28,6 +29,7 @@ const possibleDateFilterOptions: DateFilterOption[] = [
   DateFilterOption.IS_BEFORE,
   DateFilterOption.IS_AFTER,
   DateFilterOption.IS_BETWEEN,
+  DateFilterOption.YEARS,
 ]
 
 interface DateFilterState extends filterProps {
@@ -44,6 +46,8 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
   const [date2, setDate2] = useState(state?.date2 || '')
   const [selectedDateFilter, setSelectedDateFilter] = useState(state?.selectedDateFilter || DateFilterOption.IS_BETWEEN)
   const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(state?.isDateFilterSelectOpen || false)
+  const [startYear, setStartYear] = useState('')
+  const [endYear, setEndYear] = useState('')
 
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
@@ -62,11 +66,20 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
 
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
 
+  const handleYearChange = () => {
+    if (startYear && endYear) {
+      const startDate = `${startYear}-01-01`
+      const endDate = `${endYear}-12-31`
+      setDate1(startDate)
+      setDate2(endDate)
+    }
+  }
+
   return (
     <BaseFilter
       icon={<LucideCalendar />}
       text={
-        selectedDateFilter === DateFilterOption.IS_BETWEEN
+        selectedDateFilter === DateFilterOption.IS_BETWEEN || selectedDateFilter === DateFilterOption.YEARS
           ? `Fecha: ${formatDateString(date1)} - ${formatDateString(date2)}`
           : `Fecha: ${formatDateString(date1)}`
       }
@@ -110,18 +123,53 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
         )}
       </div>
 
-      <div className="flex flex-row items-center gap-2">
-        {/* First input to select the first date */}
-        <input type="date" onChange={(e) => setDate1(e.target.value)} value={date1} className="rounded-md border border-gray-300 p-1" />
+      {selectedDateFilter !== DateFilterOption.YEARS && (
+        <div className="flex flex-row items-center gap-2">
+          {/* First input to select the first date */}
+          <input
+            type="date"
+            onChange={(e) => setDate1(e.target.value)}
+            value={date1}
+            className="w-24 rounded-md border border-gray-300 p-0.5 text-sm"
+          />
 
-        {/* Second input to select the second date (only used for the "between" filter) */}
-        {selectedDateFilter === DateFilterOption.IS_BETWEEN && (
-          <>
-            <span>-</span>
-            <input type="date" onChange={(e) => setDate2(e.target.value)} value={date2} className="rounded-md border border-gray-300 p-1" />
-          </>
-        )}
-      </div>
+          {/* Second input to select the second date (only used for the "between" filter) */}
+          {selectedDateFilter === DateFilterOption.IS_BETWEEN && (
+            <>
+              <span>-</span>
+              <input
+                type="date"
+                onChange={(e) => setDate2(e.target.value)}
+                value={date2}
+                className="w-24 rounded-md border border-gray-300 p-0.5 text-sm"
+              />
+            </>
+          )}
+        </div>
+      )}
+      {selectedDateFilter === DateFilterOption.YEARS && (
+        <div className="mt-2 flex flex-row items-center gap-2">
+          <label>
+            <input
+              type="number"
+              value={startYear}
+              onChange={(e) => setStartYear(e.target.value)}
+              onBlur={handleYearChange}
+              className="w-16 rounded-md border border-gray-300 p-0.5 text-sm"
+            />
+          </label>
+          -
+          <label>
+            <input
+              type="number"
+              value={endYear}
+              onChange={(e) => setEndYear(e.target.value)}
+              onBlur={handleYearChange}
+              className="w-16 rounded-md border border-gray-300 p-0.5 text-sm"
+            />
+          </label>
+        </div>
+      )}
       <button
         onClick={() =>
           dispatch({
