@@ -64,7 +64,7 @@ const StatsDashboard: React.FC = () => {
   const filteredBounds = calculateBounds(Object.fromEntries(filteredIncidents))
 
   return (
-    <div className="flex min-h-full flex-col gap-2 p-4">
+    <div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">
       <div className="flex flex-row items-start justify-between">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
         <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
@@ -75,21 +75,23 @@ const StatsDashboard: React.FC = () => {
         <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <IncidentsStats incidents={filteredIncidents} bounds={filteredBounds} />
       </div>
-      <div className="flex items-center gap-2">
-        <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="incidents" label="Incidentes" />
-        <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="municipalities" label="Municipios" />
-        <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="departments" label="Departamentos" />
-        <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="activities" label="Actividades" />
-        <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="types" label="Tipos" />
-        <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="map" label="Mapa" />
+      <div className="w-full grow overflow-x-auto rounded-lg border border-gray-300 p-2 md:w-full">
+        <div className="mb-2 flex items-center gap-2">
+          <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="incidents" label="Incidentes" />
+          <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="municipalities" label="Municipios" />
+          <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="departments" label="Departamentos" />
+          <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="activities" label="Actividades" />
+          <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="types" label="Tipos" />
+          <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="map" label="Mapa" />
+        </div>
+        {currentView === 'incidents' ? (
+          <IncidentTable incidents={filteredIncidents} />
+        ) : currentView === 'map' ? (
+          <StatisticsFilterMap incidents={filteredIncidents} />
+        ) : (
+          <ThingTable mode={currentView} incidents={filteredIncidents} />
+        )}
       </div>
-      {currentView === 'incidents' ? (
-        <IncidentTable incidents={filteredIncidents} />
-      ) : currentView === 'map' ? (
-        <StatisticsFilterMap incidents={filteredIncidents} />
-      ) : (
-        <ThingTable mode={currentView} incidents={filteredIncidents} />
-      )}
     </div>
   )
 }

@@ -52,14 +52,16 @@ const BaseFilter = ({ icon, text, children, scrollOverflow }: { icon: any; text:
     <>
       <div
         onClick={() => setIsOpen(true)}
-        className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 transition-all hover:shadow-md
-          ${isOpen ? ' border-blue-600 bg-blue-100 text-blue-600 shadow-md' : 'border-gray-300 hover:bg-gray-100'}`}
+        className={`flex cursor-pointer items-center gap-2 rounded-full border  px-3 transition-all hover:shadow-md
+          ${isOpen ? ' border-blue-600 bg-blue-100 text-blue-600 shadow-md' : 'border-gray-400 hover:bg-gray-200'}`}
         ref={refs.setReference}
         {...getReferenceProps()}
       >
         <icon.type size={16} strokeWidth={1} />
         <span>{text}</span>
-        <span>{isOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}</span>
+        <span>
+          <LucideChevronRight size={16} strokeWidth={1} style={{ transform: `rotate(${isOpen ? 90 : 0}deg)` }} />
+        </span>
       </div>
       {isOpen && (
         <FloatingFocusManager context={context} modal={false}>

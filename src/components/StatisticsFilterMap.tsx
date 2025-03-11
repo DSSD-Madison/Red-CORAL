@@ -54,7 +54,7 @@ export default function StatisticsFilterMap({ incidents }: StatisticsFilterMapPr
   filteredData.Incidents = Object.fromEntries(incidents)
 
   return (
-    <div className="relative h-[calc(100vh-128px)] w-full grow overflow-hidden rounded-lg border border-gray-300">
+    <div className="relative h-[calc(100vh-128px)] w-full grow overflow-hidden rounded-lg">
       <MapContainer
         className="z-0 h-full w-full focus-visible:outline-none"
         center={[20, 0]}

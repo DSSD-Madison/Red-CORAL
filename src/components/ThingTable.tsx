@@ -36,24 +36,22 @@ const ThingTable: React.FC<ThingTableProps> = ({ mode, incidents }) => {
   const sortedEntries = Object.entries(countMap).sort((a, b) => b[1] - a[1])
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-gray-300 p-4">
-      <table className="w-full table-auto">
-        <thead>
-          <tr>
-            <th className="p-2 text-left">{modeToTitle[mode]}</th>
-            <th className="p-2 text-left">Cantidad</th>
+    <table className="w-full table-auto">
+      <thead>
+        <tr>
+          <th className="p-2 text-left">{modeToTitle[mode]}</th>
+          <th className="p-2 text-left">Cantidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedEntries.map(([thing, count]) => (
+          <tr key={thing} className="border-t border-black text-gray-700">
+            <td className="p-2">{thing}</td>
+            <td className="p-2">{count}</td>
           </tr>
-        </thead>
-        <tbody>
-          {sortedEntries.map(([thing, count]) => (
-            <tr key={thing} className="border-t border-black text-gray-700">
-              <td className="p-2">{thing}</td>
-              <td className="p-2">{count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
