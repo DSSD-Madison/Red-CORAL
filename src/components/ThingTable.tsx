@@ -36,7 +36,7 @@ const ThingTable: React.FC<ThingTableProps> = ({ mode, incidents }) => {
   const sortedEntries = Object.entries(countMap).sort((a, b) => b[1] - a[1])
 
   return (
-    <table className="w-full table-auto">
+    <table className="m-2 table-auto">
       <thead>
         <tr>
           <th className="p-2 text-left">{modeToTitle[mode]}</th>

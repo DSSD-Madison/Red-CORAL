@@ -1,6 +1,6 @@
 import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
-import { LucideTags, LucideTrash2 } from 'lucide-react'
+import { LucideTags } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useDB } from '@/context/DBContext'
 
@@ -62,10 +62,6 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
     }
   }
 
-  const removeThisFilter = () => {
-    dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
-  }
-
   const parts: string[] = []
 
   if (hiddenCategories.length > 0) {
@@ -79,15 +75,12 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
   const filterStringDisplay = parts.length ? `: ${parts.join(', ')}` : ''
 
   return (
-    <BaseFilter icon={<LucideTags />} text={'Categorías' + filterStringDisplay} scrollOverflow={true}>
-      <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
-        <LucideTrash2 size={20} />
-      </button>
+    <BaseFilter icon={<LucideTags />} text={'Categorías' + filterStringDisplay} scrollOverflow={true} dispatch={dispatch} id={id}>
       <div className="p-2">
         <button onClick={() => selectAllCategories(true)} className="mb-2 mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
           Seleccionar todo
         </button>
-        <button onClick={() => selectAllCategories(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
+        <button onClick={() => selectAllCategories(false)} className="mb-2 rounded bg-neutral-500 px-2 py-1 text-white">
           Deseleccionar todo
         </button>
         {Object.entries(db.Categories).map(([categoryID, category]) => (
@@ -101,7 +94,7 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
               />
               {category.name}
             </summary>
-            <div className="pl-4">
+            <div className="pl-6">
               <ul>
                 {typesByCategory[categoryID]?.map(({ typeID, name: typeName }) => (
                   <li key={typeID}>

@@ -86,15 +86,12 @@ export default function LineGraph({ incidents, bounds }: { incidents: [string, I
           .attr('fill', 'steelblue')
       }
     }
-
-    addEventListener('resize', render)
     render()
-    return () => removeEventListener('resize', render)
   }, [incidents, bounds, groupBy])
 
   return (
-    <div ref={containerRef} className="relative min-w-[250px] flex-1 rounded-lg bg-neutral-100">
-      <div className="flex items-center justify-between p-2">
+    <div ref={containerRef} className="relative flex max-h-72 min-w-[250px] flex-1 flex-col rounded-lg bg-neutral-100">
+      <div className="mx-2 mt-2 flex items-center justify-between">
         <h2>Incidentes a lo largo del tiempo</h2>
         <select value={groupBy} className="rounded-full border border-black bg-transparent px-2" onChange={(e) => setGroupBy(e.target.value as any)}>
           <option value="year">Año</option>
@@ -104,7 +101,7 @@ export default function LineGraph({ incidents, bounds }: { incidents: [string, I
           <option value="day">Día</option>
         </select>
       </div>
-      <svg width="400" className="aspect-[2] w-full" ref={d3Ref}></svg>
+      <svg width="400" height="200" className="mx-auto h-full w-full object-cover" ref={d3Ref}></svg>
     </div>
   )
 }

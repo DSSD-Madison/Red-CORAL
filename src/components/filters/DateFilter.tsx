@@ -1,6 +1,6 @@
 import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
-import { LucideCalendar, LucideChevronDown, LucideChevronRight, LucideTrash2 } from 'lucide-react'
+import { LucideCalendar, LucideChevronDown, LucideChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import {
   useFloating,
@@ -49,10 +49,6 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
   const [startYear, setStartYear] = useState('')
   const [endYear, setEndYear] = useState('')
 
-  const removeThisFilter = () => {
-    dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
-  }
-
   const { refs, floatingStyles, context } = useFloating({
     open: isDateFilterSelectOpen,
     onOpenChange: setIsDateFilterSelectOpen,
@@ -87,11 +83,7 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
   }
 
   return (
-    <BaseFilter icon={<LucideCalendar />} text={dateString}>
-      <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
-        <LucideTrash2 size={20} />
-      </button>
-
+    <BaseFilter icon={<LucideCalendar />} text={dateString} dispatch={dispatch} id={id}>
       {/* Dropdown to select the filter option */}
       <div
         onClick={() => setIsDateFilterSelectOpen(true)}
@@ -99,7 +91,7 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
         ref={refs.setReference}
         {...getReferenceProps()}
       >
-        <p className="flex flex-row items-center text-gray-600">
+        <p className="mb-2 flex flex-row items-center text-gray-600">
           Fecha {selectedDateFilter}
           <span>{isDateFilterSelectOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}</span>
         </p>
@@ -134,7 +126,7 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
             type="date"
             onChange={(e) => setDate1(e.target.value)}
             value={date1}
-            className="w-24 rounded-md border border-gray-300 p-0.5 text-sm"
+            className="w-32 rounded-md border border-gray-300 p-0.5 text-sm"
           />
 
           {/* Second input to select the second date (only used for the "between" filter) */}
@@ -145,7 +137,7 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
                 type="date"
                 onChange={(e) => setDate2(e.target.value)}
                 value={date2}
-                className="w-24 rounded-md border border-gray-300 p-0.5 text-sm"
+                className="w-32 rounded-md border border-gray-300 p-0.5 text-sm"
               />
             </>
           )}

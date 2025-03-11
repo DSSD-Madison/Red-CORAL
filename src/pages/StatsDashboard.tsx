@@ -70,13 +70,13 @@ const StatsDashboard: React.FC = () => {
         <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
       </div>
       <StatisticsFilterBar filters={filters.filters} dispatchFilters={dispatchFilters} />
-      <div className="flex w-full flex-wrap gap-4">
+      <div className="flex w-full flex-wrap justify-center gap-2">
         <PieChart incidents={filteredIncidents}></PieChart>
         <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
         <IncidentsStats incidents={filteredIncidents} bounds={filteredBounds} />
       </div>
-      <div className="w-full grow overflow-x-auto rounded-lg border border-gray-300 p-2 md:w-full">
-        <div className="mb-2 flex items-center gap-2">
+      <div className="w-full grow overflow-x-auto rounded-lg bg-white md:w-full">
+        <div className="m-2 flex flex-wrap items-center gap-2">
           <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="incidents" label="Incidentes" />
           <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="municipalities" label="Municipios" />
           <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="departments" label="Departamentos" />
@@ -84,13 +84,16 @@ const StatsDashboard: React.FC = () => {
           <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="types" label="Tipos" />
           <ViewButton currentView={currentView} setCurrentView={setCurrentView} view="map" label="Mapa" />
         </div>
-        {currentView === 'incidents' ? (
-          <IncidentTable incidents={filteredIncidents} />
-        ) : currentView === 'map' ? (
-          <StatisticsFilterMap incidents={filteredIncidents} />
-        ) : (
-          <ThingTable mode={currentView} incidents={filteredIncidents} />
-        )}
+        <div className="mb-2 border-b border-gray-300"></div>
+        <div className="max-w-full overflow-x-auto p-2">
+          {currentView === 'incidents' ? (
+            <IncidentTable incidents={filteredIncidents} />
+          ) : currentView === 'map' ? (
+            <StatisticsFilterMap incidents={filteredIncidents} />
+          ) : (
+            <ThingTable mode={currentView} incidents={filteredIncidents} />
+          )}
+        </div>
       </div>
     </div>
   )

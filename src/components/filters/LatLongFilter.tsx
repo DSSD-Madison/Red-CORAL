@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
-import { LucideMapPin, LucideTrash2 } from 'lucide-react'
+import { LucideMapPin } from 'lucide-react'
 
 export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const toRadians = (deg: number) => deg * (Math.PI / 180)
@@ -25,52 +25,46 @@ const LatLongFilter: React.FC<filterProps> = ({ id, dispatch, state }: LatLongFi
   const [longitude, setLongitude] = useState(state?.longitude || '')
   const [radius, setRadius] = useState(state?.radius || '')
 
-  const removeThisFilter = () => {
-    dispatch({ type: 'REMOVE_FILTER', payload: { id } })
-  }
-
   const filterStringDisplay = latitude || longitude || radius ? `: (${latitude || 0}, ${longitude || 0}) Radio: ${radius || 0}km` : ''
   return (
-    <BaseFilter icon={<LucideMapPin />} text={'Ubicación' + filterStringDisplay}>
-      <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
-        <LucideTrash2 size={20} />
-      </button>
-      <br />
-      <input
-        type="number"
-        placeholder="Latitud"
-        value={latitude}
-        onChange={(e) => setLatitude(e.target.value)}
-        className="rounded-md border border-gray-300 p-1"
-      />
-      <input
-        type="number"
-        placeholder="Longitud"
-        value={longitude}
-        onChange={(e) => setLongitude(e.target.value)}
-        className="rounded-md border border-gray-300 p-1"
-      />
-      <input
-        type="number"
-        placeholder="Radio (km)"
-        value={radius}
-        onChange={(e) => setRadius(e.target.value)}
-        className="rounded-md border border-gray-300 p-1"
-      />
-      <button
-        onClick={() =>
-          dispatch({
-            type: 'UPDATE_FILTER',
-            payload: {
-              id: id,
-              state: { latitude, longitude, radius },
-            },
-          })
-        }
-        className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
-      >
-        Aplicar
-      </button>
+    <BaseFilter icon={<LucideMapPin />} text={'Ubicación' + filterStringDisplay} dispatch={dispatch} id={id}>
+      <div className="my-2 flex gap-2">
+        <input
+          type="number"
+          placeholder="Latitud"
+          value={latitude}
+          onChange={(e) => setLatitude(e.target.value)}
+          className="rounded-md border border-gray-300 p-1"
+        />
+        <input
+          type="number"
+          placeholder="Longitud"
+          value={longitude}
+          onChange={(e) => setLongitude(e.target.value)}
+          className="rounded-md border border-gray-300 p-1"
+        />
+        <input
+          type="number"
+          placeholder="Radio (km)"
+          value={radius}
+          onChange={(e) => setRadius(e.target.value)}
+          className="rounded-md border border-gray-300 p-1"
+        />
+        <button
+          onClick={() =>
+            dispatch({
+              type: 'UPDATE_FILTER',
+              payload: {
+                id: id,
+                state: { latitude, longitude, radius },
+              },
+            })
+          }
+          className="rounded bg-blue-500 px-2 py-1 text-white"
+        >
+          Aplicar
+        </button>
+      </div>
     </BaseFilter>
   )
 }

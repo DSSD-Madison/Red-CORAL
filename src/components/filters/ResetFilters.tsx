@@ -1,11 +1,24 @@
 import { LucideRotateCcw } from 'lucide-react'
 import { filterDispatchType } from '@/filters/filterReducer'
+import { useState } from 'react'
 
 const ResetFilters = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> }) => {
+  const [arrowDeg, setArrowDeg] = useState(0)
   return (
-    <div onClick={() => dispatch({ type: 'RESET_FILTERS' })} className="cursor-pointer text-sm text-gray-600">
+    <div
+      onClick={() => {
+        dispatch({ type: 'RESET_FILTERS' })
+        setArrowDeg((cur) => cur + 360)
+      }}
+      className="cursor-pointer text-sm text-gray-600"
+    >
       <span className="flex items-center">
-        <LucideRotateCcw size={16} strokeWidth={1} className="mr-1" />
+        <LucideRotateCcw
+          size={16}
+          strokeWidth={1}
+          className="mr-1 transition-transform duration-500 ease-in-out"
+          style={{ transform: `rotate(${-arrowDeg}deg)` }}
+        />
         Resetear Filtros
       </span>
     </div>

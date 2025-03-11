@@ -1,6 +1,6 @@
 import { filterProps, filterType, filterComponents, filterDispatchType } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
-import { CircleOff, LucideTrash2 } from 'lucide-react'
+import { CircleOff } from 'lucide-react'
 import AddFilter from './AddFilter'
 
 export interface NOTFilterState extends filterProps {
@@ -15,9 +15,6 @@ export interface NOTFilterState extends filterProps {
  */
 const NOTFilter = ({ id, dispatch, state }: NOTFilterState) => {
   const eState = state || { index: 0, filters: [] } // effective state
-  const removeThisFilter = () => {
-    dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
-  }
   const intermediateDispatch = (action: filterDispatchType) => {
     switch (action.type) {
       case 'REMOVE_FILTER':
@@ -54,11 +51,10 @@ const NOTFilter = ({ id, dispatch, state }: NOTFilterState) => {
             ? 'NO: ' + eState.filters.length + ' filtro'
             : 'NO: ' + eState.filters.length + ' filtros'
       }
+      dispatch={dispatch}
+      id={id}
     >
-      <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
-        <LucideTrash2 size={20} />
-      </button>
-      <div className="mx-2 mt-6 flex w-max max-w-full flex-wrap items-center justify-start gap-2">
+      <div className="mx-2 mt-2 flex w-max max-w-full flex-wrap items-center justify-start gap-2">
         {eState.filters.map((filter) => {
           const FilterComponent = filterComponents[filter.type]
           if (!FilterComponent) {

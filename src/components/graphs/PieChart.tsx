@@ -132,15 +132,13 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
           .attr('fill', '#000')
       }
     }
-    addEventListener('resize', render)
     render()
-    return () => removeEventListener('resize', render)
   }, [incidents])
 
   return (
-    <div ref={containerRef} className="relative min-w-[270px] flex-1 rounded-lg bg-neutral-100">
+    <div ref={containerRef} className="relative flex max-h-72 min-w-[270px] flex-1 flex-col rounded-lg bg-neutral-100">
       <h2 className="ml-2 mt-2">Categorías de incidentes</h2>
-      <svg width="400" className="aspect-[2] w-full" ref={d3Ref}></svg>
+      <svg width="400" height="200" className="mx-auto h-full w-full" ref={d3Ref}></svg>
     </div>
   )
 }

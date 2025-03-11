@@ -1,6 +1,6 @@
 import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
-import { LucideGlobe, LucideTrash2 } from 'lucide-react'
+import { LucideGlobe } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useDB } from '@/context/DBContext'
 
@@ -92,98 +92,91 @@ const CountryFilter = ({ id, dispatch, state }: CountryFilterState) => {
     }
   }
 
-    const removeThisFilter = () => {
-      dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
-    }
+  const parts: string[] = []
 
-    const parts: string[] = []
+  if (hiddenCountries.length > 0) {
+    parts.push(hiddenCountries.length === 1 ? '1 país oculto' : `${hiddenCountries.length} países ocultos`)
+  }
+  if (hiddenDepartments.length > 0) {
+    parts.push(hiddenDepartments.length === 1 ? '1 departamento oculto' : `${hiddenDepartments.length} departamentos ocultos`)
+  }
+  if (hiddenMunicipalities.length > 0) {
+    parts.push(hiddenMunicipalities.length === 1 ? '1 municipio oculto' : `${hiddenMunicipalities.length} municipios ocultos`)
+  }
 
-    if (hiddenCountries.length > 0) {
-      parts.push(hiddenCountries.length === 1 ? '1 país oculto' : `${hiddenCountries.length} países ocultos`)
-    }
-    if (hiddenDepartments.length > 0) {
-      parts.push(hiddenDepartments.length === 1 ? '1 departamento oculto' : `${hiddenDepartments.length} departamentos ocultos`)
-    }
-    if (hiddenMunicipalities.length > 0) {
-      parts.push(hiddenMunicipalities.length === 1 ? '1 municipio oculto' : `${hiddenMunicipalities.length} municipios ocultos`)
-    }
+  const filterStringDisplay = parts.length ? `: ${parts.join(', ')}` : ''
 
-    const filterStringDisplay = parts.length ? `: ${parts.join(', ')}` : ''
-
-    return (
-      <BaseFilter icon={<LucideGlobe />} text={'Áreas' + filterStringDisplay} scrollOverflow={true}>
-        <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
-          <LucideTrash2 size={20} />
+  return (
+    <BaseFilter icon={<LucideGlobe />} text={'Áreas' + filterStringDisplay} scrollOverflow={true} dispatch={dispatch} id={id}>
+      <div className="p-2">
+        <button onClick={() => selectAllCountries(true)} className="mb-2 mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
+          Seleccionar todo
         </button>
-        <div className="p-2">
-          <button onClick={() => selectAllCountries(true)} className="mb-2 mr-2 rounded bg-neutral-500 px-2 py-1 text-white">
-            Seleccionar todo
-          </button>
-          <button onClick={() => selectAllCountries(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
-            Deseleccionar todo
-          </button>
-          {Object.entries(db.filterBounds.locations).map(([country, departments]) => (
-            <details key={country}>
-              <summary>
-                <input
-                  type="checkbox"
-                  checked={!hiddenCountries.includes(country)}
-                  onChange={(e) => handleCountryChange(country, e.target.checked)}
-                  className="mr-2"
-                />
-                {country}
-              </summary>
-              <div className="pl-4">
-                {Object.keys(departments).map((department) => (
-                  <details key={department}>
-                    <summary>
-                      <input
-                        type="checkbox"
-                        checked={!hiddenCountries.includes(country) && !hiddenDepartments.includes(`${country} - ${department}`)}
-                        onChange={(e) => handleDepartmentChange(country, department, e.target.checked)}
-                        className="mr-2"
-                      />
-                      {department}
-                    </summary>
-                    <ul>
-                      {departments[department].map((municipality) => (
-                        <li key={municipality} className="pl-6">
-                          <input
-                            type="checkbox"
-                            checked={
-                              !hiddenCountries.includes(country) &&
-                              !hiddenDepartments.includes(`${country} - ${department}`) &&
-                              !hiddenMunicipalities.includes(`${country} - ${department} - ${municipality}`)
-                            }
-                            onChange={(e) => handleMunicipalityChange(country, department, municipality, e.target.checked)}
-                            className="mr-2"
-                          />
-                          {municipality}
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                ))}
-              </div>
-            </details>
-          ))}
-          <button
-            onClick={() =>
-              dispatch({
-                type: 'UPDATE_FILTER',
-                payload: {
-                  id: id,
-                  state: { hiddenCountries, hiddenDepartments, hiddenMunicipalities },
-                },
-              })
-            }
-            className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
-          >
-            Aplicar
-          </button>
-        </div>
-      </BaseFilter>
-    )
+        <button onClick={() => selectAllCountries(false)} className="mb-2 mr-4 rounded bg-neutral-500 px-2 py-1 text-white">
+          Deseleccionar todo
+        </button>
+        {Object.entries(db.filterBounds.locations).map(([country, departments]) => (
+          <details key={country}>
+            <summary>
+              <input
+                type="checkbox"
+                checked={!hiddenCountries.includes(country)}
+                onChange={(e) => handleCountryChange(country, e.target.checked)}
+                className="mr-2"
+              />
+              {country}
+            </summary>
+            <div className="pl-6">
+              {Object.keys(departments).map((department) => (
+                <details key={department}>
+                  <summary>
+                    <input
+                      type="checkbox"
+                      checked={!hiddenCountries.includes(country) && !hiddenDepartments.includes(`${country} - ${department}`)}
+                      onChange={(e) => handleDepartmentChange(country, department, e.target.checked)}
+                      className="mr-2"
+                    />
+                    {department}
+                  </summary>
+                  <ul>
+                    {departments[department].map((municipality) => (
+                      <li key={municipality} className="pl-8">
+                        <input
+                          type="checkbox"
+                          checked={
+                            !hiddenCountries.includes(country) &&
+                            !hiddenDepartments.includes(`${country} - ${department}`) &&
+                            !hiddenMunicipalities.includes(`${country} - ${department} - ${municipality}`)
+                          }
+                          onChange={(e) => handleMunicipalityChange(country, department, municipality, e.target.checked)}
+                          className="mr-2"
+                        />
+                        {municipality}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ))}
+            </div>
+          </details>
+        ))}
+        <button
+          onClick={() =>
+            dispatch({
+              type: 'UPDATE_FILTER',
+              payload: {
+                id: id,
+                state: { hiddenCountries, hiddenDepartments, hiddenMunicipalities },
+              },
+            })
+          }
+          className="mt-4 rounded bg-blue-500 px-2 py-1 text-white"
+        >
+          Aplicar
+        </button>
+      </div>
+    </BaseFilter>
+  )
 }
 
 export default CountryFilter

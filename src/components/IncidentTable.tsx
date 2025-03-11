@@ -26,22 +26,22 @@ const IncidentTable = ({ incidents }: { incidents: [string, Incident][] }) => {
     <table ref={tableRef} className="w-full min-w-[800px] table-auto md:min-w-0 md:max-w-full">
       <tbody>
         <tr>
-          <th className="break-words pb-2 font-normal">País</th>
-          <th className="break-words pb-2 font-normal">Tipo de evento</th>
-          <th className="break-words pb-2 font-normal">Actividad</th>
-          <th className="break-words pb-2 font-normal">Fecha</th>
-          <th className="break-words pb-2 font-normal">Descripción</th>
-          <th className="break-words pb-2 font-normal">Departamento</th>
-          <th className="break-words pb-2 font-normal">Municipio</th>
-          <th className="break-words pb-2 font-normal">Ubicación</th>
+          <th className="pb-2">País</th>
+          <th className="w-[5%] pb-2">Tipo de evento</th>
+          <th className="pb-">Actividad</th>
+          <th className="pb-2">Fecha</th>
+          <th className="pb-2">Descripción</th>
+          <th className="pb-2">Departamento</th>
+          <th className="pb-2">Municipio</th>
+          <th className="pb-2">Ubicación</th>
         </tr>
         {incidents.slice(0, visibleCount).map(([id, incident]) => (
           <tr key={id} className="text-gray-500">
             <td className="break-words border-t border-black p-4 text-left">{incident.country}</td>
-            <td className="break-words border-t border-black p-4 text-left">{typeIDtoTypeName(db, incident.typeID)}</td>
+            <td className="break-words border-t border-black p-4 text-left text-sm">{typeIDtoTypeName(db, incident.typeID)}</td>
             <td className="break-words border-t border-black p-4 text-left">{typeIDtoCategory(db, incident.typeID).name}</td>
             <td className="break-words border-t border-black p-4 text-left">{formatDateString(incident.dateString)}</td>
-            <td className="max-w-[250px] break-words border-t border-black p-4 text-left lg:max-w-[33vw]">{incident.description}</td>
+            <td className="max-w-[250px] break-words border-t border-black p-4 text-left text-sm lg:max-w-[33vw]">{incident.description}</td>
             <td className="break-words border-t border-black p-4 text-left">{incident.department}</td>
             <td className="break-words border-t border-black p-4 text-left">{incident.municipality}</td>
             <td className="break-words border-t border-black p-4 text-left">
