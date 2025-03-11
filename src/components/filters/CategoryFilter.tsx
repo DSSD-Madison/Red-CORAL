@@ -66,23 +66,20 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
   }
 
-  const filterString = []
-  if (hiddenCategories.length === 1) {
-    filterString.push(`1 categoría oculta`)
-  } else if (hiddenCategories.length > 1) {
-    filterString.push(`${hiddenCategories.length} categorías ocultas`)
-  }
-  if (hiddenTypes.length === 1) {
-    filterString.push(`1 tipo oculto`)
-  } else if (hiddenTypes.length > 1) {
-    filterString.push(`${hiddenTypes.length} tipos ocultos`)
-  }
-  if (filterString.length === 0) {
-    filterString.push('ningún filtro aplicado')
+  const parts: string[] = []
+
+  if (hiddenCategories.length > 0) {
+    parts.push(hiddenCategories.length === 1 ? '1 categoría oculta' : `${hiddenCategories.length} categorías ocultas`)
   }
 
+  if (hiddenTypes.length > 0) {
+    parts.push(hiddenTypes.length === 1 ? '1 tipo oculto' : `${hiddenTypes.length} tipos ocultos`)
+  }
+
+  const filterStringDisplay = parts.length ? `: ${parts.join(', ')}` : ''
+
   return (
-    <BaseFilter icon={<LucideTags />} text={'Categorías: ' + filterString.join(', ')} scrollOverflow={true}>
+    <BaseFilter icon={<LucideTags />} text={'Categorías' + filterStringDisplay} scrollOverflow={true}>
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>

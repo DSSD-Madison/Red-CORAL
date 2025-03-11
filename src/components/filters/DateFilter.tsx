@@ -74,16 +74,20 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
       setDate2(endDate)
     }
   }
+  let dateString = 'Fecha'
+
+  if (formatDateString(date1) !== 'Fecha inválida') {
+    if (selectedDateFilter === DateFilterOption.IS_BETWEEN || selectedDateFilter === DateFilterOption.YEARS) {
+      if (formatDateString(date2) !== 'Fecha inválida') {
+        dateString = `Fecha: ${formatDateString(date1)} - ${formatDateString(date2)}`
+      }
+    } else {
+      dateString = `Fecha: ${formatDateString(date1)}`
+    }
+  }
 
   return (
-    <BaseFilter
-      icon={<LucideCalendar />}
-      text={
-        selectedDateFilter === DateFilterOption.IS_BETWEEN || selectedDateFilter === DateFilterOption.YEARS
-          ? `Fecha: ${formatDateString(date1)} - ${formatDateString(date2)}`
-          : `Fecha: ${formatDateString(date1)}`
-      }
-    >
+    <BaseFilter icon={<LucideCalendar />} text={dateString}>
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>

@@ -24,19 +24,24 @@ const ViewButton: React.FC<any> = ({ currentView, setCurrentView, view, label })
 }
 
 function getFilterState() {
-  const local = localStorage.getItem('filterState')
-  if (local) {
-    return JSON.parse(local)
+  try {
+    const local = localStorage.getItem('filterState')
+    if (local) {
+      return JSON.parse(local)
+    }
+  } catch (e) {
+    console.error(e)
+    localStorage.removeItem('filterState')
   }
-  return initialFilterState
+  return initialFilterState(0)
 }
 
 const StatsDashboard: React.FC = () => {
   const { db } = useDB()
   const [filters, dispatchFilters] = useReducer(filterReducer, getFilterState())
 
+  // save filter state to local storage
   useEffect(() => {
-    if (filters === initialFilterState) return
     localStorage.setItem('filterState', JSON.stringify(filters))
   }, [filters])
 

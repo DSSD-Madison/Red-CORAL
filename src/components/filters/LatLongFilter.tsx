@@ -29,8 +29,9 @@ const LatLongFilter: React.FC<filterProps> = ({ id, dispatch, state }: LatLongFi
     dispatch({ type: 'REMOVE_FILTER', payload: { id } })
   }
 
+  const filterStringDisplay = latitude || longitude || radius ? `: (${latitude || 0}, ${longitude || 0}) Radio: ${radius || 0}km` : ''
   return (
-    <BaseFilter icon={<LucideMapPin />} text={`Ubicación: (${latitude || 0}, ${longitude || 0}) Radio: ${radius || 'N/A'}`}>
+    <BaseFilter icon={<LucideMapPin />} text={'Ubicación' + filterStringDisplay}>
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>

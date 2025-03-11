@@ -1,6 +1,6 @@
 import { filterProps } from '@/filters/filterReducer'
 import BaseFilter from './BaseFilter'
-import { LucideCalendar, LucideTrash2 } from 'lucide-react'
+import { LucideText, LucideTrash2 } from 'lucide-react'
 import { useState } from 'react'
 
 interface DescFilterState extends filterProps {
@@ -14,9 +14,9 @@ const FilterDesc = ({ id, dispatch, state }: DescFilterState) => {
   const removeThisFilter = () => {
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
   }
-
+  const filterStringDisplay = search ? `: «${search}»` : ''
   return (
-    <BaseFilter icon={<LucideCalendar />} text={`La descripción contiene «${search}»`}>
+    <BaseFilter icon={<LucideText />} text={'Descripción' + filterStringDisplay}>
       <button onClick={removeThisFilter} className="absolute right-2 top-1 h-4 w-4 text-red-600" title="Eliminar Filtro">
         <LucideTrash2 size={20} />
       </button>

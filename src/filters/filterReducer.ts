@@ -8,7 +8,7 @@ import LatLongFilter, { calculateDistance } from '@/components/filters/LatLongFi
 import NOTFilter, { NOTFilterState } from '@/components/filters/NOTFilter'
 import ORFilter, { ORFilterState } from '@/components/filters/ORFilter'
 
-export type filterDispatchType = { type: 'ADD_FILTER' | 'REMOVE_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
+export type filterDispatchType = { type: 'RESET_FILTERS' } | { type: 'REMOVE_FILTER', payload: { id: number } } | { type: 'ADD_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
 
 export type filterProps = {
   id: number
@@ -27,11 +27,11 @@ type reducerType = {
   filters: filterType[]
 }
 
-export const initialFilterState: reducerType = {
-  "index": 6,
+export const initialFilterState = (index: number): reducerType => ({
+  "index": index + 5,
   "filters": [
     {
-      "id": 0,
+      "id": index,
       "type": "category",
       "state": {
         "hiddenCategories": [],
@@ -39,7 +39,7 @@ export const initialFilterState: reducerType = {
       }
     },
     {
-      "id": 1,
+      "id": index + 1,
       "type": "date",
       "state": {
         "date1": "",
@@ -49,7 +49,7 @@ export const initialFilterState: reducerType = {
       }
     },
     {
-      "id": 3,
+      "id": index + 2,
       "type": "latlong",
       "state": {
         "latitude": "",
@@ -58,7 +58,7 @@ export const initialFilterState: reducerType = {
       }
     },
     {
-      "id": 4,
+      "id": index + 3,
       "type": "country",
       "state": {
         "hiddenCountries": [],
@@ -67,14 +67,14 @@ export const initialFilterState: reducerType = {
       }
     },
     {
-      "id": 5,
+      "id": index + 4,
       "type": "desc",
       "state": {
         "search": ""
       }
     }
   ]
-}
+})
 
 export const filterReducer = (state: reducerType, action: filterDispatchType): reducerType => {
   switch (action.type) {
@@ -87,6 +87,8 @@ export const filterReducer = (state: reducerType, action: filterDispatchType): r
       return { ...state, filters: state.filters.filter((filter) => filter.id !== action.payload.id) }
     case 'UPDATE_FILTER':
       return { ...state, filters: state.filters.map((filter) => (filter.id === action.payload.id ? { ...filter, ...action.payload } : filter)) }
+    case 'RESET_FILTERS':
+      return initialFilterState(state.index)
     default:
       return state
   }
