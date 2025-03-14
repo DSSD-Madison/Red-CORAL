@@ -2,7 +2,7 @@ import L, { LatLngTuple, PointTuple } from 'leaflet'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useMap, Marker as LeafletMarker, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
-import { filterIncidents, formatDateString, typeIDtoCategory, typeIDtoCategoryID, typeIDtoTypeName } from 'utils'
+import { filterIncidents, typeIDtoCategory, typeIDtoCategoryID, typeIDtoTypeName } from 'utils'
 import MarkerClusterGroup from 'react-leaflet-markercluster'
 import { db } from '@/context/DBContext' // still need to import for the marker icon functions
 
@@ -20,60 +20,66 @@ interface IncidentLayerProps {
 }
 
 const greyClusterIcon = (cluster: L.MarkerCluster) => {
+  const total = cluster.getChildCount()
+  const startShade = 160
+  const endShade = 32
+  const endColorThresh = 200
+  const color = Math.round(Math.min(1, Math.sqrt(total / endColorThresh)) * (endShade - startShade) + startShade).toString(16)
+  const size = Math.round(Math.pow(total, 0.25) * 15)
   return L.divIcon({
-    html: `<div style="background-color:#777a;line-height:30px;color:white;">${cluster.getChildCount()}</div>`,
-    className: 'marker-cluster',
-    iconSize: L.point(40, 40, true),
+    html: `<div style="background-color:#${color}${color}${color}a0;line-height:${size}px;height:${size}px;width:${size}px;">${total}</div>`,
+    className: 'marker-grey',
+    iconSize: L.point(size, size, true),
   })
 }
 
 const pieChartClusterIcon = (cluster: L.MarkerCluster) => {
   // this function is very hot!!! (called for every cluster on every zoom change)
-  const children = cluster.getAllChildMarkers()
+  const children = cluster.getAllChildMarkers() as (L.Marker<any> & { options: { catID: string } })[]
   const total = children.length
-  const proportions = children.reduce(
-    (acc, marker: any) => {
-      const catID = marker.options.catID
-      acc[catID] = (acc[catID] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>
-  )
+  // No cache, tragic
+  const proportions = {} as Record<string, number>
+  let catID
+  for (let i = 0; i < children.length; i++) {
+    catID = children[i].options.catID
+    proportions[catID] = (proportions[catID] || 0) + 1
+  }
   // pie chart rendered using CSS conic gradient.
   // need end percent and color per category -> (conic-gradient(orange 64%, blue 64%, blue 81%, black 81%);)
-  const slices = Object.entries(proportions)
-    // filter out categories with less than 5% of the total (less clutter)
+  // Filter and sort categories by proportion
+  const entries = Object.entries(proportions)
     .filter(([_, count]) => count / total > 0.05)
     .sort((a, b) => b[1] - a[1])
-    .reduce(
-      (acc, [catID, count], i) => {
-        const start = acc[0][i - 1] || 0
-        const end = start + (count / total) * 100
-        acc[0].push(end)
-        acc[1].push(db.Categories[catID].color)
-        return acc
-      },
-      // doing 'list of two lists' instead of 'list of objects' to avoid allocating objects in the loop, even if it's a bit clunky
-      // [[0, 64, 100], ['orange', 'blue', 'black']] (this did actually help performance)
-      [[], []] as [end: number[], color: string[]]
-    )
+
+  const length = entries.length
+  const slices: [number[], string[]] = [new Array(length), new Array(length)]
+
+  let runningTotal = 0
+  for (let i = 0; i < length; i++) {
+    const [catID, count] = entries[i]
+    runningTotal += (count / total) * 100
+    slices[0][i] = runningTotal
+    slices[1][i] = db.Categories[catID].color
+  }
+  // Add the remainder if needed
   if (slices[0][slices[0].length - 1] < 100) {
     slices[0].push(100)
-    slices[1].push('#777')
+    slices[1].push('#777777')
   }
   const slicesString = []
   for (let i = 0; i < slices[0].length; i++) {
     const color = slices[1][i]
     const start = i === 0 ? 0 : slices[0][i - 1]
     const end = slices[0][i]
-    slicesString.push(`${color} ${start}%, ${color} ${end}%`)
+    slicesString.push(`${color}e0 ${Math.ceil(start)}%, ${color}e0 ${Math.floor(end)}%`)
   }
   const size = Math.round(Math.pow(total, 0.25) * 15)
-  return L.divIcon({
+  const icon = L.divIcon({
     html: `<div style="background: conic-gradient(${slicesString.join(',')})"></div>`,
     className: 'marker-pie',
     iconSize: L.point(size, size, true),
   })
+  return icon
 }
 
 const IncidentLayer = forwardRef<any, IncidentLayerProps>(
@@ -181,7 +187,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                   </p>
                 )}
                 <p>
-                  <span className="font-bold">Fecha:</span> {formatDateString(incident.dateString)}
+                  <span className="font-bold">Fecha:</span> {incident.dateString}
                 </p>
                 <hr className="my-2 border-neutral-500" />
                 <p>
