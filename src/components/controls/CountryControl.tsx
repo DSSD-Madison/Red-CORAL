@@ -26,7 +26,19 @@ const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) =
   }, [])
 
   const visibleDepartments = Object.fromEntries(
-    Object.entries(db.filterBounds.locations).filter(([country]) => !filters.hideCountries.includes(country))
+    Object.entries(db.filterBounds.locations)
+      .filter(([country]) => !filters.hideCountries.includes(country))
+      .map(([country, departments]) => {
+        // For Mar Caribe and Océano Pacífico, if they only have a blank department, don't show it
+        if (
+          (country === 'Mar Caribe' || country === 'Océano Pacífico') &&
+          Object.keys(departments).length === 1 &&
+          Object.keys(departments)[0] === ''
+        ) {
+          return [country, {}]
+        }
+        return [country, departments]
+      })
   )
 
   const handleConCheckboxChange = (key: string, checked: boolean) => {

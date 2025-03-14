@@ -14,10 +14,14 @@ export function calculateIncidentStats(types: DB['Types'], incidents: [string, I
 
   incidents.forEach(([_, incident]) => {
     countriesSet.add(incident.country)
-    departmentsSet.add(incident.department)
-    municipalitiesSet.add(incident.municipality)
     dates.push(new Date(incident.dateString))
     typesSet.add(incident.typeID as string)
+    // Only add department/municip if it's not Mar Caribe/Océano Pacífico
+    if (incident.country === 'Mar Caribe' || incident.country === 'Océano Pacífico') {
+      return
+    }
+    departmentsSet.add(incident.department)
+    municipalitiesSet.add(incident.municipality)
   })
 
   const earliestDate = new Date(Math.min(...dates.map((date) => date.getTime())))
