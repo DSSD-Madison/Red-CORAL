@@ -15,13 +15,14 @@ import {
   FloatingFocusManager,
 } from '@floating-ui/react'
 import { formatDateString } from '@/utils'
+import { useDB } from '@/context/DBContext'
 
 enum DateFilterOption {
   IS = 'es',
   IS_BEFORE = 'es anterior',
   IS_AFTER = 'es posterior',
   IS_BETWEEN = 'es entre',
-  YEARS = 'años',
+  YEARS = 'es entre años',
 }
 
 const possibleDateFilterOptions: DateFilterOption[] = [
@@ -42,17 +43,16 @@ interface DateFilterState extends filterProps {
 }
 
 const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
+  const { db } = useDB()
   const [date1, setDate1] = useState(state?.date1 || '')
   const [date2, setDate2] = useState(state?.date2 || '')
   const [selectedDateFilter, setSelectedDateFilter] = useState(state?.selectedDateFilter || DateFilterOption.IS_BETWEEN)
-  const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(state?.isDateFilterSelectOpen || false)
-  const [startYear, setStartYear] = useState('')
-  const [endYear, setEndYear] = useState('')
+  const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
 
   const { refs, floatingStyles, context } = useFloating({
     open: isDateFilterSelectOpen,
     onOpenChange: setIsDateFilterSelectOpen,
-    middleware: [offset(10), flip({ fallbackAxisSideDirection: 'end' }), shift()],
+    middleware: [offset(0), flip({ fallbackAxisSideDirection: 'end' }), shift()],
     whileElementsMounted: autoUpdate,
   })
 
@@ -62,13 +62,65 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
 
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
 
-  const handleYearChange = () => {
-    if (startYear && endYear) {
-      const startDate = `${startYear}-01-01`
-      const endDate = `${endYear}-12-31`
-      setDate1(startDate)
-      setDate2(endDate)
+  const minYear = db.filterBounds.minYear
+  const maxYear = db.filterBounds.maxYear
+  const yearButtons = []
+  for (let i = minYear; i <= maxYear; i++) {
+    const date1Year = date1 ? new Date(date1).getUTCFullYear() : 0
+    const date2Year = date2 ? new Date(date2).getUTCFullYear() : 0
+    yearButtons.push(
+      <>
+        {/* prettier-ignore */}
+        <button
+          key={i}
+          onClick={() => {
+            handleYearChange(i)
+          }}
+          className={
+            'p-2 text-sm ' +
+            (i == date1Year && i == date2Year) ? 'rounded-md bg-blue-500 px-3 text-white' :
+            (i == date1Year) ? 'rounded-l-md bg-blue-500 px-3 text-white' : 
+            (i == date2Year) ? 'rounded-r-md bg-blue-500 px-3 text-white' : 
+            (date1Year < i && i < date2Year) ? 'bg-blue-300 px-3' : 
+            'mx-1 rounded-md bg-white hover:bg-gray-200'
+            }
+        >
+          {i}
+        </button>
+      </>
+    )
+  }
+
+  const handleYearChange = (i: number) => {
+    const startDate = `${i}-01-01`
+    const endDate = `${i}-12-31`
+    // selected year could be upper or lower bound.
+    // assume user picks lower, then upper
+    if (date1 && !date2) {
+      const date1Year = new Date(date1).getUTCFullYear()
+      if (date1Year > i) {
+        // swap if lower is greater than upper
+        setDate2(`${date1Year}-12-31`)
+        setDate1(startDate)
+      } else {
+        setDate2(endDate)
+      }
     }
+    // if both are set, reset upper and set lower
+    // if the same year is selected thrice, reset both
+    else if (date1 && date2) {
+      const date1Year = new Date(date1).getUTCFullYear()
+      const date2Year = new Date(date2).getUTCFullYear()
+      if (date1Year === i && date2Year === i) {
+        setDate1('')
+        setDate2('')
+      } else {
+        setDate2('')
+        setDate1(startDate)
+      }
+    }
+    // if neither are set, set lower
+    else if (!date1 && !date2) setDate1(startDate)
   }
   let dateString = 'Fecha'
 
@@ -85,39 +137,43 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
   return (
     <BaseFilter icon={<LucideCalendar />} text={dateString} dispatch={dispatch} id={id}>
       {/* Dropdown to select the filter option */}
-      <div
+
+      <p
+        className="mb-2 flex w-max cursor-pointer flex-row items-center text-sm text-gray-600"
         onClick={() => setIsDateFilterSelectOpen(true)}
-        className="flex cursor-pointer items-center text-sm"
         ref={refs.setReference}
         {...getReferenceProps()}
       >
-        <p className="mb-2 flex flex-row items-center text-gray-600">
-          Fecha {selectedDateFilter}
-          <span>{isDateFilterSelectOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}</span>
-        </p>
+        Fecha {selectedDateFilter}
+        <span>{isDateFilterSelectOpen ? <LucideChevronDown size={16} strokeWidth={1} /> : <LucideChevronRight size={16} strokeWidth={1} />}</span>
+      </p>
 
-        {isDateFilterSelectOpen && (
-          <FloatingFocusManager context={context} modal={false}>
-            <div
-              ref={refs.setFloating}
-              style={floatingStyles}
-              className="z-10 min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 focus-visible:outline-none"
-              {...getFloatingProps()}
-            >
-              <h2 className="p-1 text-sm font-semibold">Opción de filtro</h2>
-              {possibleDateFilterOptions.map((dateFilterOption) => (
-                <button
-                  key={dateFilterOption}
-                  className="flex w-full items-center gap-2 rounded-md p-1 hover:bg-black/5"
-                  onClick={() => setSelectedDateFilter(dateFilterOption)}
-                >
-                  <span>{dateFilterOption}</span>
-                </button>
-              ))}
-            </div>
-          </FloatingFocusManager>
-        )}
-      </div>
+      {isDateFilterSelectOpen && (
+        <FloatingFocusManager context={context} modal={false}>
+          <div
+            ref={refs.setFloating}
+            style={floatingStyles}
+            className="z-10 min-w-48 rounded-md border border-gray-300 bg-white px-1 py-2 shadow-md focus-visible:outline-none"
+            {...getFloatingProps()}
+          >
+            <h2 className="p-1 text-sm font-semibold">Opción de filtro</h2>
+            {possibleDateFilterOptions.map((dateFilterOption) => (
+              <button
+                key={dateFilterOption}
+                className="flex w-full items-center gap-2 rounded-md p-1 hover:bg-black/5"
+                onClick={() => {
+                  setDate1('')
+                  setDate2('')
+                  setIsDateFilterSelectOpen(false)
+                  setSelectedDateFilter(dateFilterOption)
+                }}
+              >
+                <span>{dateFilterOption}</span>
+              </button>
+            ))}
+          </div>
+        </FloatingFocusManager>
+      )}
 
       {selectedDateFilter !== DateFilterOption.YEARS && (
         <div className="flex flex-row items-center gap-2">
@@ -143,36 +199,14 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
           )}
         </div>
       )}
-      {selectedDateFilter === DateFilterOption.YEARS && (
-        <div className="mt-2 flex flex-row items-center gap-2">
-          <label>
-            <input
-              type="number"
-              value={startYear}
-              onChange={(e) => setStartYear(e.target.value)}
-              onBlur={handleYearChange}
-              className="w-16 rounded-md border border-gray-300 p-0.5 text-sm"
-            />
-          </label>
-          -
-          <label>
-            <input
-              type="number"
-              value={endYear}
-              onChange={(e) => setEndYear(e.target.value)}
-              onBlur={handleYearChange}
-              className="w-16 rounded-md border border-gray-300 p-0.5 text-sm"
-            />
-          </label>
-        </div>
-      )}
+      {selectedDateFilter === DateFilterOption.YEARS && <div className="flex flex-row flex-wrap">{yearButtons}</div>}
       <button
         onClick={() =>
           dispatch({
             type: 'UPDATE_FILTER',
             payload: {
               id: id,
-              state: { date1, date2, selectedDateFilter, isDateFilterSelectOpen },
+              state: { date1, date2, selectedDateFilter },
             },
           })
         }

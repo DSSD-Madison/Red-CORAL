@@ -134,7 +134,7 @@ export const filterOperations: Record<filterType["type"], (incident: Incident, s
         return incident.dateString < date1
       case 'es posterior':
         return incident.dateString > date1
-      case 'años':
+      case 'es entre años':
       case 'es entre':
         if (!date2) {
           return true
