@@ -72,7 +72,7 @@ const BaseFilter = ({
     <>
       <div
         onClick={() => setIsOpen(true)}
-        className={`relative flex cursor-pointer items-center overflow-hidden rounded-full border pl-3 transition-all hover:shadow-md
+        className={`relative flex cursor-pointer select-none items-center overflow-hidden rounded-full border pl-3 transition-all hover:shadow-md has-[button:hover,button:active]:border-gray-600 has-[button:hover,button:active]:bg-gray-100 has-[button:hover,button:active]:text-gray-600 
           ${isOpen ? ' border-blue-600 bg-blue-100 pr-10 text-blue-600 shadow-md' : 'border-gray-400 pr-2 hover:bg-gray-200'}`}
         ref={refs.setReference}
         {...getReferenceProps()}
@@ -82,17 +82,13 @@ const BaseFilter = ({
         <span>
           <LucideChevronRight size={16} strokeWidth={1} style={{ transform: `rotate(${isOpen ? 90 : 0}deg)` }} />
         </span>
-        <div
-          className={`absolute bottom-0 right-0 top-0 flex ${isOpen ? 'w-8 border-l' : 'w-0'} items-center justify-center rounded-full border-red-600 bg-red-100 transition-all hover:bg-red-200 hover:shadow-md`}
+        <button
+          onClick={removeThisFilter}
+          className={`absolute bottom-0 right-0 top-0 flex h-full w-4 items-center justify-center rounded-full border-gray-600 bg-white text-red-600 transition hover:border-red-600 hover:bg-red-200 hover:shadow-md ${isOpen ? 'w-8 border-l opacity-100' : 'w-0 opacity-0'}`}
+          title="Eliminar Filtro"
         >
-          <button
-            onClick={removeThisFilter}
-            className={`h-4 w-4 text-red-600 ${isOpen ? 'opacity-100' : 'opacity-0'} transition-opacity`}
-            title="Eliminar Filtro"
-          >
-            <LucideTrash2 size={16} />
-          </button>
-        </div>
+          <LucideTrash2 size={16} />
+        </button>
       </div>
       {isOpen && (
         <FloatingFocusManager context={context} modal={false}>
