@@ -12,6 +12,7 @@ import {
   FloatingArrow,
   arrow,
   size,
+  useTransitionStyles,
 } from '@floating-ui/react'
 import { LucideChevronRight, LucideTrash2 } from 'lucide-react'
 import { filterDispatchType } from '@/filters/filterReducer'
@@ -42,7 +43,7 @@ const BaseFilter = ({
     dispatch({ type: 'REMOVE_FILTER', payload: { id: id } })
   }
 
-  const { refs, floatingStyles, context } = useFloating({
+  const { refs, floatingStyles, context, middlewareData } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
     placement: 'bottom-start',
@@ -60,6 +61,26 @@ const BaseFilter = ({
       arrow({ element: arrowRef, padding: 10 }),
     ],
     whileElementsMounted: autoUpdate,
+  })
+  const ARROW_WIDTH = 16
+  const ARROW_HEIGHT = 14
+  const arrowX = middlewareData.arrow?.x ?? 0
+  const arrowY = middlewareData.arrow?.y ?? 0
+  const transformX = arrowX + ARROW_WIDTH / 2
+  const transformY = arrowY + ARROW_HEIGHT
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    initial: () => ({
+      transform: 'scale(0.95)',
+      opacity: 0,
+    }),
+    common: ({ side }) => ({
+      transformOrigin: {
+        top: `${transformX}px calc(100% + ${ARROW_HEIGHT}px)`,
+        bottom: `${transformX}px ${-ARROW_HEIGHT}px`,
+        left: `calc(100% + ${ARROW_HEIGHT}px) ${transformY}px`,
+        right: `${-ARROW_HEIGHT}px ${transformY}px`,
+      }[side],
+    }),
   })
 
   const click = useClick(context)
@@ -90,19 +111,21 @@ const BaseFilter = ({
           <LucideTrash2 size={16} />
         </button>
       </div>
-      {isOpen && (
+      {isMounted && (
         <FloatingFocusManager context={context} modal={false}>
           <div ref={refs.setFloating} style={floatingStyles} className="z-50" {...getFloatingProps()}>
-            <FloatingArrow fill="white" strokeWidth={1} stroke="#d1d5db" ref={arrowRef} context={context} />
-            <div
-              style={{ maxWidth: floatingStyles.maxWidth, maxHeight: floatingStyles.maxHeight }}
-              ref={innerSizeRef}
-              className={
-                'w-auto rounded-md border border-gray-300 bg-white px-3 py-2 text-black accent-blue-600 shadow-lg focus-visible:outline-none' +
-                (scrollOverflow ? ' overflow-y-auto' : '')
-              }
-            >
-              {children}
+            <div style={transitionStyles}>
+              <FloatingArrow fill="white" strokeWidth={1} stroke="#d1d5db" ref={arrowRef} context={context} />
+              <div
+                style={{ maxWidth: floatingStyles.maxWidth, maxHeight: floatingStyles.maxHeight }}
+                ref={innerSizeRef}
+                className={
+                  'w-auto rounded-md border border-gray-300 bg-white px-3 py-2 text-black accent-blue-600 shadow-lg focus-visible:outline-none' +
+                  (scrollOverflow ? ' overflow-y-auto' : '')
+                }
+              >
+                {children}
+              </div>
             </div>
           </div>
         </FloatingFocusManager>
