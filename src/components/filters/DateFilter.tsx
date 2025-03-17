@@ -68,26 +68,26 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
   for (let i = minYear; i <= maxYear; i++) {
     const date1Year = date1 ? new Date(date1).getUTCFullYear() : 0
     const date2Year = date2 ? new Date(date2).getUTCFullYear() : 0
+    const additionalStyles =
+      i == date1Year && i == date2Year
+        ? 'rounded-md bg-blue-500 px-3 text-white'
+        : i == date1Year
+          ? 'rounded-l-md bg-blue-500 px-3 text-white'
+          : i == date2Year
+            ? 'rounded-r-md bg-blue-500 px-3 text-white'
+            : date1Year < i && i < date2Year
+              ? 'bg-blue-300 px-3'
+              : 'mx-1 rounded-md bg-white hover:bg-gray-200 outline-1 outline outline-gray-300'
     yearButtons.push(
-      <>
-        {/* prettier-ignore */}
-        <button
-          key={i}
-          onClick={() => {
-            handleYearChange(i)
-          }}
-          className={
-            'p-2 text-sm ' +
-            (i == date1Year && i == date2Year) ? 'rounded-md bg-blue-500 px-3 text-white' :
-            (i == date1Year) ? 'rounded-l-md bg-blue-500 px-3 text-white' : 
-            (i == date2Year) ? 'rounded-r-md bg-blue-500 px-3 text-white' : 
-            (date1Year < i && i < date2Year) ? 'bg-blue-300 px-3' : 
-            'mx-1 rounded-md bg-white hover:bg-gray-200'
-            }
-        >
-          {i}
-        </button>
-      </>
+      <button
+        key={i}
+        onClick={() => {
+          handleYearChange(i)
+        }}
+        className={`p-1 px-2 text-sm ${additionalStyles}`}
+      >
+        {i}
+      </button>
     )
   }
 
