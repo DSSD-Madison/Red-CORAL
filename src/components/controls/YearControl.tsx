@@ -3,6 +3,7 @@ import { MarkerFilters } from 'types'
 import RangeSlider from 'react-range-slider-input'
 import 'react-range-slider-input/dist/style.css'
 import { useDB } from '@/context/DBContext'
+import { LucideCalendar } from 'lucide-react'
 
 interface YearControlProps {
   filters: MarkerFilters
@@ -55,8 +56,7 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters }) => {
           e.preventDefault()
         }}
       >
-        {/* ⧗ */}
-        &#x029D7;
+        <LucideCalendar className="h-5 w-5" strokeWidth={1} />
       </a>
       {isDropdownVisible && (
         <div

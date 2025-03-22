@@ -1,4 +1,5 @@
 import { useDB } from '@/context/DBContext'
+import { LucideTags } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from 'types'
 
@@ -108,8 +109,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ filters, setFilters }) =>
           e.preventDefault()
         }}
       >
-        {/* ☰ */}
-        &#x2630;
+        <LucideTags className="h-5 w-5" strokeWidth={1} />
       </a>
       {isDropdownVisible && (
         <div ref={dropdownRef} className="absolute left-10 top-0.5 flex h-96 gap-5">

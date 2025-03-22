@@ -1,4 +1,5 @@
 import { useDB } from '@/context/DBContext'
+import { LucideGlobe } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from 'types'
 
@@ -112,8 +113,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) =
           e.preventDefault()
         }}
       >
-        {/* 🏳 */}
-        &#127987;
+        <LucideGlobe className="h-5 w-5" strokeWidth={1} />
       </a>
       {isDropdownVisible && (
         <div ref={dropdownRef} className="absolute left-10 top-0.5 flex h-96 gap-5">

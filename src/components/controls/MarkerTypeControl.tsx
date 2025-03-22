@@ -6,6 +6,36 @@ interface MarkerTypeControlProps {
   setMarkerType: React.Dispatch<React.SetStateAction<'single' | 'group' | 'groupPie'>>
 }
 
+const GroupButton = ({
+  displayName,
+  id,
+  imageSrc,
+  markerType,
+  setMarkerType,
+}: {
+  displayName: string
+  id: string
+  imageSrc: string
+  markerType: string
+  setMarkerType: any
+}) => (
+  <div className="flex flex-col items-center">
+    <button
+      className="flex h-32 w-32 items-center justify-center rounded-md"
+      onClick={() => {
+        setMarkerType(id)
+      }}
+    >
+      <img
+        className={`aspect-square w-full rounded-lg border object-cover transition hover:grayscale-0 ${markerType === id ? 'border-4 border-blue-400' : 'grayscale'}`}
+        src={imageSrc}
+        alt={displayName}
+      />
+    </button>
+    <span className="mt-2 text-sm">{displayName}</span>
+  </div>
+)
+
 const MarkerTypeControl: React.FC<MarkerTypeControlProps> = ({ markerType, setMarkerType }) => {
   const [isDropdownVisible, setDropdownVisible] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -34,57 +64,29 @@ const MarkerTypeControl: React.FC<MarkerTypeControlProps> = ({ markerType, setMa
           e.preventDefault()
         }}
       >
-        <LucideMapPinned strokeWidth={1} />
+        <LucideMapPinned className="h-5 w-5" strokeWidth={1} />
       </a>
       {isDropdownVisible && (
         <div ref={dropdownRef} className="absolute left-10 top-0.5 z-[1000]">
           <div className="leaflet-bar box-content rounded bg-tint-02/80 p-4 shadow-lg backdrop-blur-sm">
             <div className="mb-2 text-base font-semibold">Tipo de marcador</div>
             <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`h-32 w-32 cursor-pointer rounded border-2 p-2 hover:bg-tint-02 ${markerType === 'single' ? 'border-blue-500' : 'border-transparent'}`}
-                  onClick={() => {
-                    setMarkerType('single')
-                    setDropdownVisible(false)
-                  }}
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <img className="aspect-square w-full rounded-lg object-cover" src="individual-marker.png" alt="Marcador individual" />
-                  </div>
-                </div>
-                <span className="mt-2 text-sm">Individual</span>
-              </div>
+              <GroupButton
+                displayName="Individual"
+                id="single"
+                imageSrc="individual-marker.png"
+                markerType={markerType}
+                setMarkerType={setMarkerType}
+              />
 
-              <div className="flex flex-col items-center">
-                <div
-                  className={`h-32 w-32 cursor-pointer rounded border-2 p-2 hover:bg-tint-02 ${markerType === 'group' ? 'border-blue-500' : 'border-transparent'}`}
-                  onClick={() => {
-                    setMarkerType('group')
-                    setDropdownVisible(false)
-                  }}
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <img className="aspect-square w-full rounded-lg object-cover" src="group-marker.png" alt="Marcador de grupo" />
-                  </div>
-                </div>
-                <span className="mt-2 text-sm">Grupo</span>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div
-                  className={`h-32 w-32 cursor-pointer rounded border-2 p-2 hover:bg-tint-02 ${markerType === 'groupPie' ? 'border-blue-500' : 'border-transparent'}`}
-                  onClick={() => {
-                    setMarkerType('groupPie')
-                    setDropdownVisible(false)
-                  }}
-                >
-                  <div className="flex h-full items-center justify-center">
-                    <img className="aspect-square w-full rounded-lg object-cover" src="group-pie-marker.png" alt="Marcador de grupo circular" />
-                  </div>
-                </div>
-                <span className="mt-2 text-sm">Gráfico circular</span>
-              </div>
+              <GroupButton displayName="Grupo" id="group" imageSrc="group-marker.png" markerType={markerType} setMarkerType={setMarkerType} />
+              <GroupButton
+                displayName="Gráfico circular"
+                id="groupPie"
+                imageSrc="group-pie-marker.png"
+                markerType={markerType}
+                setMarkerType={setMarkerType}
+              />
             </div>
           </div>
         </div>

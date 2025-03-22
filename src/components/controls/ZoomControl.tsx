@@ -2,6 +2,7 @@ import { useMap } from 'react-leaflet'
 import Control from 'react-leaflet-custom-control'
 import { MarkerFilters } from 'types'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../../constants'
+import { LucideMinus, LucidePlus, LucideRotateCcw } from 'lucide-react'
 
 interface ZoomControlProps {
   zoomInTitle?: string
@@ -28,7 +29,7 @@ function ZoomControl(props: ZoomControlProps) {
             e.preventDefault()
           }}
         >
-          +
+          <LucidePlus className="h-5 w-5" strokeWidth={1} />
         </a>
         <a
           className="leaflet-control-zoom-out"
@@ -39,7 +40,7 @@ function ZoomControl(props: ZoomControlProps) {
             e.preventDefault()
           }}
         >
-          -
+          <LucideMinus className="h-5 w-5" strokeWidth={1} />
         </a>
         <a
           className="leaflet-control-zoom-out pt-[2px]"
@@ -59,7 +60,7 @@ function ZoomControl(props: ZoomControlProps) {
             e.preventDefault()
           }} // circle arrow symbol
         >
-          &#x21ba;
+          <LucideRotateCcw className="h-5 w-5" strokeWidth={1} />
         </a>
       </div>
     </Control>

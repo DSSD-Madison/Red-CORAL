@@ -162,6 +162,7 @@ const Map: React.FC = () => {
         />
         <Control prepend position="topleft">
           <div className="leaflet-bar">
+            <SearchControl />
             <CategoryControl filters={filters} setFilters={setFilters} />
             <CountryControl filters={filters} setFilters={setFilters} />
             <MarkerTypeControl markerType={markerDisplayType} setMarkerType={setMarkerDisplayType} />
@@ -169,7 +170,6 @@ const Map: React.FC = () => {
         </Control>
         <Control position="bottomleft">
           <YearControl filters={filters} setFilters={setFilters} />
-          <SearchControl />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
