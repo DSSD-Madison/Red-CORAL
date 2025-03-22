@@ -13,6 +13,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
+import { getFromIndexedDB, saveToIndexedDB } from './utils/indexedDB'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
@@ -67,11 +68,24 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
 
 /**
  * Fetches the data from the firebase storage and returns the database object
+ * First attempts to retrieve from IndexedDB cache. If cache is not available or 
+ * if isAdmin is true, fetches from Firebase.
+ * 
  * if isAdmin is set, also queries firestore for documents with updateAt timestamps
  * after the readAt timestamp from firebase storage. Any documents having `deleted: true`
  * will not be returned in the database object.
  */
 export async function getData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
+  // If not admin, try to get data from IndexedDB first
+  if (!isAdmin) {
+    const cachedData = await getFromIndexedDB();
+    if (cachedData) {
+      console.log('Using cached data from IndexedDB');
+      return cachedData;
+    }
+  }
+
+  // If cache miss or admin mode, fetch from Firebase
   const bytes = await getBytes(ref(storage, 'state.json'))
   const db: DB = JSON.parse(new TextDecoder().decode(bytes))
   const collectionNames = ['Categories', 'Types', 'Incidents']
@@ -98,10 +112,23 @@ export async function getData(isAdmin: boolean, storage: FirebaseStorage, firest
       }
     }
   }
-  return {
+
+  const finalData = {
     ...db,
     filterBounds: calculateBounds(db.Incidents),
+  };
+
+  // If not in admin mode, save the fetched data to IndexedDB
+  if (!isAdmin) {
+    try {
+      await saveToIndexedDB(finalData);
+      console.log('Saved data to IndexedDB cache');
+    } catch (error) {
+      console.warn('Failed to cache data in IndexedDB:', error);
+    }
   }
+
+  return finalData;
 }
 
 export function filterIncidents(incidents: DB['Incidents'],

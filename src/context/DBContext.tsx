@@ -4,6 +4,7 @@ import { getAuth, Auth } from 'firebase/auth'
 import { getFirestore, Firestore, collection, doc } from 'firebase/firestore'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData, calculateBounds } from 'utils'
+import { clearIndexedDBCache, saveToIndexedDB } from 'utils/indexedDB'
 import { Incident, DB } from 'types'
 
 interface DBContextType {
@@ -15,6 +16,7 @@ interface DBContextType {
   firestore: Firestore
   storage: FirebaseStorage
   fetchData: (isAdmin: boolean) => Promise<void>
+  clearCache: () => Promise<void>
   isLoggedIn: boolean
   isLoading: boolean
 }
@@ -135,6 +137,21 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     }
   }
 
+  /**
+   * Clears the IndexedDB cache and forces a fresh fetch from Firebase
+   */
+  async function clearCache(): Promise<void> {
+    try {
+      setIsLoading(true)
+      await clearIndexedDBCache()
+      await fetchData(isLoggedIn)
+    } catch (e) {
+      console.error('Failed to clear cache:', e)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   async function fetchData(isAdmin: boolean) {
     setIsLoading(() => true)
     getData(isAdmin, storage, firestore)
@@ -153,7 +170,11 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
 
   useEffect(() => {
     db = data
-  }, [data])
+    // When data changes and user is not an admin, update the IndexedDB cache (shouldn't actually happen?)
+    if (!isLoggedIn && Object.keys(data.Incidents).length > 0) {
+      saveToIndexedDB(data).catch((e) => console.warn('Failed to update cache:', e))
+    }
+  }, [data, isLoggedIn])
 
   const value: DBContextType = {
     db: data,
@@ -164,6 +185,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     firestore,
     storage,
     fetchData,
+    clearCache,
     isLoading,
     isLoggedIn,
   }
