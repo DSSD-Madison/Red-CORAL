@@ -69,6 +69,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
    */
   async function addIncident(incident: Incident): Promise<boolean> {
     try {
+      setIsLoading(() => true)
       const ref = await addDocWithTimestamp(collection(firestore, 'Incidents'), JSON.parse(JSON.stringify(incident)))
       setData((data) => ({
         ...data,
@@ -82,6 +83,8 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     } catch (e) {
       console.error(e)
       return false
+    } finally {
+      setIsLoading(() => false)
     }
   }
 
@@ -91,6 +94,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
    */
   async function editIncident(incidentID: keyof DB['Incidents'], incident: Incident): Promise<boolean> {
     try {
+      setIsLoading(() => true)
       await setDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`), JSON.parse(JSON.stringify(incident)))
       setData((data) => ({
         ...data,
@@ -103,6 +107,8 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     } catch (e) {
       console.error(e)
       return false
+    } finally {
+      setIsLoading(() => false)
     }
   }
 
@@ -113,6 +119,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
    */
   async function deleteIncident(incidentID: keyof DB['Incidents']): Promise<boolean> {
     try {
+      setIsLoading(() => true)
       await deleteDocWithTimestamp(doc(firestore, `Incidents/${incidentID}`))
       setData((data) => {
         const newData = { ...data }
@@ -123,6 +130,8 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     } catch (e) {
       console.error(e)
       return false
+    } finally {
+      setIsLoading(() => false)
     }
   }
 

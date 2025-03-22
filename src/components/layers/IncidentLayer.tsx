@@ -132,75 +132,77 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
     }
 
     return (
-      // @ts-expect-error: MarkerClusterGroup typings do not include children
-      <MarkerClusterGroup
-        key={markerType}
-        ref={ref}
-        showCoverageOnHover={false}
-        disableClusteringAtZoom={isGroupingEnabled ? 13 : 0}
-        spiderfyOnMaxZoom={false}
-        iconCreateFunction={markerType === 'groupPie' ? pieChartClusterIcon : greyClusterIcon}
-      >
-        <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-          <symbol id="marker">
-            <circle r="9" cx="9" cy="9" fill="currentColor" />
-          </symbol>
-        </svg>
-        {incidentList.map(([id, incident]) => (
-          <LeafletMarker
-            key={id}
-            position={incident.location}
-            icon={L.divIcon({
-              iconSize: [15, 15],
-              className: '',
-              html: createMarkerSVG(id, incident),
-            })}
-            // @ts-expect-error: passing catID to marker options so we can use it for the cluster icon
-            catID={typeIDtoCategoryID(data, incident.typeID)}
-            eventHandlers={{
-              click: () => {
-                if (selectedIncidentID === id) {
-                  setSelectedIncidentID(null)
-                } else {
-                  setSelectedIncidentID(id)
-                  zoomToLocation(incident.location)
-                }
-              },
-            }}
-          >
-            <Tooltip
-              direction={incident.location.lat < map.getCenter().lat ? 'top' : 'bottom'}
-              offset={[0, incident.location.lat < map.getCenter().lat ? -8 : 8]}
+      <>
+        {/* @ts-expect-error: MarkerClusterGroup typings do not include children */}
+        <MarkerClusterGroup
+          key={markerType}
+          ref={ref}
+          showCoverageOnHover={false}
+          disableClusteringAtZoom={isGroupingEnabled ? 13 : 0}
+          spiderfyOnMaxZoom={false}
+          iconCreateFunction={markerType === 'groupPie' ? pieChartClusterIcon : greyClusterIcon}
+        >
+          <svg style={{ display: 'none' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+            <symbol id="marker">
+              <circle r="9" cx="9" cy="9" fill="currentColor" />
+            </symbol>
+          </svg>
+          {incidentList.map(([id, incident]) => (
+            <LeafletMarker
+              key={id}
+              position={incident.location}
+              icon={L.divIcon({
+                iconSize: [15, 15],
+                className: '',
+                html: createMarkerSVG(id, incident),
+              })}
+              // @ts-expect-error: passing catID to marker options so we can use it for the cluster icon
+              catID={typeIDtoCategoryID(data, incident.typeID)}
+              eventHandlers={{
+                click: () => {
+                  if (selectedIncidentID === id) {
+                    setSelectedIncidentID(null)
+                  } else {
+                    setSelectedIncidentID(id)
+                    zoomToLocation(incident.location)
+                  }
+                },
+              }}
             >
-              <div className="w-max min-w-24 max-w-72 text-wrap break-words">
-                <p>
-                  <span className="font-bold">Pais:</span> {incident.country}
-                </p>
-                {incident.department && (
+              <Tooltip
+                direction={incident.location.lat < map.getCenter().lat ? 'top' : 'bottom'}
+                offset={[0, incident.location.lat < map.getCenter().lat ? -8 : 8]}
+              >
+                <div className="w-max min-w-24 max-w-72 text-wrap break-words">
                   <p>
-                    <span className="font-bold">Departamento:</span> {incident.department}
+                    <span className="font-bold">Pais:</span> {incident.country}
                   </p>
-                )}
-                {incident.municipality && (
+                  {incident.department && (
+                    <p>
+                      <span className="font-bold">Departamento:</span> {incident.department}
+                    </p>
+                  )}
+                  {incident.municipality && (
+                    <p>
+                      <span className="font-bold">Municipalidad:</span> {incident.municipality}
+                    </p>
+                  )}
                   <p>
-                    <span className="font-bold">Municipalidad:</span> {incident.municipality}
+                    <span className="font-bold">Fecha:</span> {incident.dateString}
                   </p>
-                )}
-                <p>
-                  <span className="font-bold">Fecha:</span> {incident.dateString}
-                </p>
-                <hr className="my-2 border-neutral-500" />
-                <p>
-                  <span className="font-bold">Actividad:</span> {typeIDtoCategory(data, incident.typeID).name}
-                  <span className="ml-1 inline-block h-[1em] w-[1em] rounded-full" style={{ backgroundColor: typeColors[incident.typeID] }} />
-                </p>
-                <p>
-                  <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(data, incident.typeID)}
-                </p>
-              </div>
-            </Tooltip>
-          </LeafletMarker>
-        ))}
+                  <hr className="my-2 border-neutral-500" />
+                  <p>
+                    <span className="font-bold">Actividad:</span> {typeIDtoCategory(data, incident.typeID).name}
+                    <span className="ml-1 inline-block h-[1em] w-[1em] rounded-full" style={{ backgroundColor: typeColors[incident.typeID] }} />
+                  </p>
+                  <p>
+                    <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(data, incident.typeID)}
+                  </p>
+                </div>
+              </Tooltip>
+            </LeafletMarker>
+          ))}
+        </MarkerClusterGroup>
         {tmpLocation && (
           <LeafletMarker
             title={'Incidente incompleto'}
@@ -214,7 +216,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
             })}
           />
         )}
-      </MarkerClusterGroup>
+      </>
     )
   }
 )

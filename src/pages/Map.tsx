@@ -12,7 +12,6 @@ import CountryControl from '@/components/controls/CountryControl'
 import MarkerTypeControl from '@/components/controls/MarkerTypeControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
-import LoadingOverlay from '@/components/LoadingOverlay'
 import { useLocation } from 'react-router-dom'
 import { useDB } from '../context/DBContext'
 
@@ -58,7 +57,6 @@ const Map: React.FC = () => {
   const [markerDisplayType, setMarkerDisplayType] = useState<'single' | 'group' | 'groupPie'>('groupPie')
   const [location, setLocation] = useState<Incident['location'] | null>(null)
   const [editID, setEditID] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
 
   async function submitIncident(
     dateString: Incident['dateString'],
@@ -84,36 +82,27 @@ const Map: React.FC = () => {
       return false
     }
     if (incidentID != null) {
-      setIsLoading(true)
       if (!(await editIncident(incidentID, { description, dateString, typeID, location, country, department, municipality }))) {
-        setIsLoading(false)
         alert('No se pudo editar el incidente')
         return false
       }
       alert('Incidente editado con éxito')
     } else {
       if (!(await addIncident({ description, dateString, typeID, location, country, department, municipality }))) {
-        setIsLoading(false)
         alert('No se pudo crear el incidente')
         return false
       }
       alert('Incidente creado con éxito')
     }
-    setIsLoading(false)
     return true
   }
 
   async function deleteSelectedIncident() {
-    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') === false) {
-      return
-    }
-    setIsLoading(true)
+    if (!selectedIncidentID || confirm('¿Estás seguro de que quieres eliminar este incidente?') === false) return
     if (await deleteIncident(selectedIncidentID)) {
-      setIsLoading(false)
       setSelectedIncidentID(null)
       alert('Incidente eliminado con éxito')
     } else {
-      setIsLoading(false)
       alert('No se pudo eliminar el incidente')
     }
   }
@@ -209,7 +198,6 @@ const Map: React.FC = () => {
           <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
         </div>
       </div>
-      <LoadingOverlay isVisible={isLoading} color={'#888888'} />
     </div>
   )
 }
