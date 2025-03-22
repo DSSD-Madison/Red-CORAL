@@ -2,6 +2,8 @@ import { useDB } from '@/context/DBContext'
 import React, { useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from 'types'
 
+const sea_countries = ['Mar Caribe', 'Océano Pacífico']
+
 interface FilterControlProps {
   filters: MarkerFilters
   setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
@@ -27,7 +29,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) =
 
   const visibleDepartments = Object.fromEntries(
     Object.entries(db.filterBounds.locations)
-      .filter(([country]) => !filters.hideCountries.includes(country))
+      .filter(([country]) => !filters.hideCountries.includes(country) && !sea_countries.includes(country))
       .map(([country, departments]) => {
         // For Mar Caribe and Océano Pacífico, if they only have a blank department, don't show it
         if (
@@ -133,6 +135,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) =
             </div>
             <div className="h-max overflow-y-auto">
               {Object.keys(db.filterBounds.locations)
+                .filter((country) => !sea_countries.includes(country)) // Exclude sea countries
                 .sort()
                 .map((country) => (
                   <div key={country} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
@@ -149,6 +152,22 @@ const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) =
                     </label>
                   </div>
                 ))}
+              <h1 className="mx-1 mt-2 text-sm font-semibold">Océano</h1>
+              {sea_countries.map((country) => (
+                <div key={country} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
+                  <input
+                    type="checkbox"
+                    name={country}
+                    id={country}
+                    checked={!filters.hideCountries?.includes(country)}
+                    onChange={(e) => handleConCheckboxChange(country, e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor={country} className="w-full">
+                    {country}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
           {/* Departments */}
