@@ -43,13 +43,13 @@ export async function saveToIndexedDB(data: DB): Promise<void> {
       };
 
       request.onerror = (event) => {
-        console.error('Error saving to IndexedDB:', event);
+        console.error('Cache Error:', event);
         reject('Failed to save to IndexedDB');
         db.close();
       };
     });
   } catch (error) {
-    console.error('Failed to save data to IndexedDB:', error);
+    console.error('Cache Error:', error);
     throw error;
   }
 }

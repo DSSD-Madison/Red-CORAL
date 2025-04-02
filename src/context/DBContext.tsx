@@ -3,10 +3,11 @@ import { initializeApp } from 'firebase/app'
 import { getAuth, Auth } from 'firebase/auth'
 import { getFirestore, Firestore, collection, doc } from 'firebase/firestore'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
-import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, getData, calculateBounds } from 'utils'
-import { clearIndexedDBCache, saveToIndexedDB } from 'utils/indexedDB'
+import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, fetchData, calculateBounds } from 'utils'
+import { clearIndexedDBCache, getFromIndexedDB, saveToIndexedDB } from 'utils/indexedDB'
 import { Incident, DB } from 'types'
 
+const CACHE_LIFETIME = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 interface DBContextType {
   db: DB
   addIncident: (incident: Incident) => Promise<boolean>
@@ -58,7 +59,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   useEffect(() => {
     return auth.onAuthStateChanged((user) => {
       setIsLoggedIn(!!user)
-      fetchData(!!user)
+      loadDB(!!user)
     })
   }, [])
 
@@ -142,22 +143,33 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
    */
   async function clearCache(): Promise<void> {
     try {
-      setIsLoading(true)
+      setIsLoading(() => true)
       await clearIndexedDBCache()
-      await fetchData(isLoggedIn)
+      await loadDB(isLoggedIn)
     } catch (e) {
       console.error('Failed to clear cache:', e)
     } finally {
-      setIsLoading(false)
+      setIsLoading(() => false)
     }
   }
 
-  async function fetchData(isAdmin: boolean) {
+  async function loadDB(isAdmin: boolean) {
     setIsLoading(() => true)
-    getData(isAdmin, storage, firestore)
-      .then((fetchedData) => {
-        setData(fetchedData)
-        db = fetchedData
+    if (!isAdmin) {
+      const cachedData = await getFromIndexedDB()
+      if (cachedData && cachedData.cachedAt) {
+        setData(cachedData)
+        db = cachedData
+        setIsLoading(() => false)
+        if (new Date().getTime() - new Date(cachedData.cachedAt).getTime() < CACHE_LIFETIME) {
+          return
+        }
+      }
+    }
+    fetchData(isAdmin, storage, firestore)
+      .then((freshData) => {
+        setData(freshData)
+        db = freshData
       })
       .catch((e) => {
         console.error(e)
@@ -184,7 +196,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     auth,
     firestore,
     storage,
-    fetchData,
+    fetchData: loadDB,
     clearCache,
     isLoading,
     isLoggedIn,

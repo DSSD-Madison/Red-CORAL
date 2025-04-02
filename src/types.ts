@@ -38,6 +38,7 @@ export interface DB {
   }
   filterBounds: FilterBounds
   readAt?: string
+  cachedAt?: string
 }
 
 export interface MarkerFilters {

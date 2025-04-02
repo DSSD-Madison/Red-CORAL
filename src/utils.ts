@@ -13,7 +13,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
-import { getFromIndexedDB, saveToIndexedDB } from './utils/indexedDB'
+import { saveToIndexedDB } from './utils/indexedDB'
 
 /**
  * Finds the minimum and maximum years in the data and creates a structured list of all locations within the data
@@ -117,16 +117,7 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
  * after the readAt timestamp from firebase storage. Any documents having `deleted: true`
  * will not be returned in the database object.
  */
-export async function getData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
-  // If not admin, try to get data from IndexedDB first
-  if (!isAdmin) {
-    const cachedData = await getFromIndexedDB();
-    if (cachedData) {
-      console.log('Using cached data from IndexedDB');
-      return cachedData;
-    }
-  }
-
+export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
   // If cache miss or admin mode, fetch from Firebase
   const bytes = await getBytes(ref(storage, 'state.json'))
   const db: DB = JSON.parse(new TextDecoder().decode(bytes))
@@ -158,16 +149,12 @@ export async function getData(isAdmin: boolean, storage: FirebaseStorage, firest
   const finalData = {
     ...db,
     filterBounds: calculateBounds(db.Incidents),
+    cachedAt: new Date().toISOString(), // Store the last saved timestamp
   };
 
   // If not in admin mode, save the fetched data to IndexedDB
   if (!isAdmin) {
-    try {
-      await saveToIndexedDB(finalData);
-      console.log('Saved data to IndexedDB cache');
-    } catch (error) {
-      console.warn('Failed to cache data in IndexedDB:', error);
-    }
+    await saveToIndexedDB(finalData);
   }
 
   return finalData;
