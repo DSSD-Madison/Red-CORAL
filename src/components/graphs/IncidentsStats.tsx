@@ -1,49 +1,7 @@
 import { useDB } from '@/context/DBContext'
-import { DB, Incident } from '@/types'
-import { calculateBounds } from '@/utils'
+import { Incident } from '@/types'
+import { calculateBounds, calculateIncidentStats } from '@/utils'
 import { useMemo } from 'react'
-
-export function calculateIncidentStats(types: DB['Types'], incidents: [string, Incident][]) {
-  const totalincidents = incidents.length
-
-  const countriesSet = new Set<string>()
-  const departmentsSet = new Set<string>()
-  const municipalitiesSet = new Set<string>()
-  const dates: Date[] = []
-  const typesSet = new Set<string>()
-
-  incidents.forEach(([_, incident]) => {
-    countriesSet.add(incident.country)
-    dates.push(new Date(incident.dateString))
-    typesSet.add(incident.typeID as string)
-    // Only add department/municip if it's not Mar Caribe/Océano Pacífico
-    if (incident.country === 'Mar Caribe' || incident.country === 'Océano Pacífico') {
-      return
-    }
-    departmentsSet.add(incident.department)
-    municipalitiesSet.add(incident.municipality)
-  })
-
-  const earliestDate = new Date(Math.min(...dates.map((date) => date.getTime())))
-  const latestDate = new Date(Math.max(...dates.map((date) => date.getTime())))
-
-  const categoriesSet = new Set<string>()
-  typesSet.forEach((typeID) => {
-    const categoryID = types[typeID].categoryID
-    categoriesSet.add(categoryID as string)
-  })
-
-  return {
-    totalincidents,
-    countriesCount: countriesSet.size,
-    departmentsCount: departmentsSet.size,
-    municipalitiesCount: municipalitiesSet.size,
-    earliestDate,
-    latestDate,
-    categoriesCount: categoriesSet.size,
-    typesCount: typesSet.size,
-  }
-}
 
 export default function IncidentsStats({ incidents, bounds }: { incidents: [string, Incident][]; bounds: ReturnType<typeof calculateBounds> }) {
   const { db } = useDB()
