@@ -44,7 +44,7 @@ export const initialFilterState = (index: number): reducerType => ({
       "state": {
         "date1": "",
         "date2": "",
-        "selectedDateFilter": "es entre",
+        "selectedDateFilter": "es entre años",
         "isDateFilterSelectOpen": false
       }
     },

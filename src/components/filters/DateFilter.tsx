@@ -46,7 +46,7 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
   const { db } = useDB()
   const [date1, setDate1] = useState(state?.date1 || '')
   const [date2, setDate2] = useState(state?.date2 || '')
-  const [selectedDateFilter, setSelectedDateFilter] = useState(state?.selectedDateFilter || DateFilterOption.IS_BETWEEN)
+  const [selectedDateFilter, setSelectedDateFilter] = useState(state?.selectedDateFilter || DateFilterOption.YEARS)
   const [isDateFilterSelectOpen, setIsDateFilterSelectOpen] = useState(false)
 
   const { refs, floatingStyles, context } = useFloating({
