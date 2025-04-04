@@ -270,25 +270,27 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   className="mb-2 w-full rounded-md bg-white/70 p-2"
                 >
                   <option value="">--Por favor elige una actividad--</option>
-                  {Object.entries(db.Categories).map(([id, category]) => (
-                    <option key={id} value={id}>
-                      {category.name}
-                    </option>
-                  ))}
+                  {Object.entries(db.Categories)
+                    .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+                    .map(([id, category]) => (
+                      <option key={id} value={id}>
+                        {category.name}
+                      </option>
+                    ))}
                 </select>
                 <br />
                 Tipo de evento:
                 <br />
                 <select value={typeID} onChange={(e) => setTypeID(e.target.value)} className="mb-2 w-full rounded-md bg-white/70 p-2">
                   <option value="">--Por favor elige un tipo de evento--</option>
-                  {Object.entries(db.Types).map(
-                    ([id, type]) =>
-                      type.categoryID == catID && (
-                        <option key={id} value={id}>
-                          {type.name}
-                        </option>
-                      )
-                  )}
+                  {Object.entries(db.Types)
+                    .filter(([, type]) => type.categoryID == catID)
+                    .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+                    .map(([id, type]) => (
+                      <option key={id} value={id}>
+                        {type.name}
+                      </option>
+                    ))}
                 </select>
                 <br />
                 <label>
