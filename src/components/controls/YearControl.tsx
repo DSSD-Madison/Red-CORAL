@@ -83,12 +83,6 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           .nice()
           .range([height - margin.bottom, margin.top])
 
-        const line = d3
-          .line<(typeof groupedData)[0]>()
-          .x((d) => x(d.date))
-          .y((d) => y(d.count))
-          .curve(d3.curveMonotoneX)
-
         const yTicks = height / 50
 
         svg
