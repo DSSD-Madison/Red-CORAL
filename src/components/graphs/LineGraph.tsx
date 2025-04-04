@@ -45,6 +45,29 @@ export default function LineGraph({ incidents, bounds }: { incidents: [string, I
           })
         ).sort((a, b) => a.date.getTime() - b.date.getTime())
 
+        // Fallback to a more granular grouping if only one data point exists
+        if (groupedData.length < 4) {
+          let fallback: 'quarter' | 'month' | 'week' | 'day' | undefined
+          switch (groupBy) {
+            case 'year':
+              fallback = 'quarter'
+              break
+            case 'quarter':
+              fallback = 'month'
+              break
+            case 'month':
+              fallback = 'week'
+              break
+            case 'week':
+              fallback = 'day'
+              break
+          }
+          if (fallback) {
+            setGroupBy(fallback)
+            return
+          }
+        }
+
         //Create scales
         const x = d3
           .scaleTime()
