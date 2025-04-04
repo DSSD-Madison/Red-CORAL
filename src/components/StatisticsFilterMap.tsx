@@ -41,8 +41,8 @@ export default function StatisticsFilterMap({ incidents }: StatisticsFilterMapPr
   const filters: MarkerFilters = {
     hideCategories: [],
     hideTypes: [],
-    startYear: null,
-    endYear: null,
+    startDate: null,
+    endDate: null,
     hideCountries: [],
     hideDepartments: [],
     hideMunicipalities: [],

@@ -51,8 +51,8 @@ function ZoomControl(props: ZoomControlProps) {
             setFilters({
               hideCategories: [],
               hideTypes: [],
-              startYear: null,
-              endYear: null,
+              startDate: null,
+              endDate: null,
               hideCountries: [],
               hideDepartments: [],
               hideMunicipalities: [],
