@@ -152,7 +152,7 @@ const CountryControl: React.FC<FilterControlProps> = ({ filters, setFilters }) =
                     </label>
                   </div>
                 ))}
-              <h1 className="mx-1 mt-2 text-sm font-semibold">Océano</h1>
+              <h1 className="mx-1 mt-2 text-sm font-semibold">Área Marítima</h1>
               {sea_countries.map((country) => (
                 <div key={country} className="mx-1 flex items-center border-b py-1 last-of-type:border-0 hover:bg-tint-02">
                   <input
