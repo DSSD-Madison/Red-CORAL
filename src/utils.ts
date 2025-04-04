@@ -166,8 +166,8 @@ export function filterIncidents(incidents: DB['Incidents'],
   editID: keyof DB['Incidents'] | null): [string, Incident][] {
   return Object.entries(incidents).filter(
     ([id, incident]) =>
-      (!filters.startYear || new Date(incident.dateString).getFullYear() >= filters.startYear) &&
-      (!filters.endYear || new Date(incident.dateString).getFullYear() <= filters.endYear) &&
+      (!filters.startDate || new Date(incident.dateString) >= filters.startDate) &&
+      (!filters.endDate || new Date(incident.dateString) <= filters.endDate) &&
       !filters.hideCountries.includes(incident.country) &&
       !filters.hideDepartments.includes(`${incident.country} - ${incident.department}`) &&
       !filters.hideMunicipalities.includes(incident.municipality) &&

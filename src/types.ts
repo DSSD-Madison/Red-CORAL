@@ -44,8 +44,8 @@ export interface DB {
 export interface MarkerFilters {
   hideCategories: (keyof DB['Categories'])[]
   hideTypes: (keyof DB['Types'])[]
-  startYear: number | null
-  endYear: number | null
+  startDate: Date | null
+  endDate: Date | null
   hideCountries: string[]
   hideDepartments: string[]
   hideMunicipalities: string[]

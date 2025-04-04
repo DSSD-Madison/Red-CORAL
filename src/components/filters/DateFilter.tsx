@@ -71,13 +71,15 @@ const FilterDate = ({ id, dispatch, state }: DateFilterState) => {
     const additionalStyles =
       i == date1Year && i == date2Year
         ? 'rounded-md bg-blue-500 px-3 text-white'
-        : i == date1Year
-          ? 'rounded-l-md bg-blue-500 px-3 text-white'
-          : i == date2Year
-            ? 'rounded-r-md bg-blue-500 px-3 text-white'
-            : date1Year < i && i < date2Year
-              ? 'bg-blue-300 px-3'
-              : 'mx-1 rounded-md bg-white hover:bg-gray-200 outline-1 outline outline-gray-300'
+        : i == date1Year && date2Year === 0
+          ? 'rounded-l-md bg-gray-500 px-3 text-white animate-pulse'
+          : i == date1Year
+            ? 'rounded-l-md bg-blue-500 px-3 text-white'
+            : i == date2Year
+              ? 'rounded-r-md bg-blue-500 px-3 text-white'
+              : date1Year < i && i < date2Year
+                ? 'bg-blue-300 px-3'
+                : 'mx-1 rounded-md bg-white hover:bg-gray-200 outline-1 outline outline-gray-300'
     yearButtons.push(
       <button
         key={i}

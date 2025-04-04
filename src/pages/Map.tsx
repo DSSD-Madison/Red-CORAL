@@ -46,8 +46,8 @@ const Map: React.FC = () => {
   const [filters, setFilters] = useState<MarkerFilters>({
     hideCategories: [],
     hideTypes: [],
-    startYear: null,
-    endYear: null,
+    startDate: null,
+    endDate: null,
     hideCountries: [],
     hideDepartments: [],
     hideMunicipalities: [],
@@ -169,7 +169,7 @@ const Map: React.FC = () => {
           </div>
         </Control>
         <Control position="bottomleft">
-          <YearControl filters={filters} setFilters={setFilters} />
+          <YearControl filters={filters} setFilters={setFilters} setDisplayType={setMarkerDisplayType} />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />
