@@ -16,7 +16,8 @@ export default function IncidentsStats({ incidents, bounds }: { incidents: [stri
       <hr className="my-2 rounded-full border border-neutral-300" />
       <div className="mt-2 grid grid-cols-2">
         <span>
-          <strong>Países:</strong> {Object.keys(bounds.locations).length}
+          {/* we don't want to count the two maritime areas. what's the easiest way to do that? */}
+          <strong>Países:</strong> {Object.keys(bounds.locations).length - 2}
         </span>
         <span>
           <strong>Departamentos:</strong> {Object.values(bounds.locations).reduce((acc, departments) => acc + Object.keys(departments).length, 0)}
