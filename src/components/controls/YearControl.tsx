@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from 'types'
 import * as d3 from 'd3'
 import { useDB } from '@/context/DBContext'
-import { LucideCalendar, LucideRotateCcw } from 'lucide-react'
+import { LucideCalendar, LucidePlay, LucideRotateCcw, LucideSquare } from 'lucide-react'
 
 interface YearControlProps {
   filters: MarkerFilters
@@ -17,6 +17,18 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
   const d3Ref = useRef<SVGSVGElement | null>(null)
   const { minYear, maxYear } = db.filterBounds
   const { startDate: date1, endDate: date2 } = filters
+
+  const [isPlaying, setIsPlaying] = useState(false)
+  const animationRef = useRef<number | null>(null)
+
+  const updateSlider = (value: number) => {
+    setDisplayType('single')
+    const year = Math.floor(value / 12) + minYear
+    const month = value % 12
+    const startDate = new Date(year, month, 1)
+    const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 3)) // 3 months later
+    setFilters((filters) => ({ ...filters, startDate, endDate }))
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,7 +55,6 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
 
         svg.attr('viewBox', `0 0 ${width} ${height}`)
 
-        // Modify the grouping logic based on groupBy
         const incidents = Object.entries(db.Incidents)
         const groupedData = Array.from(
           d3.group(incidents, (d) => {
@@ -61,7 +72,6 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           }
         ).sort((a, b) => a.date.getTime() - b.date.getTime())
 
-        //Create scales
         const x = d3
           .scaleTime()
           .domain(d3.extent(groupedData, (d) => d.date) as [Date, Date])
@@ -79,7 +89,6 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           .y((d) => y(d.count))
           .curve(d3.curveMonotoneX)
 
-        //Create axes
         const yTicks = height / 50
 
         svg
@@ -88,7 +97,18 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           .call(d3.axisBottom(x).ticks(d3.timeYear))
 
         svg.append('g').attr('transform', `translate(${margin.left}, 0)`).call(d3.axisLeft(y).ticks(yTicks))
-        svg.append('path').datum(groupedData).attr('fill', 'none').attr('stroke', 'steelblue').attr('stroke-width', 1.5).attr('d', line)
+
+        svg
+          .selectAll('.bar')
+          .data(groupedData)
+          .join('rect')
+          .attr('class', 'bar')
+          .attr('x', (d) => x(d.date))
+          .attr('y', (d) => y(d.count))
+          .attr('width', (d) => x(d3.timeMonth.offset(d.date, 1)) - x(d.date) - 1)
+          .attr('height', (d) => height - margin.bottom - y(d.count))
+          .attr('fill', '#3b82f6')
+          .attr('opacity', 0.75)
       }
     }
     render()
@@ -103,30 +123,37 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDisplayType('single')
-    const value = parseInt(e.target.value)
-    const year = Math.floor(value / 12) + minYear
-    const month = value % 12
-    const startDate = new Date(year, month, 1)
-    const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 3)) // 3 months later
-    setFilters((filters) => ({
-      ...filters,
-      startDate,
-      endDate,
-    }))
+    updateSlider(parseInt(e.target.value))
   }
 
-  // adapted from DateFilter.tsx
-  // this function is called when a year button is clicked
+  const handlePlay = () => {
+    if (isPlaying) {
+      clearInterval(animationRef.current!)
+      animationRef.current = null
+      setIsPlaying(false)
+    } else {
+      updateSlider(0)
+      setIsPlaying(true)
+      let currentValue = 0
+      animationRef.current = window.setInterval(() => {
+        currentValue++
+        if (currentValue > sliderMax) {
+          clearInterval(animationRef.current!)
+          animationRef.current = null
+          setIsPlaying(false)
+        } else {
+          updateSlider(currentValue)
+        }
+      }, 150)
+    }
+  }
+
   const handleYearChange = (i: number) => {
     setDisplayType('single')
     const startDate = new Date(i, 0, 1)
     const endDate = new Date(i, 11, 31)
-    // selected year could be upper or lower bound.
-    // assume user picks lower, then upper
     if (date1 && !date2) {
       if (date1 > endDate) {
-        // swap if lower is greater than upper
         setFilters((filters) => ({
           ...filters,
           endDate: new Date(date1.getUTCFullYear(), 11, 31),
@@ -138,10 +165,7 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           endDate,
         }))
       }
-    }
-    // if both are set, reset upper and set lower
-    // if the same year is selected thrice, reset both
-    else if (date1 && date2) {
+    } else if (date1 && date2) {
       if (date1.getUTCFullYear() === i && date2.getUTCFullYear() === i) {
         setFilters((filters) => ({
           ...filters,
@@ -155,9 +179,7 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           startDate,
         }))
       }
-    }
-    // if neither are set, set lower
-    else if (!date1 && !date2) setFilters((filters) => ({ ...filters, startDate }))
+    } else if (!date1 && !date2) setFilters((filters) => ({ ...filters, startDate }))
   }
 
   const yearButtons = []
@@ -190,9 +212,9 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
   }
   const sliderMax = (maxYear - minYear + 1) * 12 - 1
   const sliderDisplayValue = date1 ? (date1.getUTCFullYear() - minYear) * 12 + date1.getUTCMonth() : 0
-  const endDisplayValue = date2 ? (date2.getUTCFullYear() - minYear) * 12 + date2.getUTCMonth() + (date2.getDate() > 15 ? 1 : 0) : 0
+  const endDisplayValue = date2 ? (date2.getUTCFullYear() - minYear) * 12 + date2.getUTCMonth() + (date2.getDate() > 15 ? 1 : 0) : sliderMax
   const sliderOffset = (sliderDisplayValue / sliderMax) * (600 - 70)
-  const sliderWidth = date2 ? ((endDisplayValue - sliderDisplayValue) / sliderMax) * (600 - 70) : 0
+  const sliderWidth = ((endDisplayValue - sliderDisplayValue) / sliderMax) * (600 - 70)
   return (
     <div className="leaflet-bar relative w-fit rounded">
       <a
@@ -216,7 +238,6 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           </label>
           <div className="flex flex-row flex-wrap p-2">{yearButtons}</div>
           <div className="flex items-center gap-4 p-2">
-            {/* Overlay input slider on top of the SVG graph */}
             <div className="relative h-[100px] w-[600px]">
               <svg width="600" height="100" className="absolute left-0 top-0 h-full w-full object-cover" ref={d3Ref}></svg>
               <input
@@ -242,6 +263,12 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
               onClick={handleResetRange}
             >
               <LucideRotateCcw className="h-5 w-5" strokeWidth={1} />
+            </button>
+            <button
+              className="mb-1 ml-2 rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
+              onClick={handlePlay}
+            >
+              {isPlaying ? <LucideSquare /> : <LucidePlay />}
             </button>
           </div>
         </div>
