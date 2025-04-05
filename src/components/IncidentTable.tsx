@@ -27,7 +27,7 @@ const IncidentTable = ({ incidents }: { incidents: [string, Incident][] }) => {
       <tbody>
         <tr>
           <th className="pb-2">País</th>
-          <th className="w-[5%] pb-2">Tipo de evento</th>
+          <th className="w-[5%] pb-2">Tipos de incidentes</th>
           <th className="pb-">Actividad</th>
           <th className="pb-2">Fecha</th>
           <th className="pb-2">Descripción</th>
