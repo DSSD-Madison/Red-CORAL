@@ -25,7 +25,7 @@ const possibleFilters: FilterInfo[] = [
   {
     name: 'Actividades',
     icon: LucideTags,
-    description: 'Filtrar por actividades y tipos de eventos',
+    description: 'Filtrar por actividades y tipos de incidentes',
     type: 'category',
   },
   {

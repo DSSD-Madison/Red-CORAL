@@ -102,7 +102,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ filters, setFilters }) =>
     <>
       <a
         className="leaflet-control-zoom-in"
-        title={'Filtrar por actividades y tipos de eventos'}
+        title={'Filtrar por actividades y tipos de incidentes'}
         role="button"
         onClick={(e) => {
           setDropdownVisible(!isDropdownVisible)
@@ -152,7 +152,7 @@ const CategoryControl: React.FC<YearControlProps> = ({ filters, setFilters }) =>
           {/* Event Subtypes */}
           <div className="leaflet-bar box-content w-80 rounded bg-tint-02/80 shadow-lg backdrop-blur-sm">
             <div className="flex h-8 flex-row justify-between">
-              <div className="m-1 text-base font-semibold">Tipos de eventos</div>
+              <div className="m-1 text-base font-semibold">Tipos de incidentes</div>
               <div className="mx-1 flex flex-row justify-center align-middle">
                 <label htmlFor="all" className="mx-2 mt-[5px]">
                   Seleccionar todo
