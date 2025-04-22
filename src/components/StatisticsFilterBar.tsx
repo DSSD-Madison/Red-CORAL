@@ -12,7 +12,7 @@ type statsFilterProps = {
 
 const StatisticsFilterBar = ({ filters, dispatchFilters }: statsFilterProps) => {
   return (
-    <div className="overflow-x-auto rounded-md bg-white px-2 py-2 text-sm">
+    <div className="overflow-x-auto rounded-md bg-white px-2 py-2 text-sm shadow">
       <div className="flex w-full flex-wrap items-center justify-start gap-2">
         <LucideFilter size={16} strokeWidth={1} />
         {filters.map((filter) => {
