@@ -3,6 +3,7 @@ import BaseFilter from './BaseFilter'
 import { LucideTags } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useDB } from '@/context/DBContext'
+import { typesByCategory } from '@/utils'
 
 interface CategoryFilterState extends filterProps {
   state?: {
@@ -16,22 +17,11 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
   const [hiddenCategories, setHiddenCategories] = useState<string[]>(state?.hiddenCategories || [])
   const [hiddenTypes, setHiddenTypes] = useState<string[]>(state?.hiddenTypes || [])
 
-  const typesByCategory = useMemo(() => {
-    return Object.entries(db.Types).reduce(
-      (acc, [typeID, type]) => {
-        if (!acc[type.categoryID]) {
-          acc[type.categoryID] = []
-        }
-        acc[type.categoryID].push({ typeID, name: type.name })
-        return acc
-      },
-      {} as { [key: string]: { typeID: string; name: string }[] }
-    )
-  }, [db.Types])
+  const typesByCategoryOut = useMemo(() => typesByCategory(db), [db.Types])
 
   const handleCategoryChange = (categoryID: string, makeVisible: boolean) => {
     // Clobber the state of its descendants
-    setHiddenTypes((prev) => prev.filter((t) => !typesByCategory[categoryID]?.some(({ typeID }) => typeID === t)))
+    setHiddenTypes((prev) => prev.filter((t) => !typesByCategoryOut[categoryID]?.some(({ typeID }) => typeID === t)))
     // Set the state of the category
     setHiddenCategories((prev) => (makeVisible ? prev.filter((c) => c !== categoryID) : [...prev, categoryID]))
   }
@@ -40,10 +30,10 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
     // If trying to show a type, ensure its category is visible, but hide all other types in it
     if (makeVisible && hiddenCategories.includes(categoryID)) {
       handleCategoryChange(categoryID, true)
-      setHiddenTypes((prev) => [...prev, ...typesByCategory[categoryID].map((t) => t.typeID)])
+      setHiddenTypes((prev) => [...prev, ...typesByCategoryOut[categoryID].map((t) => t.typeID)])
     }
     // If all types are hidden, hide the category instead
-    const typesInCategory = typesByCategory[categoryID]?.map((t) => t.typeID) || []
+    const typesInCategory = typesByCategoryOut[categoryID]?.map((t) => t.typeID) || []
     const hiddenTypesInCategory = hiddenTypes.filter((t) => typesInCategory.includes(t))
     if (!makeVisible && hiddenTypesInCategory.length + 1 === typesInCategory.length) {
       handleCategoryChange(categoryID, false)
@@ -73,7 +63,7 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
   }
 
   const filterStringDisplay = parts.length ? `: ${parts.join(', ')}` : ''
-
+  const sortedCategories = Object.entries(db.Categories).sort((a, b) => a[1].name.localeCompare(b[1].name))
   return (
     <BaseFilter icon={<LucideTags />} text={'Categorías' + filterStringDisplay} scrollOverflow={true} dispatch={dispatch} id={id}>
       <div className="p-2">
@@ -83,7 +73,7 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
         <button onClick={() => selectAllCategories(false)} className="mb-2 rounded bg-neutral-500 px-2 py-1 text-white">
           Deseleccionar todo
         </button>
-        {Object.entries(db.Categories).map(([categoryID, category]) => (
+        {sortedCategories.map(([categoryID, category]) => (
           <details key={categoryID}>
             <summary>
               <input
@@ -96,7 +86,7 @@ const CategoryFilter = ({ id, dispatch, state }: CategoryFilterState) => {
             </summary>
             <div className="pl-6">
               <ul>
-                {typesByCategory[categoryID]?.map(({ typeID, name: typeName }) => (
+                {typesByCategoryOut[categoryID]?.map(({ typeID, name: typeName }) => (
                   <li key={typeID}>
                     <input
                       type="checkbox"

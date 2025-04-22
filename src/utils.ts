@@ -196,3 +196,18 @@ export function typeIDtoCategory(data: DB, typeID: string): Category {
 export function typeIDtoCategoryID(data: DB, typeID: string): keyof DB['Categories'] {
   return data.Types[typeID].categoryID
 }
+
+export function typesByCategory(db: DB): { [key: string]: { typeID: string; name: string }[] } {
+  return Object.entries(db.Types)
+    .sort((a, b) => a[1].name.localeCompare(b[1].name))
+    .reduce(
+      (acc, [typeID, type]) => {
+        if (!acc[type.categoryID]) {
+          acc[type.categoryID] = []
+        }
+        acc[type.categoryID].push({ typeID, name: type.name })
+        return acc
+      },
+      {} as { [key: string]: { typeID: string; name: string }[] }
+    )
+}
