@@ -28,8 +28,8 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   const [queryDebounce, setQueryDebounce] = useState<NodeJS.Timeout | null>(null)
 
   function getName(feat: PeliasGeoJSONFeature) {
-    if (!countryCode && !department) return feat.properties?.label || ''
-    let val = feat.properties?.label || ''
+    if (!countryCode && !department) return feat.properties?.name || feat.properties?.label || ''
+    let val = feat.properties?.name || feat.properties?.label || ''
     let end = val.indexOf(',')
     if (end != -1) val = val.slice(0, end)
     return val
@@ -55,7 +55,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }
 
   async function getFeats(search: string) {
-    const q: AutocompleteRequest = { text: search, lang: 'en-US' }
+    const q: AutocompleteRequest = { text: search, lang: 'es-CO' }
     if (layers) q.layers = layers
     if (countryCode && countryCode != 'world') {
       q.boundaryCountry = [countryCode]
