@@ -1,15 +1,22 @@
+import { useDB } from '@/context/DBContext'
+import { formatDuration } from '@/utils'
 import React from 'react'
 
 const About: React.FC = () => {
+  const { db, isLoggedIn } = useDB()
   const url = import.meta.env.VITE_REPOSITORY_URL
   const commitHash = import.meta.env.VITE_APP_VERSION
+  const commitDate = import.meta.env.VITE_BUILD_TIMESTAMP || Date.now() - 10
+  const date = new Date(Number(commitDate))
+  const appDiffString = formatDuration(date.getTime())
+  const dbDiffString = formatDuration(isLoggedIn ? Date.now() : Date.parse(db.readAt || '') || Date.now())
   const commitUrl = url && commitHash ? `${url}/commit/${commitHash}` : ''
   const urlElement = commitUrl ? (
-    <a href={commitUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+    <a href={commitUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-500 hover:underline">
       {commitHash}
     </a>
   ) : (
-    <span className="text-gray-500">{commitHash || 'N/A'}</span>
+    <span className="font-semibold">{commitHash || 'N/A'}</span>
   )
 
   return (
@@ -24,7 +31,12 @@ const About: React.FC = () => {
       </div>
       <div className="rounded-lg bg-white p-4 shadow">
         <p>Red-CORAL es una plataforma para el seguimiento de incidentes criminales a lo largo del tiempo, con sede en Colombia.</p>
-        <p className="mt-4 text-sm text-gray-600">Versión: {urlElement}</p>
+        <p className="mt-4 text-sm text-gray-600">
+          Última actualización de la base de datos hace <span className="font-semibold">{dbDiffString}</span>.
+        </p>
+        <p className="mt-2 text-sm text-gray-600">
+          Versión: {urlElement}. Compilado hace <span className="font-semibold">{appDiffString}</span>.
+        </p>
       </div>
     </div>
   )

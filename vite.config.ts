@@ -9,7 +9,7 @@ const commitHash = child.execSync('git rev-parse --short HEAD').toString().trim(
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
-  define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(commitHash) },
+  define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(commitHash), 'import.meta.env.VITE_BUILD_TIMESTAMP': JSON.stringify(Date.now()) },
   base: '/',
   resolve: {
     alias: {

@@ -211,3 +211,24 @@ export function typesByCategory(db: DB): { [key: string]: { typeID: string; name
       {} as { [key: string]: { typeID: string; name: string }[] }
     )
 }
+
+export function formatDuration(duration: number): string {
+  // hace 10 horas/hace 2 días/hace 3 semanas/hace 1 mes/hace 1 año
+  // biggest unit, round down
+  const units = [
+    { label: 'año', value: 1000 * 60 * 60 * 24 * 365 },
+    { label: 'mes', value: 1000 * 60 * 60 * 24 * 30 },
+    { label: 'semana', value: 1000 * 60 * 60 * 24 * 7 },
+    { label: 'día', value: 1000 * 60 * 60 * 24 },
+    { label: 'hora', value: 1000 * 60 * 60 },
+    { label: 'minuto', value: 1000 * 60 },
+    { label: 'segundo', value: 1000 },
+  ]
+  for (const unit of units) {
+    const diff = Math.abs(Date.now() - duration) / unit.value
+    if (diff >= 1) {
+      return `${Math.floor(diff)} ${unit.label}${Math.floor(diff) > 1 ? 's' : ''}`
+    }
+  }
+  return 'un instante'
+}
