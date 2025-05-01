@@ -68,10 +68,7 @@ const StatsDashboard: React.FC = () => {
       <div className="flex flex-row items-start gap-2">
         <h1 className="text-2xl font-semibold">Estadísticas</h1>
         <div className="flex-grow" />
-        <a href="https://madison.dssdglobal.org/" target="_blank" rel="noopener noreferrer">
-          <img src="dssd_logo.svg" alt="DSSD logo" className="aspect-square h-full drop-shadow filter" />
-        </a>
-        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64 drop-shadow filter" />
+        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
       </div>
       <StatisticsFilterBar filters={filters.filters} dispatchFilters={dispatchFilters} />
       <div className="flex w-full flex-wrap justify-center gap-2">

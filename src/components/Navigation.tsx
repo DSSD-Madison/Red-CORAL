@@ -22,11 +22,13 @@ const Navigation = () => {
         </>
       )}
       <div className="flex-grow" />
-      <NavLink to="/about" text="Acerca de" />
       {isLoggedIn ? (
-        <button onClick={() => signOut(auth)} className="inline px-2 py-1 hover:bg-black/10">
-          Salir
-        </button>
+        <>
+          <NavLink to="/about" text="Acerca de" />
+          <button onClick={() => signOut(auth)} className="inline px-2 py-1 hover:bg-black/10">
+            Salir
+          </button>
+        </>
       ) : (
         <NavLink to="/login" text="Registrarse" />
       )}

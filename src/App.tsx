@@ -20,11 +20,6 @@ function Layout() {
   )
 }
 
-function Analytics() {
-  const url = import.meta.env.VITE_ANALYTICS_URL
-  return <iframe plausible-embed src={`${url}&embed=true&theme=light`} loading="lazy" className="h-full w-full"></iframe>
-}
-
 const App: React.FC = () => {
   const { isLoggedIn, auth } = useDB()
 
@@ -36,6 +31,19 @@ const App: React.FC = () => {
     return isLoggedIn ? <AdminCRUD /> : <Login auth={auth} />
   }
 
+  function AdminAnalytics() {
+    const url = import.meta.env.VITE_ANALYTICS_URL
+    return isLoggedIn ? (
+      <iframe plausible-embed src={`${url}&embed=true&theme=light`} loading="lazy" className="h-full w-full"></iframe>
+    ) : (
+      <Login auth={auth} />
+    )
+  }
+
+  function AdminAbout() {
+    return isLoggedIn ? <About /> : <Login auth={auth} />
+  }
+
   return (
     <Router>
       <Routes>
@@ -43,10 +51,10 @@ const App: React.FC = () => {
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Map />} />
           <Route path="/stats" element={<StatsDashboard />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<AdminAbout />} />
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />
-          <Route path="/admin/analytics" element={<Analytics />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
         </Route>
       </Routes>
     </Router>

@@ -25,9 +25,9 @@ const About: React.FC = () => {
         <h1 className="text-2xl font-semibold">Acerca de</h1>
         <div className="flex-grow" />
         <a href="https://madison.dssdglobal.org/" target="_blank" rel="noopener noreferrer">
-          <img src="dssd_logo.svg" alt="DSSD logo" className="aspect-square h-full drop-shadow filter" />
+          <img src="dssd_logo.svg" alt="DSSD logo" className="aspect-square h-full" />
         </a>
-        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64 drop-shadow filter" />
+        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
       </div>
       <div className="rounded-lg bg-white p-4 shadow">
         <p>Red-CORAL es una plataforma para el seguimiento de incidentes criminales a lo largo del tiempo, con sede en Colombia.</p>
