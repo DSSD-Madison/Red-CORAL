@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { GeocodingApi, Configuration, PeliasLayer, PeliasGeoJSONFeature, AutocompleteRequest } from '@stadiamaps/api'
 import { ADDITIONAL_FEATURES } from '../constants'
+import { LucideCheck, LucideLoader2, LucidePencil } from 'lucide-react'
 
 interface HomeProps {
   layers?: PeliasLayer[]
@@ -26,6 +27,8 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   const [localStrVal, setLocalStrVal] = useState<string>('')
 
   const [queryDebounce, setQueryDebounce] = useState<NodeJS.Timeout | null>(null)
+
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   function getName(feat: PeliasGeoJSONFeature) {
     if (!countryCode && !department) return feat.properties?.name || feat.properties?.label || ''
@@ -57,7 +60,10 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   async function getFeats(search: string) {
     const q: AutocompleteRequest = { text: search, lang: 'es-CO' }
     if (layers) q.layers = layers
-    if (countryCode && countryCode != 'world') {
+    if (countryCode && (countryCode == 'custom' || countryCode == 'world')) {
+      return []
+    }
+    if (countryCode) {
       q.boundaryCountry = [countryCode]
     }
     if (department && department.bbox) {
@@ -78,6 +84,10 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }
 
   useEffect(() => {
+    if (countryCode === 'custom') {
+      setIsLoading(false)
+      return
+    }
     if (search.length < 1 || search == localStrVal) {
       setOptions([])
       setIsLoading(false)
@@ -97,7 +107,17 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
   }, [search])
 
   return (
-    <div className="relative mb-2">
+    <form
+      className="relative mb-2"
+      onSubmit={(e) => {
+        // take user input instead of suggestion on enter (if user wants to input something that isn't in the suggestions)
+        const input = inputRef.current ? inputRef.current.value : ''
+        setLocalStrVal(input)
+        if (setStringValue !== undefined) setStringValue(input)
+        if (setCountryCode !== undefined) setCountryCode('custom')
+        e.preventDefault()
+      }}
+    >
       <input
         type="text"
         value={search}
@@ -108,12 +128,24 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
           setBounds(undefined)
           if (setCountryCode !== undefined) setCountryCode('')
         }}
-        className="w-full rounded-md border border-tint-02 p-2"
+        ref={inputRef}
+        className={`w-full border border-tint-02 p-2 ${options.length != 0 ? 'rounded-t-md' : 'rounded-md'}`}
       />
-      {localStrVal && <p className="absolute right-2 top-1 text-xl text-[#00ad2b]">✓</p>}
-      {isLoading && <p className="text-center">Loading...</p>}
+      <div className="absolute right-2 top-2 flex">
+        {localStrVal && <LucideCheck size={20} className="text-[#00ad2b]" />}
+        {countryCode == 'custom' && (
+          <LucidePencil size={20} className="text-[#00ad2b]">
+            <title>Entrada personalizada: no habrá autocompletado</title>
+          </LucidePencil>
+        )}
+      </div>
+      {isLoading && (
+        <p className="rounded-b-md bg-white/70 p-2">
+          <LucideLoader2 className="animate-spin" size={20}></LucideLoader2>
+        </p>
+      )}
       {!isLoading && options.length != 0 && (
-        <ul className="mt-1 max-h-32 w-full overflow-y-scroll rounded-md bg-white/70">
+        <ul className="max-h-32 w-full overflow-y-auto rounded-b-md bg-white/70">
           {options.map((option) => {
             return (
               <li
@@ -127,7 +159,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
           })}
         </ul>
       )}
-    </div>
+    </form>
   )
 }
 
