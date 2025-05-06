@@ -11,7 +11,7 @@ import {
   getDocs,
   query,
   where,
-} from 'firebase/firestore'
+} from 'firebase/firestore/lite'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
 import { saveToIndexedDB } from './utils/indexedDB'
 

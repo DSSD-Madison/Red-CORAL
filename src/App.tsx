@@ -1,14 +1,15 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import React, { Suspense, lazy } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router'
 import 'leaflet/dist/leaflet.css'
 import { useDB } from './context/DBContext'
 import Map from 'pages/Map'
 import Login from 'pages/Login'
-import AdminCRUD from 'pages/AdminCRUD'
-import StatsDashboard from 'pages/StatsDashboard'
 import About from 'pages/About'
 import Navigation from 'components/Navigation'
 import DBLoadingOverlay from './components/DBLoadingOverlay'
+
+const AdminCRUD = lazy(() => import('pages/AdminCRUD'))
+const StatsDashboard = lazy(() => import('pages/StatsDashboard'))
 
 function Layout() {
   return (
@@ -28,7 +29,13 @@ const App: React.FC = () => {
   }
 
   function AdminDash() {
-    return isLoggedIn ? <AdminCRUD /> : <Login auth={auth} />
+    return isLoggedIn ? (
+      <Suspense fallback={<div className="flex min-h-full flex-col gap-2 bg-white p-4">Loading...</div>}>
+        <AdminCRUD />
+      </Suspense>
+    ) : (
+      <Login auth={auth} />
+    )
   }
 
   function AdminAnalytics() {
@@ -44,13 +51,21 @@ const App: React.FC = () => {
     return isLoggedIn ? <About /> : <Login auth={auth} />
   }
 
+  function StatsPage() {
+    return (
+      <Suspense fallback={<div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">Loading...</div>}>
+        <StatsDashboard />
+      </Suspense>
+    )
+  }
+
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Map />} />
-          <Route path="/stats" element={<StatsDashboard />} />
+          <Route path="/stats" element={<StatsPage />} />
           <Route path="/about" element={<AdminAbout />} />
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />

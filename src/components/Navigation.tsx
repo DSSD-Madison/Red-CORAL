@@ -1,6 +1,6 @@
 import { useDB } from '@/context/DBContext'
 import { signOut } from 'firebase/auth'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 
 const Navigation = () => {
   const { isLoggedIn, auth } = useDB()

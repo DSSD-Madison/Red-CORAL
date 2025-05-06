@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { initializeApp } from 'firebase/app'
 import { getAuth, Auth } from 'firebase/auth'
-import { getFirestore, Firestore, collection, doc } from 'firebase/firestore'
+import { getFirestore, Firestore, collection, doc } from 'firebase/firestore/lite'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, fetchData, calculateBounds } from 'utils'
 import { clearIndexedDBCache, getFromIndexedDB, saveToIndexedDB } from 'utils/indexedDB'

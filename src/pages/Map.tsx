@@ -12,7 +12,7 @@ import CountryControl from '@/components/controls/CountryControl'
 import MarkerTypeControl from '@/components/controls/MarkerTypeControl'
 import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useDB } from '../context/DBContext'
 
 function SetInitialBounds() {

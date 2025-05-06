@@ -195,6 +195,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     incident.typeID.map((typeID) => (
                       <li key={typeID} className="mb-3 ml-2 text-shade-01">
                         <span style={{ backgroundColor: typeIDtoTypeColors(typeID) }} className="mr-1 rounded-md p-1 text-xs">
+                          {/* https://css-tricks.com/methods-contrasting-text-backgrounds/ */}
                           <span className="bg-inherit bg-clip-text text-transparent contrast-[900] grayscale invert">
                             {typeIDtoCategory(db, typeID).name}
                           </span>
