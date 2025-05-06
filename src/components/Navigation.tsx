@@ -18,6 +18,7 @@ const Navigation = () => {
         <>
           <div className="h-3 border-l-2 border-gray-400" />
           <NavLink to="/admin/dash" text="Administrar categorías" />
+          <NavLink to="/admin/publish" text="Publicar Datos" />
           <NavLink to="/admin/analytics" text="Analítica web" />
         </>
       )}

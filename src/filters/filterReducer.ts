@@ -8,7 +8,7 @@ import LatLongFilter, { calculateDistance } from '@/components/filters/LatLongFi
 import NOTFilter, { NOTFilterState } from '@/components/filters/NOTFilter'
 import ORFilter, { ORFilterState } from '@/components/filters/ORFilter'
 
-export type filterDispatchType = { type: 'RESET_FILTERS' } | { type: 'REMOVE_FILTER', payload: { id: number } } | { type: 'ADD_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
+export type filterDispatchType = { type: 'RESET_FILTERS' } | { type: 'REMOVE_FILTER', payload: { id: number } } | { type: 'ADD_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> } | { type: 'REPLACE_STATE', payload: reducerType }
 
 export type filterProps = {
   id: number
@@ -89,6 +89,16 @@ export const filterReducer = (state: reducerType, action: filterDispatchType): r
       return { ...state, filters: state.filters.map((filter) => (filter.id === action.payload.id ? { ...filter, ...action.payload } : filter)) }
     case 'RESET_FILTERS':
       return initialFilterState(state.index)
+    case 'REPLACE_STATE': {
+      let id = state.index // can't just copy action.payload directly, because if we don't change react's keys it won't re-render. gotta drop in and update the keys
+      const newFilters = action.payload.filters.map((filter) => {
+        if (filter.id === undefined) {
+          return { ...filter, id: id++ } // give it a new id
+        }
+        return filter
+      })
+      return { ...action.payload, filters: newFilters, index: id }
+    }
     default:
       return state
   }

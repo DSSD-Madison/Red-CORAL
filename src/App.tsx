@@ -8,8 +8,9 @@ import About from 'pages/About'
 import Navigation from 'components/Navigation'
 import DBLoadingOverlay from './components/DBLoadingOverlay'
 
-const AdminCRUD = lazy(() => import('pages/AdminCRUD'))
-const StatsDashboard = lazy(() => import('pages/StatsDashboard'))
+const AdminCRUD = lazy(() => import('@/pages/AdminCRUD'))
+const StatsDashboard = lazy(() => import('@/pages/StatsDashboard'))
+const PublishAdmin = lazy(() => import('@/pages/PublishAdmin'))
 
 function Layout() {
   return (
@@ -59,6 +60,16 @@ const App: React.FC = () => {
     )
   }
 
+  function AdminPublish() {
+    return isLoggedIn ? (
+      <Suspense fallback={<div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">Loading...</div>}>
+        <PublishAdmin />
+      </Suspense>
+    ) : (
+      <Login auth={auth} />
+    )
+  }
+
   return (
     <Router>
       <Routes>
@@ -70,6 +81,7 @@ const App: React.FC = () => {
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/publish" element={<AdminPublish />} />
         </Route>
       </Routes>
     </Router>

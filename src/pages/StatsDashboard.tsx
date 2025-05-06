@@ -2,8 +2,8 @@
 import { Incident } from 'types'
 import React, { useEffect, useMemo, useReducer, useState } from 'react'
 import IncidentTable from '@/components/IncidentTable'
-import ThingTable from '@/components/ThingTable' // <-- new import
-import StatisticsFilterBar from '@/components/StatisticsFilterBar'
+import ThingTable from '@/components/ThingTable'
+import StatisticsFilterBarOuter from '@/components/StatisticsFilterBarOuter'
 import { calculateBounds } from '@/utils'
 import IncidentsStats from '@/components/graphs/IncidentsStats'
 import LineGraph from '@/components/graphs/LineGraph'
@@ -70,7 +70,7 @@ const StatsDashboard: React.FC = () => {
         <div className="flex-grow" />
         <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
       </div>
-      <StatisticsFilterBar filters={filters.filters} dispatchFilters={dispatchFilters} />
+      <StatisticsFilterBarOuter filters={filters.filters} dispatchFilters={dispatchFilters} />
       <div className="flex w-full flex-wrap justify-center gap-2">
         <PieChart incidents={filteredIncidents}></PieChart>
         <LineGraph incidents={filteredIncidents} bounds={filteredBounds} />
