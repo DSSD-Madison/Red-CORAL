@@ -6,7 +6,7 @@ export interface Coordinates {
 export interface Incident {
   description: string
   dateString: string
-  typeID: string
+  typeID: string[] | string
   location: Coordinates
   country: string
   department: string // equivalent to province/state

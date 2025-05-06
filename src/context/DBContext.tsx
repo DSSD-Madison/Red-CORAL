@@ -155,6 +155,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
 
   async function loadDB(isAdmin: boolean) {
     setIsLoading(() => true)
+    // read from cache if not admin
     if (!isAdmin) {
       const cachedData = await getFromIndexedDB()
       if (cachedData && cachedData.cachedAt) {
@@ -166,6 +167,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
         }
       }
     }
+    // If cache miss or admin mode, fetch from Firebase
     fetchData(isAdmin, storage, firestore)
       .then((freshData) => {
         setData(freshData)

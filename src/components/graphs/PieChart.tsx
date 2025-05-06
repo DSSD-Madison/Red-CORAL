@@ -1,5 +1,6 @@
 import { useDB } from '@/context/DBContext'
 import { Incident } from '@/types'
+import { typeIDtoCategory } from '@/utils'
 import * as d3 from 'd3'
 import { useRef, useEffect } from 'react'
 
@@ -10,9 +11,10 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
 
   //gets label and color for each incident
   const parsedData = incidents.map((incident) => {
+    const category = typeIDtoCategory(db, incident[1].typeID)
     return {
-      label: db.Categories[db.Types[incident[1].typeID].categoryID].name,
-      color: db.Categories[db.Types[incident[1].typeID].categoryID].color,
+      label: category.name,
+      color: category.color,
     }
   })
   let categories = Object.values(db.Categories).map((c) => c.name) //we want in this format: ["drugs", "robbery"]

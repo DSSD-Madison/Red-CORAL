@@ -122,11 +122,14 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     // Map of types to colors (normally only categories have an associated color).
     const typeColors = Object.fromEntries(Object.entries(data?.Types || {}).map(([id, type]) => [id, data.Categories[type.categoryID].color]))
+    const typeIDtoTypeColors = (typeID: string | string[]) => {
+      return typeColors[Array.isArray(typeID) ? typeID[0] : typeID]
+    }
 
     const markerSize = (id: string): PointTuple => (id == selectedIncidentID ? [20, 20] : zoomLevel > 12 ? [15, 15] : [10, 10])
     const createMarkerSVG = (id: string, incident: Incident): string => {
       const size = markerSize(id)[0]
-      return `<svg viewBox="0 0 18 18" width="${size}px" height="${size}px" style="color: ${id == selectedIncidentID ? 'red' : typeColors[incident.typeID]};">
+      return `<svg viewBox="0 0 18 18" width="${size}px" height="${size}px" style="color: ${id == selectedIncidentID ? 'red' : typeIDtoTypeColors(incident.typeID)};">
         <use href="#marker" />
       </svg>`
     }
@@ -193,7 +196,10 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                   <hr className="my-2 border-neutral-500" />
                   <p>
                     <span className="font-bold">Actividad:</span> {typeIDtoCategory(data, incident.typeID).name}
-                    <span className="ml-1 inline-block h-[1em] w-[1em] rounded-full" style={{ backgroundColor: typeColors[incident.typeID] }} />
+                    <span
+                      className="ml-1 inline-block h-[1em] w-[1em] rounded-full"
+                      style={{ backgroundColor: typeIDtoTypeColors(incident.typeID) }}
+                    />
                   </p>
                   <p>
                     <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(data, incident.typeID)}

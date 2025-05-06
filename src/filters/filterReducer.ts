@@ -109,8 +109,12 @@ export const filterComponents: Record<filterType["type"], React.FC<filterProps>>
 export const filterOperations: Record<filterType["type"], (incident: Incident, state: any, db: DB) => boolean | undefined> = {
   category: (incident: Incident, state: any, db: DB) => {
     if (!state) return undefined
-    const { hiddenCategories, hiddenTypes } = state
-    return !hiddenCategories.includes(db.Types[incident.typeID as string].categoryID as string) && !hiddenTypes.includes(incident.typeID as string)
+    const { hiddenCategories, hiddenTypes } = state as { hiddenCategories: string[], hiddenTypes: string[] }
+    if (Array.isArray(incident.typeID)) {
+      return incident.typeID.some(typeID => !hiddenCategories.includes(db.Types[typeID].categoryID as string)) &&
+        incident.typeID.some(typeID => !hiddenTypes.includes(typeID));
+    }
+    return !hiddenCategories.includes(db.Types[incident.typeID].categoryID as string) && !hiddenTypes.includes(incident.typeID)
   },
   country: (incident: Incident, state: any) => {
     if (!state) return undefined

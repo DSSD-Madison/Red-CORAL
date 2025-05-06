@@ -1,17 +1,19 @@
-import { DB, Incident } from 'types'
+import { Incident } from 'types'
 import { useMap } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 import AutocompleteSearch from 'components/AutocompleteSearch'
 import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
 import { formatDateString, typeIDtoCategory, typeIDtoTypeName } from '@/utils'
 import { useDB } from '@/context/DBContext'
+import ActivityTypeSelector from './ActivityTypeSelector'
+import { LucidePlus, LucideTrash, LucideZoomIn } from 'lucide-react'
 
 interface InfoPanelControlProps {
   incidentID: string | null
   onClose: () => void
   submitIncident: (
     dateString: Incident['dateString'],
-    typeID: Incident['typeID'],
+    types: Incident['typeID'],
     country: Incident['country'],
     description: Incident['description'],
     department: Incident['department'],
@@ -27,6 +29,8 @@ interface InfoPanelControlProps {
   editID: string | null
   setEditID: React.Dispatch<React.SetStateAction<string | null>>
 }
+
+type ActivityTypePair = [string, string] // [keyof DB['Types'], keyof DB['Categories']]
 
 const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   incidentID,
@@ -50,8 +54,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const [department, setDepartment] = useState<Incident['department']>('')
   const [departmentBounds, setDepartmentBounds] = useState<number[] | undefined>(undefined)
   const [dateString, setDateString] = useState<Incident['dateString']>('')
-  const [typeID, setTypeID] = useState<string>('')
-  const [catID, setCatID] = useState<keyof DB['Categories']>('')
+  const [types, setTypes] = useState<(ActivityTypePair | [])[]>([[]])
 
   const disableZoom = () => {
     map.scrollWheelZoom.disable()
@@ -72,8 +75,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const cancelEdit = () => {
     setDescription('')
     setDateString('')
-    setTypeID('')
-    setCatID('')
+    setTypes([[]])
     setCountry('')
     setDepartment('')
     setMunicipality('')
@@ -82,11 +84,16 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   }
 
   const submit = async () => {
-    if (await submitIncident(dateString, typeID, description, country, department, municipality, editID)) {
+    const filteredTypes = types.filter((type) => type.length > 0) as ActivityTypePair[]
+    if (filteredTypes.length === 0) {
+      alert('Por favor, selecciona al menos un tipo de evento')
+      return
+    }
+    const typeIDs = filteredTypes.map((pair) => pair[0])
+    if (await submitIncident(dateString, typeIDs, country, description, department, municipality, editID)) {
       setDescription('')
       setDateString('')
-      setTypeID('')
-      setCatID('')
+      setTypes([[]])
       setCountry('')
       setDepartment('')
       setMunicipality('')
@@ -96,31 +103,50 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   }
 
   const incident = incidentID ? db.Incidents[incidentID] : null
+  const existingTypesToPairs = (typeID: Incident['typeID']): [string, string][] => {
+    if (Array.isArray(typeID)) {
+      return typeID.map((id) => [id, typeIDtoCategory(db, id).name])
+    }
+    return [[typeID, typeIDtoCategory(db, typeID).name]]
+  }
+  const typeColors = Object.fromEntries(Object.entries(db.Types || {}).map(([id, type]) => [id, db.Categories[type.categoryID].color]))
+  const typeIDtoTypeColors = (typeID: string | string[]) => {
+    return typeColors[Array.isArray(typeID) ? typeID[0] : typeID]
+  }
 
   useEffect(() => {
     if (editID != null) {
       if (incident) {
         setDescription(incident.description)
         setDateString(incident.dateString)
-        setTypeID(incident.typeID)
-        setCatID(db.Types[incident.typeID].categoryID)
+        setTypes(existingTypesToPairs(incident.typeID))
         setCountry(incident.country)
         setLocation(incident.location)
         setCountry(incident.country)
         setDepartment(incident.department)
         setMunicipality(incident.municipality)
       } else {
-        setDescription('')
-        setDateString('')
-        setTypeID('')
-        setCatID('')
-        setCountry('')
-        setDepartment('')
-        setMunicipality('')
-        setLocation(null)
+        cancelEdit()
       }
     }
   }, [editID])
+
+  // Handlers for ActivityTypeSelector component
+  const handleCategoryChange = (index: number, categoryID: string) => {
+    setTypes((prevPairs) => prevPairs.map((pair, i) => (i === index ? ['', categoryID] : pair)))
+  }
+
+  const handleTypeChange = (index: number, typeID: string) => {
+    setTypes((prevPairs) => prevPairs.map((pair, i) => (i === index && pair.length == 2 ? [typeID, pair[1]] : pair)))
+  }
+
+  const handleAddPair = () => {
+    setTypes((prevPairs) => [...prevPairs, ['', '']])
+  }
+
+  const handleRemovePair = (index: number) => {
+    setTypes((prevPairs) => prevPairs.filter((_, i) => i !== index))
+  }
 
   return (
     <div
@@ -141,7 +167,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
           </span>
 
           {incident && editID == null && (
-            <div className="px-6 py-10">
+            <div className="py-10 pl-6 pr-2">
               <div className="mb-4">
                 <span className="font-bold">País:</span> {incident.country}
                 <br />
@@ -163,9 +189,30 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     <span className="font-bold">Fecha:</span> {formatDateString(incident.dateString)} <br />
                   </>
                 )}
-                <span className="font-bold">Actividad:</span> {typeIDtoCategory(db, incident.typeID).name}
-                <br />
-                <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(db, incident.typeID)}
+                <span className="font-bold">Actividad{Array.isArray(incident.typeID) && incident.typeID.length > 1 ? 'es' : ''}:</span>
+                <ul className="mt-1">
+                  {Array.isArray(incident.typeID) ? (
+                    incident.typeID.map((typeID) => (
+                      <li key={typeID} className="mb-3 ml-2 text-shade-01">
+                        <span style={{ backgroundColor: typeIDtoTypeColors(typeID) }} className="mr-1 rounded-md p-1 text-xs">
+                          <span className="bg-inherit bg-clip-text text-transparent contrast-[900] grayscale invert">
+                            {typeIDtoCategory(db, typeID).name}
+                          </span>
+                        </span>
+                        {typeIDtoTypeName(db, typeID)}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="mb-3 ml-2 text-xs text-shade-01">
+                      <span style={{ backgroundColor: typeIDtoTypeColors(incident.typeID) }} className="mr-1 rounded-md p-1 text-xs">
+                        <span className="bg-inherit bg-clip-text text-transparent contrast-[900] grayscale invert">
+                          {typeIDtoCategory(db, incident.typeID).name}
+                        </span>
+                      </span>
+                      {typeIDtoTypeName(db, incident.typeID)}
+                    </li>
+                  )}
+                </ul>
               </div>
               <span className="font-bold">Descripción:</span>
               <div className="mb-6 break-words text-shade-01">{incident.description}</div>
@@ -223,32 +270,35 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                     />
                   </label>
                 )}
-                {municipalityBounds && (
-                  <button
-                    className="mr-1 rounded-sm border-0 bg-blue-200 pb-1 pl-2 pr-2 pt-1 hover:bg-blue-300"
-                    onClick={() => {
-                      const bounds: LatLngBoundsExpression = [
-                        municipalityBounds?.slice(0, 2).reverse() as LatLngTuple,
-                        municipalityBounds?.slice(2).reverse() as LatLngTuple,
-                      ]
-                      map.flyToBounds(bounds, { maxZoom: 10 })
-                    }}
-                  >
-                    Zoom sobre el Municipio
-                  </button>
-                )}
-                {location && (
-                  <button
-                    className="m-2 mr-1 block rounded-sm border-0 bg-red-100 pb-1 pl-2 pr-2 pt-1 hover:bg-red-200"
-                    onClick={() => {
-                      setLocation(null)
-                    }}
-                  >
-                    Quitar marcador
-                  </button>
-                )}
-                <br />
-                <hr className="my-4 border-neutral-500" />
+                <div className="mb-2 mt-2 flex items-center gap-2">
+                  {municipalityBounds && (
+                    <button
+                      className="rounded-sm border-0 bg-blue-100 px-2 py-1 text-xs text-blue-800 hover:bg-blue-300"
+                      onClick={() => {
+                        const bounds: LatLngBoundsExpression = [
+                          municipalityBounds?.slice(0, 2).reverse() as LatLngTuple,
+                          municipalityBounds?.slice(2).reverse() as LatLngTuple,
+                        ]
+                        map.flyToBounds(bounds, { maxZoom: 10 })
+                      }}
+                    >
+                      <LucideZoomIn className="mr-1 inline h-4 w-4" />
+                      Zoom sobre el Municipio
+                    </button>
+                  )}
+                  {location && (
+                    <button
+                      className="rounded-sm border-0 bg-red-100 px-2 py-1 text-xs text-red-800 hover:bg-red-200"
+                      onClick={() => {
+                        setLocation(null)
+                      }}
+                    >
+                      <LucideTrash className="mr-1 inline h-4 w-4" />
+                      Quitar marcador
+                    </button>
+                  )}
+                </div>
+                <hr className="my-4 border-neutral-400" />
                 Fecha:
                 <br />
                 <input
@@ -258,41 +308,31 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                   onChange={(e) => setDateString(e.target.value)}
                   required
                 />
-                <br />
-                Actividad:
-                <br />
-                <select
-                  value={catID}
-                  onChange={(e) => {
-                    setCatID(e.target.value)
-                    setTypeID('')
-                  }}
-                  className="mb-2 w-full rounded-md bg-white/70 p-2"
-                >
-                  <option value="">--Por favor elige una actividad--</option>
-                  {Object.entries(db.Categories)
-                    .sort(([, a], [, b]) => a.name.localeCompare(b.name))
-                    .map(([id, category]) => (
-                      <option key={id} value={id}>
-                        {category.name}
-                      </option>
-                    ))}
-                </select>
-                <br />
-                Tipo de evento:
-                <br />
-                <select value={typeID} onChange={(e) => setTypeID(e.target.value)} className="mb-2 w-full rounded-md bg-white/70 p-2">
-                  <option value="">--Por favor elige un tipo de evento--</option>
-                  {Object.entries(db.Types)
-                    .filter(([, type]) => type.categoryID == catID)
-                    .sort(([, a], [, b]) => a.name.localeCompare(b.name))
-                    .map(([id, type]) => (
-                      <option key={id} value={id}>
-                        {type.name}
-                      </option>
-                    ))}
-                </select>
-                <br />
+                <hr className="my-4 border-neutral-400" />
+                <div className="mb-2">
+                  <h3 className="mb-1">Actividades y Tipos de Evento:</h3>
+                  {types.map(([typeID, catID], index) => (
+                    <ActivityTypeSelector
+                      key={index} // Using index as key is okay here if list order doesn't change drastically except adds/removes
+                      index={index}
+                      categoryID={catID}
+                      typeID={typeID}
+                      onChangeCategory={handleCategoryChange}
+                      onChangeType={handleTypeChange}
+                      onRemove={handleRemovePair}
+                      canRemove={types.length > 1} // Can remove if more than one exists
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddPair}
+                    className="rounded-sm border-0 bg-blue-100 px-2 py-1 text-xs text-blue-800 hover:bg-blue-200"
+                  >
+                    <LucidePlus className="mr-1 inline h-4 w-4" />
+                    Añadir actividad
+                  </button>
+                </div>
+                <hr className="my-4 border-neutral-400" />
                 <label>
                   Descripción:
                   <br />

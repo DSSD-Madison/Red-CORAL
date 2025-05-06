@@ -66,7 +66,13 @@ export function calculateIncidentStats(types: DB['Types'], incidents: [string, I
   incidents.forEach(([_, incident]) => {
     countriesSet.add(incident.country)
     dates.push(new Date(incident.dateString))
-    typesSet.add(incident.typeID as string)
+    if (Array.isArray(incident.typeID)) {
+      incident.typeID.forEach((typeID) => {
+        typesSet.add(typeID)
+      })
+    } else {
+      typesSet.add(incident.typeID)
+    }
     // Only add department/municip if it's not Mar Caribe/Océano Pacífico
     if (incident.country === 'Mar Caribe' || incident.country === 'Océano Pacífico') {
       return
@@ -171,8 +177,12 @@ export function filterIncidents(incidents: DB['Incidents'],
       !filters.hideCountries.includes(incident.country) &&
       !filters.hideDepartments.includes(`${incident.country} - ${incident.department}`) &&
       !filters.hideMunicipalities.includes(incident.municipality) &&
-      !filters.hideCategories.includes(types[incident.typeID].categoryID) &&
-      !filters.hideTypes.includes(incident.typeID) &&
+      (Array.isArray(incident.typeID)
+        ? (incident.typeID.some((typeID) => !filters.hideTypes.includes(typeID)) &&
+          incident.typeID.some((typeID) => !filters.hideCategories.includes(types[typeID].categoryID)))
+        : (!filters.hideTypes.includes(incident.typeID) &&
+          !filters.hideCategories.includes(types[incident.typeID].categoryID))
+      ) &&
       (editID == null || id != editID)
   )
 }
@@ -185,15 +195,24 @@ export function formatDateString(dateString: string): string {
   return date.toLocaleDateString('es-ES', { timeZone: 'UTC' })
 }
 
-export function typeIDtoTypeName(data: DB, typeID: string): string {
+export function typeIDtoTypeName(data: DB, typeID: string | string[]): string {
+  if (Array.isArray(typeID)) {
+    return data.Types[typeID[0]].name
+  }
   return data.Types[typeID].name
 }
 
-export function typeIDtoCategory(data: DB, typeID: string): Category {
+export function typeIDtoCategory(data: DB, typeID: string | string[]): Category {
+  if (Array.isArray(typeID)) {
+    return data.Categories[data.Types[typeID[0]].categoryID]
+  }
   return data.Categories[data.Types[typeID].categoryID];
 }
 
-export function typeIDtoCategoryID(data: DB, typeID: string): keyof DB['Categories'] {
+export function typeIDtoCategoryID(data: DB, typeID: string | string[]): keyof DB['Categories'] {
+  if (Array.isArray(typeID)) {
+    return data.Types[typeID[0]].categoryID
+  }
   return data.Types[typeID].categoryID
 }
 
