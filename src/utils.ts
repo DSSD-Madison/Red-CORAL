@@ -11,7 +11,9 @@ import {
   getDocs,
   query,
   where,
-} from 'firebase/firestore/lite'
+  DocumentData,
+  QueryDocumentSnapshot,
+} from 'firebase/firestore'
 import { ref, getBytes, FirebaseStorage } from 'firebase/storage'
 import { saveToIndexedDB } from './utils/indexedDB'
 
@@ -128,7 +130,8 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
  */
 export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
   // If cache miss or admin mode, fetch from Firebase
-  const bytes = await getBytes(ref(storage, 'state.json'))
+  const stateFile = isAdmin ? 'fullState.json' : 'state.json';
+  const bytes = await getBytes(ref(storage, stateFile))
   const db: DB = JSON.parse(new TextDecoder().decode(bytes))
   const collectionNames = ['Categories', 'Types', 'Incidents']
   if (isAdmin) {
@@ -138,7 +141,7 @@ export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, fire
     for (let i = 0; i < collectionNames.length; i++) {
       const col = collectionNames[i]
       const snap = snaps[i]
-      snap.forEach((doc) => {
+      snap.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
         //@ts-ignore
         db[col][doc.id] = doc.data()
       })

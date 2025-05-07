@@ -4,6 +4,8 @@ import {
   doc,
   deleteDoc,
   Firestore,
+  QueryDocumentSnapshot,
+  DocumentData,
 } from 'firebase/firestore/lite'
 import { ref, uploadString, getMetadata, FirebaseStorage } from 'firebase/storage'
 import { filterOperations, filterType } from '@/filters/filterReducer'
@@ -28,7 +30,7 @@ export async function publishData(
     { target: types, name: 'Types' },
   ]) {
     const querySnapshot = await getDocs(collection(firestore, d.name))
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
       const data = doc.data()
       if (data.deleted === true) {
         toRemove.push({ collectionName: d.name, docId: doc.id })
@@ -42,7 +44,7 @@ export async function publishData(
   // Fetch Incidents and apply filters
   const incidentsSnapshot = await getDocs(collection(firestore, 'Incidents'))
   const allIncidents: [string, Incident][] = []
-  incidentsSnapshot.forEach((doc) => {
+  incidentsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
     const data = doc.data()
     if (data.deleted === true) {
       toRemove.push({ collectionName: 'Incidents', docId: doc.id })
@@ -51,6 +53,22 @@ export async function publishData(
       allIncidents.push([doc.id, data as Incident]) // Cast to Incident
     }
   })
+
+  // Prepare the full data object (for fullState.json)
+  const fullDataOut: Partial<DB> & { readAt: string } = {
+    Categories: { ...categories }, // Create copies to avoid mutation issues
+    Types: { ...types },
+    Incidents: Object.fromEntries(allIncidents),
+    readAt: readAt,
+  };
+
+  // Minify and upload fullState.json to Cloud Storage
+  const minifiedFullData = JSON.stringify(fullDataOut);
+  const fullStorageRef = ref(storage, 'fullState.json');
+  await uploadString(fullStorageRef, minifiedFullData, 'raw', {
+    contentType: 'application/json',
+    contentDisposition: 'attachment; filename="fullState.json"',
+  });
 
   // Apply user-defined filters from the UI
   // Construct a temporary DB object for filter operations
@@ -65,7 +83,7 @@ export async function publishData(
     filters.every((filter: filterType) => filterOperations[filter.type](incident, filter.state, dbForFiltering) !== false) // thank god this part is easy at least
   )
 
-  // Prepare final output object
+  // Prepare final output object for state.json (filtered)
   const out: Partial<DB> & { readAt: string } = {
     Categories: categories,
     Types: types,
@@ -122,7 +140,7 @@ export async function countIncidentsToPublish(firestore: Firestore, filters: fil
   // Fetch Categories and Types for filtering context
   for (const d of [{ target: categories, name: 'Categories' }, { target: types, name: 'Types' }]) {
     const querySnapshot = await getDocs(collection(firestore, d.name));
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
       const data = doc.data();
       if (data.deleted !== true) {
         d.target[doc.id] = data as any;
@@ -133,7 +151,7 @@ export async function countIncidentsToPublish(firestore: Firestore, filters: fil
   // Fetch Incidents
   const incidentsSnapshot = await getDocs(collection(firestore, 'Incidents'));
   const allIncidents: [string, Incident][] = [];
-  incidentsSnapshot.forEach((doc) => {
+  incidentsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
     const data = doc.data();
     if (data.deleted !== true) {
       allIncidents.push([doc.id, data as Incident]);

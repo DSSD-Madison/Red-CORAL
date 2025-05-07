@@ -186,7 +186,7 @@ const Map: React.FC = () => {
               Crear incidente
             </button>
             <a
-              href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/state.json?alt=media"
+              href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/fullState.json?alt=media"
               className="block rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
             >
               Guardar copia de datos
