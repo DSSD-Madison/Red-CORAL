@@ -31,12 +31,7 @@ const ActivityTypeSelector: React.FC<ActivityTypeSelectorProps> = ({
           onChange={(e) => onChangeCategory(index, e.target.value)}
           className="mt-1 block w-full rounded-md bg-white p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         >
-          <option value="">
-            <span role="img" aria-label="alert" className="mr-1">
-              ⚠️
-            </span>
-            Por favor, elige una actividad
-          </option>
+          <option value="">⚠️ Por favor, elige una actividad</option>
           {Object.entries(db.Categories)
             .sort(([, a], [, b]) => a.name.localeCompare(b.name))
             .map(([id, category]) => (
@@ -54,12 +49,7 @@ const ActivityTypeSelector: React.FC<ActivityTypeSelectorProps> = ({
           disabled={!categoryID}
           className="mt-1 block w-full rounded-md bg-white p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:opacity-50 sm:text-sm"
         >
-          <option value="">
-            <span role="img" aria-label="alert" className="mr-1">
-              ⚠️
-            </span>
-            Por favor, elige un tipo de evento
-          </option>
+          <option value="">⚠️ Por favor, elige un tipo de evento</option>
           {Object.entries(db.Types)
             .filter(([, type]) => type.categoryID === categoryID)
             .sort(([, a], [, b]) => a.name.localeCompare(b.name))

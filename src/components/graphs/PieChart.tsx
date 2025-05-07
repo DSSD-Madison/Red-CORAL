@@ -38,6 +38,19 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
   })
   cleanData = cleanData.filter((d) => d.value > 0).sort((a, b) => d3.descending(a.value, b.value))
 
+  const labelColorMap = Object.values(db.Categories).reduce(
+    (acc, category) => {
+      acc[category.name] = category.color
+      return acc
+    },
+    {} as Record<string, string>
+  )
+
+  const d3ColorScale = d3
+    .scaleOrdinal<string>()
+    .domain(cleanData.map((d) => d.label))
+    .range(cleanData.map((d) => labelColorMap[d.label] || '#CCCCCC'))
+
   useEffect(() => {
     function render() {
       if (d3Ref.current) {
@@ -46,17 +59,14 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
         svg.selectAll('*').remove()
 
         // Set dimensions
-        const width = 400
+        const width = 200
         const height = 200
-
-        svg.attr('viewBox', `0 0 ${width} ${height}`)
 
         const g = svg.append('g')
         g.append('g').attr('class', 'slices')
-        g.append('g').attr('class', 'labels')
-        g.append('g').attr('class', 'lines')
 
-        g.attr('transform', 'translate(' + width / 4 + ',' + height / 2 + ')')
+        // Center the pie chart in the new SVG dimensions
+        g.attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')')
 
         const radius = Math.min(width, height) / 2
 
@@ -66,22 +76,6 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
           .value(function (d) {
             return d.value
           })
-
-        //helper function for color
-        //reduce() iterates over the Categories array and builds an object "acc" so that
-        //acc will be similar to a dictionary in the form: {"drugs": "black", "robbery": "white"}
-        const labelColorMap = Object.values(db.Categories).reduce(
-          (acc, category) => {
-            acc[category.name] = category.color
-            return acc
-          },
-          {} as Record<string, string>
-        )
-
-        const color = d3
-          .scaleOrdinal()
-          .domain(cleanData.map((d) => d.label))
-          .range(cleanData.map((d) => labelColorMap[d.label]))
 
         const arc = d3
           .arc()
@@ -99,48 +93,48 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
           .enter()
           .append('path')
           .attr('class', 'slice')
-          .style('fill', (d) => color(d.data.label) as string)
+          .style('fill', (d) => d3ColorScale(d.data.label) as string)
           .attr('d', arc as any)
 
         slice.exit().remove()
-
-        /* ------- LEGEND ------- */
-        const legend = svg
-          .append('g')
-          .attr('class', 'legend')
-          .attr('transform', `translate(${width - 200}, 20)`) // Position legend to the right of the pie chart
-
-        const legendItems = legend
-          .selectAll('.legend-item')
-          .data(cleanData)
-          .enter()
-          .append('g')
-          .attr('transform', (_, i) => `translate(0, ${i * 20})`) // Position each legend item
-
-        // Add colored rectangles
-        legendItems
-          .append('rect')
-          .attr('width', 12)
-          .attr('height', 12)
-          .attr('fill', (d) => color(d.label) as string)
-
-        // Add text labels
-        legendItems
-          .append('text')
-          .attr('x', 18) // Position text next to rectangle
-          .attr('y', 10) // Vertically align text with rectangle
-          .text((d) => `${d.label} (${Math.floor((d.value / totalValue) * 100)}%)`)
-          .style('font-size', '12px')
-          .attr('fill', '#000')
       }
     }
     render()
-  }, [incidents])
+  }, [incidents, cleanData, d3ColorScale, db]) // Added cleanData, d3ColorScale, db to dependencies
 
   return (
     <div ref={containerRef} className="relative flex max-h-72 min-w-[270px] flex-1 flex-col rounded-lg bg-neutral-100">
       <h2 className="ml-2 mt-2">Categorías de incidentes</h2>
-      <svg width="400" height="200" className="mx-auto h-full w-full" ref={d3Ref}></svg>
+      <div className="mt-2 flex h-full">
+        <svg width="200" height="200" className="flex-shrink" ref={d3Ref}></svg>
+        {cleanData.length > 0 && totalValue > 0 && (
+          <div className="h-full min-w-max flex-grow overflow-y-auto px-2">
+            <ul className="text-xs">
+              {cleanData.map((d) => (
+                <li key={d.label} className="flex items-center justify-between py-0.5">
+                  <div className="flex items-center">
+                    <span
+                      style={{
+                        backgroundColor: labelColorMap[d.label] || '#CCCCCC',
+                        width: '10px',
+                        height: '10px',
+                        display: 'inline-block',
+                        marginRight: '6px',
+                        borderRadius: '2px',
+                        flexShrink: 0,
+                      }}
+                    ></span>
+                    <span className="truncate" title={d.label}>
+                      {d.label}
+                    </span>
+                  </div>
+                  <span className="ml-2 flex-shrink-0">{`${Math.floor((d.value / totalValue) * 100)}%`}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

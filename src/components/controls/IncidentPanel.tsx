@@ -14,8 +14,8 @@ interface InfoPanelControlProps {
   submitIncident: (
     dateString: Incident['dateString'],
     types: Incident['typeID'],
-    country: Incident['country'],
     description: Incident['description'],
+    country: Incident['country'],
     department: Incident['department'],
     municipality: Incident['municipality'],
     incidentID: string | null
@@ -90,7 +90,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
       return
     }
     const typeIDs = filteredTypes.map((pair) => pair[0])
-    if (await submitIncident(dateString, typeIDs, country, description, department, municipality, editID)) {
+    if (await submitIncident(dateString, typeIDs, description, country, department, municipality, editID)) {
       setDescription('')
       setDateString('')
       setTypes([[]])
@@ -105,9 +105,9 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const incident = incidentID ? db.Incidents[incidentID] : null
   const existingTypesToPairs = (typeID: Incident['typeID']): [string, string][] => {
     if (Array.isArray(typeID)) {
-      return typeID.map((id) => [id, typeIDtoCategory(db, id).name])
+      return typeID.map((id) => [id, db.Types[id].categoryID as string])
     }
-    return [[typeID, typeIDtoCategory(db, typeID).name]]
+    return [[typeID, db.Types[typeID].categoryID as string]]
   }
   const typeColors = Object.fromEntries(Object.entries(db.Types || {}).map(([id, type]) => [id, db.Categories[type.categoryID].color]))
   const typeIDtoTypeColors = (typeID: string | string[]) => {
@@ -147,7 +147,6 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
   const handleRemovePair = (index: number) => {
     setTypes((prevPairs) => prevPairs.filter((_, i) => i !== index))
   }
-
   return (
     <div
       key={'overlay'}

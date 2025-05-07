@@ -202,7 +202,7 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
                     />
                   </p>
                   <p>
-                    <span className="font-bold">Tipo de evento:</span> {typeIDtoTypeName(data, incident.typeID)}
+                    <span className="font-bold">Tipo de incidente:</span> {typeIDtoTypeName(data, incident.typeID)}
                   </p>
                 </div>
               </Tooltip>

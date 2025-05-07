@@ -71,7 +71,6 @@ const Map: React.FC = () => {
       alert('Por, favor, selecciona una fecha para el incidente')
       return false
     }
-    console.log('TypeID', typeID)
     if (!Array.isArray(typeID) || typeID.length === 0 || typeID.some((id) => !Object.keys(db.Types).some((type) => type === id))) {
       alert('Tipo de evento no válido, algo salió mal')
       return false

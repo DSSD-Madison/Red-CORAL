@@ -6,7 +6,9 @@ import { useMemo } from 'react'
 export default function IncidentsStats({ incidents, bounds }: { incidents: [string, Incident][]; bounds: ReturnType<typeof calculateBounds> }) {
   const { db } = useDB()
   const stats = useMemo(() => calculateIncidentStats(db.Types, incidents), [incidents, db])
-
+  // subtract maritime areas if they're in the set of countries
+  stats.countriesSet.delete('Mar Caribe')
+  stats.countriesSet.delete('Océano Pacífico')
   return (
     <div className="relative min-w-max flex-1 rounded-lg bg-neutral-100 p-2">
       <h2>Estadísticas de incidentes</h2>
@@ -17,7 +19,7 @@ export default function IncidentsStats({ incidents, bounds }: { incidents: [stri
       <div className="mt-2 grid grid-cols-2">
         <span>
           {/* we don't want to count the two maritime areas. what's the easiest way to do that? */}
-          <strong>Países:</strong> {Object.keys(bounds.locations).length - 2}
+          <strong>Países:</strong> {stats.countriesSet.size}
         </span>
         <span>
           <strong>Departamentos:</strong> {Object.values(bounds.locations).reduce((acc, departments) => acc + Object.keys(departments).length, 0)}

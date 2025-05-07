@@ -93,8 +93,11 @@ export function calculateIncidentStats(types: DB['Types'], incidents: [string, I
   return {
     totalincidents,
     countriesCount: countriesSet.size,
+    countriesSet,
     departmentsCount: departmentsSet.size,
+    departmentsSet,
     municipalitiesCount: municipalitiesSet.size,
+    municipalitiesSet,
     earliestDate,
     latestDate,
     categoriesCount: categoriesSet.size,
