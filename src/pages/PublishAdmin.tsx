@@ -111,10 +111,13 @@ const PublishAdmin: React.FC = () => {
 
   return (
     <div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">
-      <div className="flex flex-row items-start gap-2">
-        <h1 className="text-2xl font-semibold">Publicar Datos Públicos</h1>
+      <div className="flex flex-row items-center gap-2">
+        <h1 className="self-start text-2xl font-semibold">Publicar Datos Públicos</h1>
         <div className="flex-grow" />
-        <img src="/banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
+        <a href="https://madison.dssdglobal.org/" target="_blank" rel="noopener noreferrer">
+          <img src="dssd_logo.svg" alt="DSSD logo" height={75} width={75} />
+        </a>
+        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
       </div>
 
       <div className="rounded-lg bg-white p-4 shadow">
