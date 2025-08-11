@@ -31,7 +31,8 @@ const Navigation = () => {
           </button>
         </>
       ) : (
-        <NavLink to="/login" text="Registrarse" />
+        // <NavLink to="/login" text="Registrarse" />
+        <a href="https://redcoralmap.org/guia-metodologia">Guía de Metodología</a>
       )}
     </div>
   )
