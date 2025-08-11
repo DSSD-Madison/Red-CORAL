@@ -30,7 +30,7 @@ const IncidentTable = ({ incidents }: { incidents: [string, Incident][] }) => {
           <th className="w-[5%] pb-2">Tipos de incidentes</th>
           <th className="pb-2">Actividad</th>
           <th className="pb-2">Fecha</th>
-          <th className="min-w-[250px] pb-2">Descripción</th>
+          {/* <th className="min-w-[250px] pb-2">Descripción</th> */}
           <th className="pb-2">Departamento</th>
           <th className="pb-2">Municipio</th>
           <th className="pb-2">Ubicación</th>
@@ -41,7 +41,7 @@ const IncidentTable = ({ incidents }: { incidents: [string, Incident][] }) => {
             <td className="break-words border-t border-black p-2 text-left text-sm">{typeIDtoTypeName(db, incident.typeID)}</td>
             <td className="break-words border-t border-black p-2 text-left">{typeIDtoCategory(db, incident.typeID).name}</td>
             <td className="break-words border-t border-black p-2 text-left">{formatDateString(incident.dateString)}</td>
-            <td className="break-words border-t border-black p-2 text-left text-sm lg:max-w-[33vw]">{incident.description}</td>
+            {/* <td className="break-words border-t border-black p-2 text-left text-sm lg:max-w-[33vw]">{incident.description}</td> */}
             <td className="break-words border-t border-black p-2 text-left">{incident.department}</td>
             <td className="break-words border-t border-black p-2 text-left">{incident.municipality}</td>
             <td className="break-words border-t border-black p-2 text-left">
