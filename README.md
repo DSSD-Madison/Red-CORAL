@@ -18,5 +18,5 @@ Assign an issue to yourself, or work on one that has been assigned to you by clo
 First, make sure you have [Node.js](https://nodejs.org/) installed and you've made a .env file in the root of the project with contents from the Secrets doc (QA environment) in the Drive folder. Then it's as easy as running:
 
 ```bash
-npm i && npm run dev
+pnpm i && pnpm dev
 ```
