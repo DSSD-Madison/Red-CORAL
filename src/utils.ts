@@ -241,19 +241,21 @@ export function formatDuration(duration: number): string {
   // hace 10 horas/hace 2 días/hace 3 semanas/hace 1 mes/hace 1 año
   // biggest unit, round down
   const units = [
-    { label: 'año', value: 1000 * 60 * 60 * 24 * 365 },
-    { label: 'mes', value: 1000 * 60 * 60 * 24 * 30 },
-    { label: 'semana', value: 1000 * 60 * 60 * 24 * 7 },
-    { label: 'día', value: 1000 * 60 * 60 * 24 },
-    { label: 'hora', value: 1000 * 60 * 60 },
-    { label: 'minuto', value: 1000 * 60 },
-    { label: 'segundo', value: 1000 },
+    { label: 'año', plural: 'años', value: 1000 * 60 * 60 * 24 * 365 },
+    { label: 'mes', plural: 'meses', value: 1000 * 60 * 60 * 24 * 30 },
+    { label: 'semana', plural: 'semanas', value: 1000 * 60 * 60 * 24 * 7 },
+    { label: 'día', plural: 'días', value: 1000 * 60 * 60 * 24 },
+    { label: 'hora', plural: 'horas', value: 1000 * 60 * 60 },
+    { label: 'minuto', plural: 'minutos', value: 1000 * 60 },
+    { label: 'segundo', plural: 'segundos', value: 1000 },
   ]
+  const diffMs = Math.abs(Date.now() - duration)
   for (const unit of units) {
-    const diff = Math.abs(Date.now() - duration) / unit.value
+    const diff = diffMs / unit.value
     if (diff >= 1) {
-      return `${Math.floor(diff)} ${unit.label}${Math.floor(diff) > 1 ? 's' : ''}`
+      const count = Math.floor(diff)
+      return `hace ${count} ${count > 1 ? unit.plural : unit.label}`
     }
   }
-  return 'un instante'
+  return 'hace un instante'
 }
