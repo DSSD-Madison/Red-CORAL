@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function getUserPermissions(userId) {
+      return get(/databases/$(database)/documents/Permissions/$(userId)).data;
+    }
+
+    match /Incidents/{incidentId} {
+      allow read: if request.auth != null && exists(/databases/$(database)/documents/user_permissions/$(request.auth.uid));
+      // Admins punch through all rules
+      allow write: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin;
+      // create: the 'country' field in the new incident data is contained in the user's 'countryCodes' array
+      allow create: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin &&
+                    request.resource.data.country in getUserPermissions(request.auth.uid).countryCodes;
+      // update: the 'country' field in both the existing and new data is contained in the user's 'countryCodes' array
+      allow update: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin &&
+                    request.resource.data.country in getUserPermissions(request.auth.uid).countryCodes &&
+                    resource.data.country in getUserPermissions(request.auth.uid).countryCodes;
+      // delete: the 'country' field in the existing data is contained in the user's 'countryCodes' array
+      allow delete: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin &&
+                    resource.data.country in getUserPermissions(request.auth.uid).countryCodes;
+    }
+    match /Categories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin;
+    }
+
+    match /Types/{typeId} {
+      allow read: if true;
+      allow write: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin;
+    }
+    match /Permissions/{userId} {
+      // Users can read their own permissions, and admins can read/write all permissions.
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin;
+    }
+  }
+}
