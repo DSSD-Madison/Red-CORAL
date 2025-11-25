@@ -253,6 +253,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                       setStringValue={setDepartment}
                       setBounds={setDepartmentBounds}
                       countryCode={countryCode}
+                      countryName={country}
                       initialValue={editID != null ? incident?.department : undefined}
                     />
                   </label>
@@ -266,6 +267,7 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                       setStringValue={setMunicipality}
                       setBounds={setMunicipalityBounds}
                       department={{ name: department, bbox: departmentBounds }}
+                      countryName={country}
                       initialValue={editID != null ? incident?.municipality : undefined}
                     />
                   </label>

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { GeocodingApi, Configuration, PeliasLayer, PeliasGeoJSONFeature, AutocompleteRequest } from '@stadiamaps/api'
 import { ADDITIONAL_FEATURES } from '../constants'
 import { LucideCheck, LucideLoader2, LucidePencil } from 'lucide-react'
+import { useDB } from '@/context/DBContext'
 
 interface HomeProps {
   layers?: PeliasLayer[]
@@ -10,6 +11,7 @@ interface HomeProps {
   setBounds: (bound: number[] | undefined) => void
   setCountryCode?: (code: string) => void
   countryCode?: string
+  countryName?: string
   department?: { name: string; bbox: number[] | undefined }
   initialValue?: string
 }
@@ -17,17 +19,30 @@ interface HomeProps {
 const stadiaAPIKey = import.meta.env.VITE_STADIA_KEY
 const api = new GeocodingApi(new Configuration({ apiKey: stadiaAPIKey }))
 
-const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBounds, setCountryCode, countryCode, department, initialValue }) => {
+const normalize = (str: string) =>
+  str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+
+const AutocompleteSearch: React.FC<HomeProps> = ({
+  layers,
+  setStringValue,
+  setBounds,
+  setCountryCode,
+  countryCode,
+  countryName,
+  department,
+  initialValue,
+}) => {
+  const { db } = useDB()
+  const locations = useMemo(() => db.filterBounds.locations, [db.filterBounds])
+
   const [search, setSearch] = useState<string>(initialValue || '')
-
   const [options, setOptions] = useState<PeliasGeoJSONFeature[]>([])
-
   const [isLoading, setIsLoading] = useState(true)
-
   const [localStrVal, setLocalStrVal] = useState<string>('')
-
   const [queryDebounce, setQueryDebounce] = useState<NodeJS.Timeout | null>(null)
-
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   function getName(feat: PeliasGeoJSONFeature) {
@@ -45,23 +60,64 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
     setLocalStrVal(val)
     if (setCountryCode !== undefined) setCountryCode(feat.properties?.country_a || '')
     if (!layers?.includes('country') && !feat.bbox) {
-      alert('Stadia Maps no tiene información de ubicación para este municipio. No podrás acercarlo automáticamente.')
+      if (feat.properties?.source !== 'local') {
+        alert('Stadia Maps no tiene información de ubicación para este municipio. No podrás acercarlo automáticamente.')
+      }
     }
     setBounds(feat.bbox)
     setOptions([])
   }
 
   function isMatch(feat: PeliasGeoJSONFeature, search: string) {
-    const normalizedSearch = search.toLowerCase()
-    const normalizedLabel = feat.properties?.label?.toLowerCase()
+    const normalizedSearch = normalize(search)
+    const normalizedLabel = normalize(feat.properties?.label || '')
     return normalizedLabel?.includes(normalizedSearch) || false
   }
 
   async function getFeats(search: string) {
-    const q: AutocompleteRequest = { text: search, lang: 'es-CO' }
+    const normalizedSearch = normalize(search)
+    const localMatches: PeliasGeoJSONFeature[] = []
+
+    if (layers?.includes('country')) {
+      Object.keys(locations).forEach((c) => {
+        if (normalize(c).includes(normalizedSearch)) {
+          localMatches.push({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [0, 0] },
+            properties: { name: c, label: c, layer: 'country', source: 'local' },
+          })
+        }
+      })
+    } else if (layers?.includes('region')) {
+      if (countryName && locations[countryName]) {
+        Object.keys(locations[countryName]).forEach((d) => {
+          if (normalize(d).includes(normalizedSearch)) {
+            localMatches.push({
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: [0, 0] },
+              properties: { name: d, label: d, layer: 'region', source: 'local', country: countryName },
+            })
+          }
+        })
+      }
+    } else if (layers?.includes('locality')) {
+      if (countryName && department?.name && locations[countryName]?.[department.name]) {
+        locations[countryName][department.name].forEach((m) => {
+          if (normalize(m).includes(normalizedSearch)) {
+            localMatches.push({
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: [0, 0] },
+              properties: { name: m, label: m, layer: 'locality', source: 'local', country: countryName, region: department.name },
+            })
+          }
+        })
+      }
+    }
+
+    const q: AutocompleteRequest = { text: search, lang: 'en' }
     if (layers) q.layers = layers
     if (countryCode && (countryCode == 'custom' || countryCode == 'world')) {
-      return []
+      return localMatches
     }
     if (countryCode) {
       q.boundaryCountry = [countryCode]
@@ -72,15 +128,49 @@ const AutocompleteSearch: React.FC<HomeProps> = ({ layers, setStringValue, setBo
       q.boundaryRectMaxLon = department.bbox[2]
       q.boundaryRectMaxLat = department.bbox[3]
     }
-    const response = await api.autocomplete(q)
-    let feats = response.features
+
+    let apiFeats: PeliasGeoJSONFeature[] = []
+    try {
+      const response = await api.autocomplete(q)
+      apiFeats = response.features
+    } catch (e) {
+      console.error(e)
+    }
+
     if (layers?.includes('country')) {
-      feats.push(...ADDITIONAL_FEATURES.filter((feat) => isMatch(feat, search)))
+      apiFeats.push(...ADDITIONAL_FEATURES.filter((feat) => isMatch(feat, search)))
     }
     if (department) {
-      feats = feats.filter((feat) => feat.properties?.region == department.name)
+      apiFeats = apiFeats.filter((feat) => feat.properties?.region == department.name)
     }
-    return feats
+
+    // Merge logic
+    const merged: PeliasGeoJSONFeature[] = []
+    localMatches.forEach((local) => {
+      const localNameNorm = normalize(local.properties?.name || '')
+      const matchIndex = apiFeats.findIndex((apiFeat) => {
+        const apiName = getName(apiFeat) // Use getName to handle comma slicing if needed
+        return normalize(apiName) === localNameNorm
+      })
+
+      if (matchIndex !== -1) {
+        const apiMatch = apiFeats[matchIndex]
+        merged.push({
+          ...apiMatch,
+          properties: {
+            ...apiMatch.properties,
+            name: local.properties?.name,
+            label: local.properties?.label,
+            source: 'local_enriched',
+          },
+        })
+        apiFeats.splice(matchIndex, 1)
+      } else {
+        merged.push(local)
+      }
+    })
+
+    return [...merged, ...apiFeats]
   }
 
   useEffect(() => {
