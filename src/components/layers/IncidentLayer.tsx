@@ -136,7 +136,6 @@ const IncidentLayer = forwardRef<any, IncidentLayerProps>(
 
     return (
       <>
-        {/* @ts-expect-error: MarkerClusterGroup typings do not include children */}
         <MarkerClusterGroup
           key={markerType}
           ref={ref}
