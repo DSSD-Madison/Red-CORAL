@@ -165,10 +165,8 @@ const Map: React.FC = () => {
             <CategoryControl filters={filters} setFilters={setFilters} />
             <CountryControl filters={filters} setFilters={setFilters} />
             <MarkerTypeControl markerType={markerDisplayType} setMarkerType={setMarkerDisplayType} />
+            <YearControl filters={filters} setFilters={setFilters} setDisplayType={setMarkerDisplayType} />
           </div>
-        </Control>
-        <Control position="bottomleft">
-          <YearControl filters={filters} setFilters={setFilters} setDisplayType={setMarkerDisplayType} />
         </Control>
         <ZoomControl zoomLevel={2} setFilters={setFilters} />
         <SetInitialBounds />

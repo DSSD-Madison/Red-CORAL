@@ -1,8 +1,10 @@
+import { useDB } from '@/context/DBContext'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import * as d3 from 'd3'
+import { LucideCalendar, LucidePlay, LucideRotateCcw, LucideSquare } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from 'types'
-import * as d3 from 'd3'
-import { useDB } from '@/context/DBContext'
-import { LucideCalendar, LucidePlay, LucideRotateCcw, LucideSquare } from 'lucide-react'
+import { ResponsiveDropdown } from './ResponsiveDropdown'
 
 interface YearControlProps {
   filters: MarkerFilters
@@ -12,14 +14,16 @@ interface YearControlProps {
 
 const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDisplayType }) => {
   const { db } = useDB()
+  const isMobile = useIsMobile()
   const [isDropdownVisible, setDropdownVisible] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
   const d3Ref = useRef<SVGSVGElement | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const { minYear, maxYear } = db.filterBounds
   const { startDate: date1, endDate: date2 } = filters
 
   const [isPlaying, setIsPlaying] = useState(false)
   const animationRef = useRef<number | null>(null)
+  const [chartWidth, setChartWidth] = useState(600)
 
   const updateSlider = (value: number) => {
     setDisplayType('single')
@@ -30,17 +34,20 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
     setFilters((filters) => ({ ...filters, startDate, endDate }))
   }
 
+  // Measure container width
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownVisible(false)
-      }
+    if (isDropdownVisible && containerRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.contentRect.width > 0) {
+            setChartWidth(entry.contentRect.width)
+          }
+        }
+      })
+      resizeObserver.observe(containerRef.current)
+      return () => resizeObserver.disconnect()
     }
-    document.addEventListener('pointerdown', handleClickOutside)
-    return () => {
-      document.removeEventListener('pointerdown', handleClickOutside)
-    }
-  }, [])
+  }, [isDropdownVisible])
 
   useEffect(() => {
     function render() {
@@ -49,7 +56,7 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
 
         svg.selectAll('*').remove()
 
-        const width = 600
+        const width = chartWidth
         const height = 100
         const margin = { top: 5, right: 30, bottom: 30, left: 40 }
 
@@ -99,14 +106,14 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
           .attr('class', 'bar')
           .attr('x', (d) => x(d.date))
           .attr('y', (d) => y(d.count))
-          .attr('width', (d) => x(d3.timeMonth.offset(d.date, 1)) - x(d.date) - 1)
+          .attr('width', (d) => Math.max(0, x(d3.timeMonth.offset(d.date, 1)) - x(d.date) - 1))
           .attr('height', (d) => height - margin.bottom - y(d.count))
           .attr('fill', '#3b82f6')
           .attr('opacity', 0.75)
       }
     }
     render()
-  })
+  }, [chartWidth, db.Incidents])
 
   const handleResetRange = () => {
     setFilters((filters) => ({
@@ -176,7 +183,7 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
     } else if (!date1 && !date2) setFilters((filters) => ({ ...filters, startDate }))
   }
 
-  const yearButtons = []
+  const yearButtons: React.ReactNode[] = []
   for (let i = minYear; i <= maxYear; i++) {
     const date1Year = date1?.getUTCFullYear() || 0
     const date2Year = date2?.getUTCFullYear() || 0
@@ -207,12 +214,63 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
   const sliderMax = (maxYear - minYear + 1) * 12 - 1
   const sliderDisplayValue = date1 ? (date1.getUTCFullYear() - minYear) * 12 + date1.getUTCMonth() : 0
   const endDisplayValue = date2 ? (date2.getUTCFullYear() - minYear) * 12 + date2.getUTCMonth() + (date2.getDate() > 15 ? 1 : 0) : sliderMax
-  const sliderOffset = (sliderDisplayValue / sliderMax) * (600 - 70)
-  const sliderWidth = ((endDisplayValue - sliderDisplayValue) / sliderMax) * (600 - 70)
+
+  const graphInnerWidth = chartWidth - 70
+  const sliderLeftMargin = 40
+
+  const sliderOffset = (sliderDisplayValue / sliderMax) * graphInnerWidth
+  const sliderWidth = ((endDisplayValue - sliderDisplayValue) / sliderMax) * graphInnerWidth
+
+  const YearContent = () => (
+    <>
+      <label className="block pl-4 pt-4 text-xl font-semibold" htmlFor="year">
+        Fecha
+      </label>
+      <div className="flex flex-row flex-wrap p-2">{yearButtons}</div>
+      <div className="flex flex-col items-center gap-4 p-2 md:flex-row">
+        <div ref={containerRef} className={`relative h-[100px] ${isMobile ? 'w-full' : 'w-[600px]'}`}>
+          <svg width={chartWidth} height="100" className="absolute left-0 top-0 h-full w-full object-cover" ref={d3Ref}></svg>
+          <input
+            type="range"
+            min={0}
+            max={sliderMax}
+            step={1}
+            className="absolute right-[30px] top-0 h-full cursor-pointer opacity-0"
+            style={{ left: `${sliderLeftMargin}px`, width: `${graphInnerWidth}px` }}
+            value={sliderDisplayValue}
+            onChange={handleInputChange}
+          />
+          <div
+            style={{ transform: `translateX(${sliderOffset}px)`, left: `${sliderLeftMargin}px` }}
+            className="pointer-events-none absolute bottom-[30px] top-0 border border-black"
+          />
+          <div
+            style={{ transform: `translateX(${sliderOffset + sliderWidth / 2}px) scaleX(${sliderWidth})`, left: `${sliderLeftMargin}px` }}
+            className="pointer-events-none absolute bottom-[30px] top-0 w-[1px] bg-black/20"
+          />
+        </div>
+        <div className="flex flex-row">
+          <button
+            className="mb-1 rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
+            onClick={handleResetRange}
+          >
+            <LucideRotateCcw className="h-5 w-5" strokeWidth={1} />
+          </button>
+          <button
+            className="mb-1 ml-2 rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
+            onClick={handlePlay}
+          >
+            {isPlaying ? <LucideSquare /> : <LucidePlay />}
+          </button>
+        </div>
+      </div>
+    </>
+  )
+
   return (
-    <div className="leaflet-bar relative w-fit rounded">
+    <>
       <a
-        className="leaflet-control-zoom-in rounded"
+        className="leaflet-control-zoom-in"
         title={'Filtrar por año'}
         role="button"
         onClick={(e) => {
@@ -222,52 +280,15 @@ const YearControl: React.FC<YearControlProps> = ({ filters, setFilters, setDispl
       >
         <LucideCalendar className="h-5 w-5" strokeWidth={1} />
       </a>
-      {isDropdownVisible && (
-        <div
-          ref={dropdownRef}
-          className="leaflet-bar absolute -bottom-0.5 left-10 box-content w-max rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
-        >
-          <label className="block pl-4 pt-4 text-xl font-semibold" htmlFor="year">
-            Fecha
-          </label>
-          <div className="flex flex-row flex-wrap p-2">{yearButtons}</div>
-          <div className="flex items-center gap-4 p-2">
-            <div className="relative h-[100px] w-[600px]">
-              <svg width="600" height="100" className="absolute left-0 top-0 h-full w-full object-cover" ref={d3Ref}></svg>
-              <input
-                type="range"
-                min={0}
-                max={sliderMax}
-                step={1}
-                className="absolute left-[40px] right-[30px] top-0 h-full cursor-pointer opacity-0"
-                value={sliderDisplayValue}
-                onChange={handleInputChange}
-              />
-              <div
-                style={{ transform: `translateX(${sliderOffset}px)` }}
-                className="pointer-events-none absolute bottom-[30px] left-[40px] top-0 border border-black"
-              />
-              <div
-                style={{ transform: `translateX(${sliderOffset + sliderWidth / 2}px) scaleX(${sliderWidth})` }}
-                className="pointer-events-none absolute bottom-[30px] left-[40px] top-0 w-[1px] bg-black/20"
-              />
-            </div>
-            <button
-              className="mb-1 rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
-              onClick={handleResetRange}
-            >
-              <LucideRotateCcw className="h-5 w-5" strokeWidth={1} />
-            </button>
-            <button
-              className="mb-1 ml-2 rounded border-2 border-tint-01 bg-white px-2 py-1 text-lg hover:bg-tint-02 active:bg-tint-01"
-              onClick={handlePlay}
-            >
-              {isPlaying ? <LucideSquare /> : <LucidePlay />}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      <ResponsiveDropdown
+        isOpen={isDropdownVisible}
+        onClose={() => setDropdownVisible(false)}
+        desktopClassName="leaflet-bar absolute left-10 top-0.5 box-content w-max rounded bg-tint-02/80 shadow-lg backdrop-blur-sm"
+        snapPoints={[0.6]}
+      >
+        <YearContent />
+      </ResponsiveDropdown>
+    </>
   )
 }
 

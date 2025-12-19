@@ -11,7 +11,7 @@ const Navigation = () => {
     </Link>
   )
   return (
-    <div className="absolute top-0 z-[1000] flex h-5 w-full items-center gap-1 overflow-hidden border-b-2 border-gray-400 bg-white px-2 text-xs leading-none">
+    <div className="absolute top-0 z-[1000] flex h-5 w-full items-center gap-1 overflow-x-auto overflow-y-hidden border-b-2 border-gray-400 bg-white px-2 text-xs leading-none">
       <NavLink to="/" text="Mapa" />
       <NavLink to="/stats" text="Estadísticas" />
       {isLoggedIn && (

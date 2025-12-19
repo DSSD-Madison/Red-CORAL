@@ -1,5 +1,7 @@
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { LucideMapPinned } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { ResponsiveDropdown } from './ResponsiveDropdown'
 
 interface MarkerTypeControlProps {
   markerType: 'single' | 'group' | 'groupPie'
@@ -37,21 +39,26 @@ const GroupButton = ({
 )
 
 const MarkerTypeControl: React.FC<MarkerTypeControlProps> = ({ markerType, setMarkerType }) => {
+  const isMobile = useIsMobile()
   const [isDropdownVisible, setDropdownVisible] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setDropdownVisible(false)
-    }
-  }
+  const MarkerTypeContent = () => (
+    <div className={`${isMobile ? 'w-full' : 'leaflet-bar box-content rounded bg-tint-02/80 p-4 shadow-lg backdrop-blur-sm'}`}>
+      <div className="mb-2 text-base font-semibold">Tipo de marcador</div>
+      <div className={`flex gap-4 ${isMobile ? 'justify-around' : ''}`}>
+        <GroupButton displayName="Individual" id="single" imageSrc="individual-marker.png" markerType={markerType} setMarkerType={setMarkerType} />
 
-  useEffect(() => {
-    document.addEventListener('pointerdown', handleClickOutside)
-    return () => {
-      document.removeEventListener('pointerdown', handleClickOutside)
-    }
-  }, [])
+        <GroupButton displayName="Grupo" id="group" imageSrc="group-marker.png" markerType={markerType} setMarkerType={setMarkerType} />
+        <GroupButton
+          displayName="Gráfico circular"
+          id="groupPie"
+          imageSrc="group-pie-marker.png"
+          markerType={markerType}
+          setMarkerType={setMarkerType}
+        />
+      </div>
+    </div>
+  )
 
   return (
     <>
@@ -66,31 +73,14 @@ const MarkerTypeControl: React.FC<MarkerTypeControlProps> = ({ markerType, setMa
       >
         <LucideMapPinned className="h-5 w-5" strokeWidth={1} />
       </a>
-      {isDropdownVisible && (
-        <div ref={dropdownRef} className="absolute left-10 top-0.5 z-[1000]">
-          <div className="leaflet-bar box-content rounded bg-tint-02/80 p-4 shadow-lg backdrop-blur-sm">
-            <div className="mb-2 text-base font-semibold">Tipo de marcador</div>
-            <div className="flex gap-4">
-              <GroupButton
-                displayName="Individual"
-                id="single"
-                imageSrc="individual-marker.png"
-                markerType={markerType}
-                setMarkerType={setMarkerType}
-              />
-
-              <GroupButton displayName="Grupo" id="group" imageSrc="group-marker.png" markerType={markerType} setMarkerType={setMarkerType} />
-              <GroupButton
-                displayName="Gráfico circular"
-                id="groupPie"
-                imageSrc="group-pie-marker.png"
-                markerType={markerType}
-                setMarkerType={setMarkerType}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      <ResponsiveDropdown
+        isOpen={isDropdownVisible}
+        onClose={() => setDropdownVisible(false)}
+        desktopClassName="absolute left-10 top-0.5 z-[1000]"
+        snapPoints={[0.4]}
+      >
+        <MarkerTypeContent />
+      </ResponsiveDropdown>
     </>
   )
 }
