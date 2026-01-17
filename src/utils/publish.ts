@@ -20,7 +20,7 @@ export async function publishData(
   filters: filterType[]
 ): Promise<string> {
   const categories: Record<string, Category> = {} // Use Category type
-  const types: Record<string, Type> = {}       // Use Type type
+  const types: Record<string, Type> = {} // Use Type type
   const toRemove: { collectionName: string; docId: string }[] = []
   const readAt = new Date().toISOString()
 
@@ -54,21 +54,21 @@ export async function publishData(
     }
   })
 
-  // Prepare the full data object (for fullState.json)
+  // Prepare the full data object (for adminCheckpointState.json)
   const fullDataOut: Partial<DB> & { readAt: string } = {
     Categories: { ...categories }, // Create copies to avoid mutation issues
     Types: { ...types },
     Incidents: Object.fromEntries(allIncidents),
     readAt: readAt,
-  };
+  }
 
-  // Minify and upload fullState.json to Cloud Storage
-  const minifiedFullData = JSON.stringify(fullDataOut);
-  const fullStorageRef = ref(storage, 'fullState.json');
+  // Minify and upload adminCheckpointState.json to Cloud Storage
+  const minifiedFullData = JSON.stringify(fullDataOut)
+  const fullStorageRef = ref(storage, 'adminCheckpointState.json')
   await uploadString(fullStorageRef, minifiedFullData, 'raw', {
     contentType: 'application/json',
-    contentDisposition: 'attachment; filename="fullState.json"',
-  });
+    contentDisposition: 'attachment; filename="adminCheckpointState.json"',
+  })
 
   // Apply user-defined filters from the UI
   // Construct a temporary DB object for filter operations
@@ -77,10 +77,11 @@ export async function publishData(
     Types: types,
     Incidents: Object.fromEntries(allIncidents),
     filterBounds: {} as any, // filterBounds not used in filtering ops
-    readAt: readAt // readat not used either but trivial to add :)
+    readAt: readAt, // readat not used either but trivial to add :)
   }
-  const filteredIncidents = allIncidents.filter(([, incident]: [string, Incident]) =>
-    filters.every((filter: filterType) => filterOperations[filter.type](incident, filter.state, dbForFiltering) !== false) // thank god this part is easy at least
+  const filteredIncidents = allIncidents.filter(
+    ([, incident]: [string, Incident]) =>
+      filters.every((filter: filterType) => filterOperations[filter.type](incident, filter.state, dbForFiltering) !== false) // thank god this part is easy at least
   )
 
   // Prepare final output object for state.json (filtered)
@@ -104,7 +105,7 @@ export async function publishData(
     try {
       await deleteDoc(doc(firestore, item.collectionName, item.docId))
     } catch (error) {
-      console.error(`Failed to delete document ${item.docId} from ${item.collectionName}:`, error);
+      console.error(`Failed to delete document ${item.docId} from ${item.collectionName}:`, error)
     }
   }
 

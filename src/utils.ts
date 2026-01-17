@@ -130,7 +130,7 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
  */
 export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
   // If cache miss or admin mode, fetch from Firebase
-  const stateFile = isAdmin ? 'fullState.json' : 'state.json';
+  const stateFile = isAdmin ? 'adminCheckpointState.json' : 'state.json'
   const bytes = await getBytes(ref(storage, stateFile))
   const db: DB = JSON.parse(new TextDecoder().decode(bytes))
   const collectionNames = ['Categories', 'Types', 'Incidents']
