@@ -1,8 +1,9 @@
-import { DB } from 'types'
+import { DB, UserTier } from 'types'
 
 const DB_NAME = import.meta.env.VITE_FIREBASE_PROJECT_ID
 const STORE_NAME = 'dbState'
-const DB_KEY = 'currentState'
+const PUBLIC_KEY = 'publicState'
+const PAID_KEY = 'paidState'
 
 // Initialize IndexedDB
 function openDB(): Promise<IDBDatabase> {
@@ -28,14 +29,18 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 // Save DB state to IndexedDB
-export async function saveToIndexedDB(data: DB): Promise<void> {
+export async function saveToIndexedDB(data: DB, tier: UserTier): Promise<void> {
+  if (tier === 'admin') return // Don't cache admin data
+
   try {
     const db = await openDB()
     const transaction = db.transaction(STORE_NAME, 'readwrite')
     const store = transaction.objectStore(STORE_NAME)
 
+    const key = tier === 'public' ? PUBLIC_KEY : PAID_KEY
+
     return new Promise((resolve, reject) => {
-      const request = store.put(data, DB_KEY)
+      const request = store.put(data, key)
 
       request.onsuccess = () => {
         resolve()
@@ -55,14 +60,18 @@ export async function saveToIndexedDB(data: DB): Promise<void> {
 }
 
 // Get DB state from IndexedDB
-export async function getFromIndexedDB(): Promise<DB | null> {
+export async function getFromIndexedDB(tier: UserTier): Promise<DB | null> {
+  if (tier === 'admin') return null // No cache for admins
+
   try {
     const db = await openDB()
     const transaction = db.transaction(STORE_NAME, 'readonly')
     const store = transaction.objectStore(STORE_NAME)
 
+    const key = tier === 'public' ? PUBLIC_KEY : PAID_KEY
+
     return new Promise((resolve, reject) => {
-      const request = store.get(DB_KEY)
+      const request = store.get(key)
 
       request.onsuccess = () => {
         resolve(request.result || null)

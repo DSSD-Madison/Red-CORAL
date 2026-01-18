@@ -27,7 +27,7 @@ const About: React.FC = () => {
         <a href="https://madison.dssdglobal.org/" target="_blank" rel="noopener noreferrer">
           <img src="dssd_logo.svg" alt="DSSD logo" height={75} width={75} />
         </a>
-        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
+        <img src="/banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
       </div>
       <div className="rounded-lg bg-white p-4 shadow">
         <p>Red-CORAL es una plataforma para el seguimiento de incidentes criminales a lo largo del tiempo, con sede en Colombia.</p>

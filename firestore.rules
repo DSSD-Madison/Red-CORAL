@@ -7,7 +7,11 @@ service cloud.firestore {
     }
 
     match /Incidents/{incidentId} {
-      allow read: if request.auth != null && exists(/databases/$(database)/documents/user_permissions/$(request.auth.uid));
+      // Read access: authenticated users with isPaid=true OR admins
+      allow read: if request.auth != null &&
+                    exists(/databases/$(database)/documents/Permissions/$(request.auth.uid)) &&
+                    (getUserPermissions(request.auth.uid).isPaid == true ||
+                     getUserPermissions(request.auth.uid).isAdmin == true);
       // Admins punch through all rules
       allow write: if request.auth != null && getUserPermissions(request.auth.uid).isAdmin;
       // create: the 'country' field in the new incident data is contained in the user's 'countryCodes' array

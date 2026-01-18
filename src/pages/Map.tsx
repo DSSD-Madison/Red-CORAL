@@ -33,7 +33,7 @@ function SetInitialBounds() {
 }
 
 const Map: React.FC = () => {
-  const { addIncident, deleteIncident, editIncident, isLoggedIn: isAdmin, db } = useDB()
+  const { addIncident, deleteIncident, editIncident, isAdmin, db } = useDB()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -192,7 +192,7 @@ const Map: React.FC = () => {
           </div>
         )}
         <div>
-          <img src="banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
+          <img src="/banner.png" alt="Red CORAL logo" className="float-right block w-64 drop-shadow filter" />
         </div>
       </div>
     </div>

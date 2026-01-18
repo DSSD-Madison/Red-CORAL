@@ -70,13 +70,6 @@ export const initialFilterState = (index: number): reducerType => ({
         hiddenMunicipalities: [],
       },
     },
-    {
-      id: index + 4,
-      type: 'desc',
-      state: {
-        search: '',
-      },
-    },
   ],
 })
 
@@ -165,7 +158,7 @@ export const filterOperations: Record<filterType['type'], (incident: Incident, s
     }
   },
   desc: (incident: Incident, state: any) => {
-    if (!state) return undefined
+    if (!state || !incident.description) return undefined
     const { search } = state
     return incident.description.toLowerCase().includes(search.toLowerCase())
   },

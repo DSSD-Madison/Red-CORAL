@@ -4,7 +4,7 @@ export interface Coordinates {
 }
 
 export interface Incident {
-  description: string
+  description?: string
   dateString: string
   typeID: string[] | string
   location: Coordinates
@@ -25,6 +25,16 @@ export interface Type {
   categoryID: keyof DB['Categories']
   deleted?: boolean
 }
+
+export interface Permission {
+  isAdmin: boolean
+  isPaid?: boolean // Optional for backward compatibility
+  countryCodes: string[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type UserTier = 'public' | 'paid' | 'admin'
 
 export interface DB {
   Categories: {

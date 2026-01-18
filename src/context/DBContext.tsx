@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { initializeApp } from 'firebase/app'
 import { getAuth, Auth } from 'firebase/auth'
-import { getFirestore, Firestore, collection, doc } from 'firebase/firestore/lite'
+import { getFirestore, Firestore, collection, doc, getDoc } from 'firebase/firestore/lite'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
 import { addDocWithTimestamp, setDocWithTimestamp, deleteDocWithTimestamp, fetchData, calculateBounds } from 'utils'
 import { clearIndexedDBCache, getFromIndexedDB, saveToIndexedDB } from 'utils/indexedDB'
-import { Incident, DB } from 'types'
+import { Incident, DB, Permission, UserTier } from 'types'
 
 const CACHE_LIFETIME = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 interface DBContextType {
@@ -16,10 +16,13 @@ interface DBContextType {
   auth: Auth
   firestore: Firestore
   storage: FirebaseStorage
-  fetchData: (isAdmin: boolean) => Promise<void>
+  fetchData: (tier: UserTier) => Promise<void>
   clearCache: () => Promise<void>
   isLoggedIn: boolean
   isLoading: boolean
+  userTier: UserTier
+  permissions: Permission | null
+  isAdmin: boolean
 }
 
 const DBContext = createContext<DBContextType | undefined>(undefined)
@@ -55,11 +58,44 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(auth.currentUser !== null)
+  const [userTier, setUserTier] = useState<UserTier>('public')
+  const isAdmin = userTier === 'admin'
+  const [permissions, setPermissions] = useState<Permission | null>(null)
 
   useEffect(() => {
-    return auth.onAuthStateChanged((user) => {
+    return auth.onAuthStateChanged(async (user) => {
       setIsLoggedIn(!!user)
-      loadDB(!!user)
+
+      if (user) {
+        // Fetch user permissions
+        try {
+          const permDoc = await getDoc(doc(firestore, 'Permissions', user.uid))
+          if (permDoc.exists()) {
+            const perms = permDoc.data() as Permission
+            setPermissions(perms)
+
+            // Determine tier
+            const tier = perms.isAdmin ? 'admin' : perms.isPaid ? 'paid' : 'public'
+            setUserTier(tier)
+            await loadDB(tier)
+          } else {
+            // User authenticated but no permission doc
+            setPermissions(null)
+            setUserTier('public')
+            await loadDB('public')
+          }
+        } catch (error) {
+          console.error('Failed to fetch permissions:', error)
+          setPermissions(null)
+          setUserTier('public')
+          await loadDB('public')
+        }
+      } else {
+        // Not logged in
+        setPermissions(null)
+        setUserTier('public')
+        await loadDB('public')
+      }
     })
   }, [])
 
@@ -145,7 +181,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     try {
       setIsLoading(() => true)
       await clearIndexedDBCache()
-      await loadDB(isLoggedIn)
+      await loadDB(userTier)
     } catch (e) {
       console.error('Failed to clear cache:', e)
     } finally {
@@ -153,11 +189,11 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     }
   }
 
-  async function loadDB(isAdmin: boolean) {
+  async function loadDB(tier: UserTier) {
     setIsLoading(() => true)
     // read from cache if not admin
-    if (!isAdmin) {
-      const cachedData = await getFromIndexedDB()
+    if (tier !== 'admin') {
+      const cachedData = await getFromIndexedDB(tier)
       if (cachedData && cachedData.cachedAt) {
         setData(cachedData)
         db = cachedData
@@ -168,7 +204,7 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
       }
     }
     // If cache miss or admin mode, fetch from Firebase
-    fetchData(isAdmin, storage, firestore)
+    fetchData(tier, storage, firestore)
       .then((freshData) => {
         setData(freshData)
         db = freshData
@@ -184,11 +220,11 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
 
   useEffect(() => {
     db = data
-    // When data changes and user is not an admin, update the IndexedDB cache (shouldn't actually happen?)
-    if (!isLoggedIn && Object.keys(data.Incidents).length > 0) {
-      saveToIndexedDB(data).catch((e) => console.warn('Failed to update cache:', e))
+    // When data changes and user is not an admin, update the IndexedDB cache
+    if (userTier !== 'admin' && Object.keys(data.Incidents).length > 0) {
+      saveToIndexedDB(data, userTier).catch((e) => console.warn('Failed to update cache:', e))
     }
-  }, [data, isLoggedIn])
+  }, [data, userTier])
 
   const value: DBContextType = {
     db: data,
@@ -202,6 +238,9 @@ export const DBProvider: React.FC<{ children: React.ReactNode }> = (props) => {
     clearCache,
     isLoading,
     isLoggedIn,
+    isAdmin,
+    userTier,
+    permissions,
   }
 
   return <DBContext.Provider value={value}>{props.children}</DBContext.Provider>

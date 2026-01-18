@@ -88,6 +88,27 @@ export async function publishData(firestore: Firestore, storage: FirebaseStorage
     contentDisposition: 'attachment; filename="state.json"',
   })
 
+  // Prepare public data object (without descriptions)
+  const publicIncidents = filteredIncidents.map(([id, incident]) => {
+    const { description: _, ...incidentWithoutDescription } = incident
+    return [id, incidentWithoutDescription]
+  })
+
+  const publicOut: Partial<DB> & { readAt: string } = {
+    Categories: categories,
+    Types: types,
+    Incidents: Object.fromEntries(publicIncidents),
+    readAt: readAt,
+  }
+
+  // Minify and upload publicState.json
+  const minifiedPublicData = JSON.stringify(publicOut)
+  const publicStorageRef = ref(storage, 'publicState.json')
+  await uploadString(publicStorageRef, minifiedPublicData, 'raw', {
+    contentType: 'application/json',
+    contentDisposition: 'attachment; filename="publicState.json"',
+  })
+
   // Remove documents marked as deleted after successful upload
   for (const item of toRemove) {
     try {

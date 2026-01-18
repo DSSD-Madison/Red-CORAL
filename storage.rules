@@ -5,6 +5,10 @@ rules_version = '2';
 //    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
+		match /publicState.json {
+      allow write: if request.auth.token.email in ["admin@gmail.com", "frederic.masse@redcoralmap.org"];
+      allow read: if true;
+    }
 		match /state.json {
       allow write: if request.auth.token.email in ["admin@gmail.com", "frederic.masse@redcoralmap.org"];
       allow read: if true;

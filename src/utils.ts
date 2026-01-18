@@ -1,4 +1,4 @@
-import { Category, DB, FilterBounds, Incident, MarkerFilters } from 'types'
+import { Category, DB, FilterBounds, Incident, MarkerFilters, UserTier } from 'types'
 import {
   addDoc,
   setDoc,
@@ -121,20 +121,26 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
 
 /**
  * Fetches the data from the firebase storage and returns the database object
- * First attempts to retrieve from IndexedDB cache. If cache is not available or
- * if isAdmin is true, fetches from Firebase.
+ * Routes to appropriate state file based on user tier.
  *
- * if isAdmin is set, also queries firestore for documents with updateAt timestamps
+ * For admin tier, also queries firestore for documents with updateAt timestamps
  * after the readAt timestamp from firebase storage. Any documents having `deleted: true`
  * will not be returned in the database object.
  */
-export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
-  // If cache miss or admin mode, fetch from Firebase
-  const stateFile = isAdmin ? 'adminCheckpointState.json' : 'state.json'
+export async function fetchData(tier: UserTier, storage: FirebaseStorage, firestore: Firestore): Promise<DB> {
+  // Determine state file based on tier
+  const stateFileMap: Record<UserTier, string> = {
+    public: 'publicState.json',
+    paid: 'state.json',
+    admin: 'adminCheckpointState.json',
+  }
+  const stateFile = stateFileMap[tier]
   const bytes = await getBytes(ref(storage, stateFile))
   const db: DB = JSON.parse(new TextDecoder().decode(bytes))
   const collectionNames = ['Categories', 'Types', 'Incidents']
-  if (isAdmin) {
+
+  // Only admins get real-time updates from Firestore
+  if (tier === 'admin') {
     const readAtTimestamp = db.readAt ? Timestamp.fromDate(new Date(db.readAt)) : new Timestamp(0, 0)
     const q = where('updatedAt', '>', readAtTimestamp)
     const snaps = await Promise.all(collectionNames.map((col) => getDocs(query(collection(firestore, col), q))))
@@ -164,9 +170,9 @@ export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, fire
     cachedAt: new Date().toISOString(), // Store the last saved timestamp
   }
 
-  // If not in admin mode, save the fetched data to IndexedDB
-  if (!isAdmin) {
-    await saveToIndexedDB(finalData)
+  // Cache data for non-admin users
+  if (tier !== 'admin') {
+    await saveToIndexedDB(finalData, tier)
   }
 
   return finalData

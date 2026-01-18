@@ -71,7 +71,7 @@ const StatsDashboard: React.FC = () => {
         <a href="https://madison.dssdglobal.org/" target="_blank" rel="noopener noreferrer">
           <img src="dssd_logo.svg" alt="DSSD logo" height={75} width={75} />
         </a>
-        <img src="banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
+        <img src="/banner.png" alt="Red CORAL logo" className="w-full max-w-64" />
       </div>
       <StatisticsFilterBarOuter filters={filters.filters} dispatchFilters={dispatchFilters} />
       <div className="flex w-full flex-wrap justify-center gap-2">
