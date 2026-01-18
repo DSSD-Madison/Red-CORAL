@@ -48,10 +48,6 @@ const App: React.FC = () => {
     )
   }
 
-  function AdminAbout() {
-    return isLoggedIn ? <About /> : <Login auth={auth} />
-  }
-
   function StatsPage() {
     return (
       <Suspense fallback={<div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">Loading...</div>}>
@@ -77,7 +73,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Map />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/stats" element={<StatsPage />} />
-          <Route path="/about" element={<AdminAbout />} />
+          <Route path="/about" element={<About />} />
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
