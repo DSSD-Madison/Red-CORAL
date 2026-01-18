@@ -5,7 +5,7 @@ import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import prettierConfig from 'eslint-config-prettier'
 import { fileURLToPath } from 'url'
-import globals from "globals";
+import globals from 'globals'
 import path from 'path'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -13,14 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default [
   // Global ignores
   {
-    ignores: [
-      'dist/**',
-      'dist-ssr/**',
-      'node_modules/**',
-      '.vite/**',
-      'backend/**',
-      '*.local',
-    ],
+    ignores: ['dist/**', 'dist-ssr/**', 'node_modules/**', '.vite/**', 'backend/**', '*.local'],
   },
 
   // Base recommended config
@@ -43,7 +36,7 @@ export default [
         tsconfigRootDir: __dirname,
       },
       globals: {
-        ...globals.browser
+        ...globals.browser,
       },
     },
     plugins: {

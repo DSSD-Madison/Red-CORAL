@@ -1,12 +1,4 @@
-import {
-  collection,
-  getDocs,
-  doc,
-  deleteDoc,
-  Firestore,
-  QueryDocumentSnapshot,
-  DocumentData,
-} from 'firebase/firestore/lite'
+import { collection, getDocs, doc, deleteDoc, Firestore, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore/lite'
 import { ref, uploadString, getMetadata, FirebaseStorage } from 'firebase/storage'
 import { filterOperations, filterType } from '@/filters/filterReducer'
 import { DB, Incident, Category, Type } from '@/types' // Import Category and Type
@@ -14,11 +6,7 @@ import { DB, Incident, Category, Type } from '@/types' // Import Category and Ty
 /**
  * Fetches data, applies filters, and uploads to storage.
  */
-export async function publishData(
-  firestore: Firestore,
-  storage: FirebaseStorage,
-  filters: filterType[]
-): Promise<string> {
+export async function publishData(firestore: Firestore, storage: FirebaseStorage, filters: filterType[]): Promise<string> {
   const categories: Record<string, Category> = {} // Use Category type
   const types: Record<string, Type> = {} // Use Type type
   const toRemove: { collectionName: string; docId: string }[] = []
@@ -139,48 +127,51 @@ export async function countIncidentsToPublish(firestore: Firestore, filters: fil
   const types: Record<string, Type> = {}
 
   // Fetch Categories and Types for filtering context
-  for (const d of [{ target: categories, name: 'Categories' }, { target: types, name: 'Types' }]) {
-    const querySnapshot = await getDocs(collection(firestore, d.name));
+  for (const d of [
+    { target: categories, name: 'Categories' },
+    { target: types, name: 'Types' },
+  ]) {
+    const querySnapshot = await getDocs(collection(firestore, d.name))
     querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-      const data = doc.data();
+      const data = doc.data()
       if (data.deleted !== true) {
-        d.target[doc.id] = data as any;
+        d.target[doc.id] = data as any
       }
-    });
+    })
   }
 
   // Fetch Incidents
-  const incidentsSnapshot = await getDocs(collection(firestore, 'Incidents'));
-  const allIncidents: [string, Incident][] = [];
+  const incidentsSnapshot = await getDocs(collection(firestore, 'Incidents'))
+  const allIncidents: [string, Incident][] = []
   incidentsSnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-    const data = doc.data();
+    const data = doc.data()
     if (data.deleted !== true) {
-      allIncidents.push([doc.id, data as Incident]);
+      allIncidents.push([doc.id, data as Incident])
     }
-  });
+  })
 
   // Apply filters
   // Construct a temporary DB object for filter operations
   const dbForFiltering: DB = {
     Categories: categories, // Use fetched categories
-    Types: types,           // Use fetched types
+    Types: types, // Use fetched types
     Incidents: Object.fromEntries(allIncidents), // Use fetched incidents
     filterBounds: {} as any, // filterBounds not needed for filtering ops
     // readAt is optional and not needed here
-  };
+  }
 
   // Filter the fetched incidents using the provided filters and context
   const filteredIncidents = allIncidents.filter(([, incident]: [string, Incident]) => {
     return filters.every((filter: filterType) => {
-      const operation = filterOperations[filter.type];
+      const operation = filterOperations[filter.type]
       // Ensure the operation exists before calling it
       if (operation) {
-        return operation(incident, filter.state, dbForFiltering) !== false;
+        return operation(incident, filter.state, dbForFiltering) !== false
       }
-      console.warn(`Filter operation not found for type: ${filter.type}`);
-      return true; // Or false, depending on desired behavior for unknown filters
-    });
-  });
+      console.warn(`Filter operation not found for type: ${filter.type}`)
+      return true // Or false, depending on desired behavior for unknown filters
+    })
+  })
 
-  return filteredIncidents.length; // Return the count of incidents that pass the filters
+  return filteredIncidents.length // Return the count of incidents that pass the filters
 }

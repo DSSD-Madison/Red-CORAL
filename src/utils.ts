@@ -52,7 +52,7 @@ export function calculateBounds(incidents: { [key: string]: Incident }) {
     maxYear,
     minYear,
     locations,
-    totalCount
+    totalCount,
   }
 }
 
@@ -121,9 +121,9 @@ export function deleteDocWithTimestamp(ref: DocumentReference) {
 
 /**
  * Fetches the data from the firebase storage and returns the database object
- * First attempts to retrieve from IndexedDB cache. If cache is not available or 
+ * First attempts to retrieve from IndexedDB cache. If cache is not available or
  * if isAdmin is true, fetches from Firebase.
- * 
+ *
  * if isAdmin is set, also queries firestore for documents with updateAt timestamps
  * after the readAt timestamp from firebase storage. Any documents having `deleted: true`
  * will not be returned in the database object.
@@ -162,20 +162,22 @@ export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, fire
     ...db,
     filterBounds: calculateBounds(db.Incidents),
     cachedAt: new Date().toISOString(), // Store the last saved timestamp
-  };
+  }
 
   // If not in admin mode, save the fetched data to IndexedDB
   if (!isAdmin) {
-    await saveToIndexedDB(finalData);
+    await saveToIndexedDB(finalData)
   }
 
-  return finalData;
+  return finalData
 }
 
-export function filterIncidents(incidents: DB['Incidents'],
+export function filterIncidents(
+  incidents: DB['Incidents'],
   filters: MarkerFilters,
   types: DB['Types'],
-  editID: keyof DB['Incidents'] | null): [string, Incident][] {
+  editID: keyof DB['Incidents'] | null
+): [string, Incident][] {
   return Object.entries(incidents).filter(
     ([id, incident]) =>
       (!filters.startDate || new Date(incident.dateString) >= filters.startDate) &&
@@ -184,11 +186,9 @@ export function filterIncidents(incidents: DB['Incidents'],
       !filters.hideDepartments.includes(`${incident.country} - ${incident.department}`) &&
       !filters.hideMunicipalities.includes(incident.municipality) &&
       (Array.isArray(incident.typeID)
-        ? (incident.typeID.some((typeID) => !filters.hideTypes.includes(typeID)) &&
-          incident.typeID.some((typeID) => !filters.hideCategories.includes(types[typeID].categoryID)))
-        : (!filters.hideTypes.includes(incident.typeID) &&
-          !filters.hideCategories.includes(types[incident.typeID].categoryID))
-      ) &&
+        ? incident.typeID.some((typeID) => !filters.hideTypes.includes(typeID)) &&
+          incident.typeID.some((typeID) => !filters.hideCategories.includes(types[typeID].categoryID))
+        : !filters.hideTypes.includes(incident.typeID) && !filters.hideCategories.includes(types[incident.typeID].categoryID)) &&
       (editID == null || id != editID)
   )
 }
@@ -212,7 +212,7 @@ export function typeIDtoCategory(data: DB, typeID: string | string[]): Category 
   if (Array.isArray(typeID)) {
     return data.Categories[data.Types[typeID[0]].categoryID]
   }
-  return data.Categories[data.Types[typeID].categoryID];
+  return data.Categories[data.Types[typeID].categoryID]
 }
 
 export function typeIDtoCategoryID(data: DB, typeID: string | string[]): keyof DB['Categories'] {

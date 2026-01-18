@@ -1,9 +1,9 @@
 // https://github.com/n3r4zzurr0/react-range-slider-input/issues/7
-declare module "react-range-slider-input" {
-  import type { FC } from "react"
+declare module 'react-range-slider-input' {
+  import type { FC } from 'react'
 
-  export type Orientation = "horizontal" | "vertical"
-  export type Step = number | "any"
+  export type Orientation = 'horizontal' | 'vertical'
+  export type Step = number | 'any'
 
   export type InputEvent = [number, number]
   export type InputEventHandler = (event: InputEvent) => void
@@ -35,7 +35,7 @@ declare module "react-range-slider-input" {
      * Number that specifies the amount by which the slider value(s) will change upon user interaction.
      * Other than numbers, the value of step can be a string value of any.
      * */
-    step?: number | "any"
+    step?: number | 'any'
 
     /* @default [25, 75]
      * Array of two numbers that specify the default values of the lower and upper offsets of the range slider element respectively.

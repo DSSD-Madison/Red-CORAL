@@ -11,13 +11,13 @@ env:
   VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
   VITE_STADIA_KEY: ${{ secrets.VITE_STADIA_KEY }}
   VITE_ANALYTICS_URL: ${{ secrets.VITE_ANALYTICS_URL }}
-  VITE_REPOSITORY_URL: "https://github.com/DSSD-Madison/Red-CORAL"
+  VITE_REPOSITORY_URL: 'https://github.com/DSSD-Madison/Red-CORAL'
 'on': pull_request
 jobs:
   build_and_preview:
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
     runs-on: ubuntu-latest
-    concurrency: 
+    concurrency:
       group: 'firebase-hosting-pull-request-${{ github.event.pull_request.number }}'
       cancel-in-progress: true
     steps:

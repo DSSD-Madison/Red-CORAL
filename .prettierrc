@@ -5,9 +5,7 @@
   "semi": false,
   "bracketSpacing": true,
   "jsxBracketSameLine": false,
-  "plugins": [
-    "prettier-plugin-tailwindcss"
-  ],
+  "plugins": ["prettier-plugin-tailwindcss"],
   "printWidth": 150,
   "proseWrap": "always"
 }

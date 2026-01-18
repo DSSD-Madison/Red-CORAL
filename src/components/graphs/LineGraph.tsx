@@ -134,16 +134,14 @@ function parseDateKey(key: string, groupBy: string): Date {
   switch (groupBy) {
     case 'year':
       return new Date(Number(key), 0, 1)
-    case 'quarter':
-      {
-        const [yearQ, q] = key.split('-T')
-        return new Date(Number(yearQ), (Number(q) - 1) * 3, 1)
-      }
-    case 'month':
-      {
-        const [yearM, month] = key.split('-')
-        return new Date(Number(yearM), Number(month) - 1, 1)
-      }
+    case 'quarter': {
+      const [yearQ, q] = key.split('-T')
+      return new Date(Number(yearQ), (Number(q) - 1) * 3, 1)
+    }
+    case 'month': {
+      const [yearM, month] = key.split('-')
+      return new Date(Number(yearM), Number(month) - 1, 1)
+    }
     case 'week':
       return d3.timeParse('%Y-%W')(key) || new Date()
     case 'day':

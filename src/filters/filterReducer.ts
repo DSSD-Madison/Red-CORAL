@@ -8,7 +8,11 @@ import LatLongFilter, { calculateDistance } from '@/components/filters/LatLongFi
 import NOTFilter, { NOTFilterState } from '@/components/filters/NOTFilter'
 import ORFilter, { ORFilterState } from '@/components/filters/ORFilter'
 
-export type filterDispatchType = { type: 'RESET_FILTERS' } | { type: 'REMOVE_FILTER', payload: { id: number } } | { type: 'ADD_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> } | { type: 'REPLACE_STATE', payload: reducerType }
+export type filterDispatchType =
+  | { type: 'RESET_FILTERS' }
+  | { type: 'REMOVE_FILTER'; payload: { id: number } }
+  | { type: 'ADD_FILTER' | 'UPDATE_FILTER'; payload: Partial<filterType> }
+  | { type: 'REPLACE_STATE'; payload: reducerType }
 
 export type filterProps = {
   id: number
@@ -28,52 +32,52 @@ type reducerType = {
 }
 
 export const initialFilterState = (index: number): reducerType => ({
-  "index": index + 5,
-  "filters": [
+  index: index + 5,
+  filters: [
     {
-      "id": index,
-      "type": "category",
-      "state": {
-        "hiddenCategories": [],
-        "hiddenTypes": []
-      }
+      id: index,
+      type: 'category',
+      state: {
+        hiddenCategories: [],
+        hiddenTypes: [],
+      },
     },
     {
-      "id": index + 1,
-      "type": "date",
-      "state": {
-        "date1": "",
-        "date2": "",
-        "selectedDateFilter": "es entre años",
-        "isDateFilterSelectOpen": false
-      }
+      id: index + 1,
+      type: 'date',
+      state: {
+        date1: '',
+        date2: '',
+        selectedDateFilter: 'es entre años',
+        isDateFilterSelectOpen: false,
+      },
     },
     {
-      "id": index + 2,
-      "type": "latlong",
-      "state": {
-        "latitude": "",
-        "longitude": "",
-        "radius": ""
-      }
+      id: index + 2,
+      type: 'latlong',
+      state: {
+        latitude: '',
+        longitude: '',
+        radius: '',
+      },
     },
     {
-      "id": index + 3,
-      "type": "country",
-      "state": {
-        "hiddenCountries": [],
-        "hiddenDepartments": [],
-        "hiddenMunicipalities": []
-      }
+      id: index + 3,
+      type: 'country',
+      state: {
+        hiddenCountries: [],
+        hiddenDepartments: [],
+        hiddenMunicipalities: [],
+      },
     },
     {
-      "id": index + 4,
-      "type": "desc",
-      "state": {
-        "search": ""
-      }
-    }
-  ]
+      id: index + 4,
+      type: 'desc',
+      state: {
+        search: '',
+      },
+    },
+  ],
 })
 
 export const filterReducer = (state: reducerType, action: filterDispatchType): reducerType => {
@@ -104,25 +108,27 @@ export const filterReducer = (state: reducerType, action: filterDispatchType): r
   }
 }
 
-export const filterComponents: Record<filterType["type"], React.FC<filterProps>> = {
+export const filterComponents: Record<filterType['type'], React.FC<filterProps>> = {
   category: CategoryFilter,
   country: CountryFilter,
   date: DateFilter,
   desc: DescFilter,
   latlong: LatLongFilter,
   not: NOTFilter,
-  or: ORFilter
+  or: ORFilter,
 }
 
 // filters return true if the incident should be shown, false if it should be hidden, and undefined if the filter isn't initialized yet
 // if one uninitialized filter returns true for everything, that produces bad behavior in the NOT (false for everything) and OR filters (true for everything)
-export const filterOperations: Record<filterType["type"], (incident: Incident, state: any, db: DB) => boolean | undefined> = {
+export const filterOperations: Record<filterType['type'], (incident: Incident, state: any, db: DB) => boolean | undefined> = {
   category: (incident: Incident, state: any, db: DB) => {
     if (!state) return undefined
-    const { hiddenCategories, hiddenTypes } = state as { hiddenCategories: string[], hiddenTypes: string[] }
+    const { hiddenCategories, hiddenTypes } = state as { hiddenCategories: string[]; hiddenTypes: string[] }
     if (Array.isArray(incident.typeID)) {
-      return incident.typeID.some(typeID => !hiddenCategories.includes(db.Types[typeID].categoryID as string)) &&
-        incident.typeID.some(typeID => !hiddenTypes.includes(typeID));
+      return (
+        incident.typeID.some((typeID) => !hiddenCategories.includes(db.Types[typeID].categoryID as string)) &&
+        incident.typeID.some((typeID) => !hiddenTypes.includes(typeID))
+      )
     }
     return !hiddenCategories.includes(db.Types[incident.typeID].categoryID as string) && !hiddenTypes.includes(incident.typeID)
   },
@@ -177,14 +183,14 @@ export const filterOperations: Record<filterType["type"], (incident: Incident, s
     }
     return true
   },
-  not: (incident: Incident, state: NOTFilterState["state"], db: DB) => {
+  not: (incident: Incident, state: NOTFilterState['state'], db: DB) => {
     if (!state || state.filters.length === 0) return undefined
     // return false if any of the filters return true
     return state.filters.some((filter) => filterOperations[filter.type](incident, filter.state, db) !== true)
   },
-  or: (incident: Incident, state: ORFilterState["state"], db: DB) => {
+  or: (incident: Incident, state: ORFilterState['state'], db: DB) => {
     if (!state || state.filters.length === 0) return undefined
     // return true if any of the filters return true
     return state.filters.some((filter) => filterOperations[filter.type](incident, filter.state, db) !== false)
-  }
+  },
 }

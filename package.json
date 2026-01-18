@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
     "preview": "vite preview",
     "firebase": "firebase"
   },

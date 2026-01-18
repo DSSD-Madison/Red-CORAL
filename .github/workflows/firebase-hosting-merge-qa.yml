@@ -11,7 +11,7 @@ env:
   VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
   VITE_STADIA_KEY: ${{ secrets.VITE_STADIA_KEY }}
   VITE_ANALYTICS_URL: ${{ secrets.VITE_ANALYTICS_URL }}
-  VITE_REPOSITORY_URL: "https://github.com/DSSD-Madison/Red-CORAL"
+  VITE_REPOSITORY_URL: 'https://github.com/DSSD-Madison/Red-CORAL'
 'on':
   push:
     branches:
@@ -19,7 +19,7 @@ env:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    concurrency: 
+    concurrency:
       group: 'firebase-hosting-merge-qa'
       cancel-in-progress: true
     steps:
