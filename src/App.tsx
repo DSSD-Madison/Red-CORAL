@@ -14,7 +14,7 @@ const PublishAdmin = lazy(() => import('@/pages/PublishAdmin'))
 
 function Layout() {
   return (
-    <div className="relative h-screen max-h-screen pt-5">
+    <div className="relative h-screen max-h-screen pt-12">
       <Navigation />
       <Outlet />
       <DBLoadingOverlay />
@@ -73,9 +73,9 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Map />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/about" element={<AdminAbout />} />
           <Route path="/admin" element={<Navigate to="/login" />} />
