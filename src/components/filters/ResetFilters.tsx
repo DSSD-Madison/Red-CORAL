@@ -1,8 +1,8 @@
 import { LucideRotateCcw } from 'lucide-react'
 import { filterDispatchType } from '@/filters/filterReducer'
-import { useState } from 'react'
+import { Dispatch, useState } from 'react'
 
-const ResetFilters = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> }) => {
+const ResetFilters = ({ dispatch }: { dispatch: Dispatch<filterDispatchType> }) => {
   const [arrowDeg, setArrowDeg] = useState(0)
   return (
     <button

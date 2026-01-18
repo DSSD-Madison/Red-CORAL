@@ -1,5 +1,5 @@
 import L, { LatLngTuple, PointTuple } from 'leaflet'
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { Dispatch, forwardRef, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { useMap, Marker as LeafletMarker, Tooltip } from 'react-leaflet'
 import { DB, Incident, MarkerFilters } from 'types'
 import { filterIncidents, typeIDtoCategory, typeIDtoCategoryID, typeIDtoTypeName } from 'utils'
@@ -9,10 +9,10 @@ import { db } from '@/context/DBContext' // still need to import for the marker 
 interface IncidentLayerProps {
   data: DB // not using context here so we can be fed whatever points we want
   selectedIncidentID: keyof DB['Incidents'] | null
-  setSelectedIncidentID: React.Dispatch<React.SetStateAction<string | null>>
+  setSelectedIncidentID: Dispatch<SetStateAction<string | null>>
   isAdmin: boolean
   tmpLocation: Incident['location'] | null
-  setTmpLocation: React.Dispatch<React.SetStateAction<Incident['location'] | null>>
+  setTmpLocation: Dispatch<SetStateAction<Incident['location'] | null>>
   tmpSelected: boolean
   filters: MarkerFilters
   editID: keyof DB['Incidents'] | null

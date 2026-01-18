@@ -100,7 +100,7 @@ export default function PieChart({ incidents }: { incidents: [string, Incident][
       }
     }
     render()
-  }, [incidents, cleanData, d3ColorScale, db]) // Added cleanData, d3ColorScale, db to dependencies
+  }, [incidents, categories, d3ColorScale, db]) // Added cleanData, d3ColorScale, db to dependencies
 
   return (
     <div ref={containerRef} className="relative flex max-h-72 min-w-[270px] flex-1 flex-col rounded-lg bg-neutral-100">

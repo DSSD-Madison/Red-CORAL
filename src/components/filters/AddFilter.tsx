@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { Dispatch, useRef, useState } from 'react'
 import { filterDispatchType, filterType } from '@/filters/filterReducer'
 import { LucideBlend, LucideCalendar, LucideCircleOff, LucideGlobe, LucideMapPin, LucidePlus, LucideTags, LucideText } from 'lucide-react'
 import {
@@ -66,7 +66,7 @@ const possibleFilters: FilterInfo[] = [
   },
 ]
 
-function NewFilterButton({ filter, dispatch }: { filter: FilterInfo; dispatch: React.Dispatch<filterDispatchType> }) {
+function NewFilterButton({ filter, dispatch }: { filter: FilterInfo; dispatch: Dispatch<filterDispatchType> }) {
   return (
     <button
       className="block w-full rounded-md px-2 py-1 text-left hover:bg-black/5"
@@ -81,7 +81,7 @@ function NewFilterButton({ filter, dispatch }: { filter: FilterInfo; dispatch: R
   )
 }
 
-const AddFilter = ({ dispatch }: { dispatch: React.Dispatch<filterDispatchType> }) => {
+const AddFilter = ({ dispatch }: { dispatch: Dispatch<filterDispatchType> }) => {
   const [isOpen, setIsOpen] = useState(false)
   const arrowRef = useRef(null)
 

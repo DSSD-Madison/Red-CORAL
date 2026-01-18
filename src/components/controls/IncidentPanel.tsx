@@ -1,6 +1,6 @@
 import { Incident } from 'types'
 import { useMap } from 'react-leaflet'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AutocompleteSearch from 'components/AutocompleteSearch'
 import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
 import { formatDateString, typeIDtoCategory, typeIDtoTypeName } from '@/utils'

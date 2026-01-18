@@ -1,4 +1,4 @@
-import { MutableRefObject, ReactNode, useRef, useState } from 'react'
+import { Dispatch, MutableRefObject, ReactNode, useRef, useState } from 'react'
 import {
   useFloating,
   offset,
@@ -32,7 +32,7 @@ const BaseFilter = ({
   text: string
   children: ReactNode
   scrollOverflow?: boolean
-  dispatch: React.Dispatch<filterDispatchType>
+  dispatch: Dispatch<filterDispatchType>
   id: number
 }) => {
   const [isOpen, setIsOpen] = useState(false)

@@ -24,20 +24,24 @@ const ORFilter = ({ id, dispatch, state }: ORFilterState) => {
         })
         break
       case 'UPDATE_FILTER':
-        const newState = {
-          ...eState,
-          filters: eState.filters.map((filter) => (filter.id === action.payload.id ? { ...filter, ...action.payload } : filter)),
+        {
+          const newState = {
+            ...eState,
+            filters: eState.filters.map((filter) => (filter.id === action.payload.id ? { ...filter, ...action.payload } : filter)),
+          }
+          dispatch({ type: 'UPDATE_FILTER', payload: { id, state: newState } })
+          break
         }
-        dispatch({ type: 'UPDATE_FILTER', payload: { id, state: newState } })
-        break
       case 'ADD_FILTER':
-        const newId = eState.index
-        const newFilter = { id: newId, ...action.payload } as filterType
-        dispatch({
-          type: 'UPDATE_FILTER',
-          payload: { id, state: { index: newId + 1, filters: [...eState.filters, newFilter] } },
-        })
-        break
+        {
+          const newId = eState.index
+          const newFilter = { id: newId, ...action.payload } as filterType
+          dispatch({
+            type: 'UPDATE_FILTER',
+            payload: { id, state: { index: newId + 1, filters: [...eState.filters, newFilter] } },
+          })
+          break
+        }
     }
   }
 

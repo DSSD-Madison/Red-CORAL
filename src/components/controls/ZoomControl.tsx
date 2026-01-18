@@ -3,13 +3,14 @@ import Control from 'react-leaflet-custom-control'
 import { MarkerFilters } from 'types'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '../../constants'
 import { LucideMinus, LucidePlus, LucideRotateCcw } from 'lucide-react'
+import { Dispatch, SetStateAction } from 'react'
 
 interface ZoomControlProps {
   zoomInTitle?: string
   zoomOutTitle?: string
   zoomResetTitle?: string
   zoomLevel: number
-  setFilters: React.Dispatch<React.SetStateAction<MarkerFilters>>
+  setFilters: Dispatch<SetStateAction<MarkerFilters>>
 }
 
 function ZoomControl(props: ZoomControlProps) {

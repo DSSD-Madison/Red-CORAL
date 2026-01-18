@@ -64,7 +64,7 @@ const AdminCRUD: React.FC = () => {
       setShowAddEntity(false)
 
       setIsLoading(false)
-    } catch (error) {
+    } catch {
       window.alert('Error al agregar')
       setIsLoading(false)
     }
@@ -100,7 +100,7 @@ const AdminCRUD: React.FC = () => {
         delete data[entityType][entityId]
         setIsLoading(false)
       }
-    } catch (error) {
+    } catch {
       window.alert('Error al eliminar ' + entityType.toLowerCase())
       setIsLoading(false)
     }
@@ -141,7 +141,7 @@ const AdminCRUD: React.FC = () => {
       setModifyEntityId(null)
 
       // call showEntities to fetch and display updated data[entityType]
-    } catch (error) {
+    } catch {
       window.alert('Error al modificar ' + entityType.toLowerCase())
       setIsLoading(false)
     }
@@ -202,7 +202,7 @@ const AdminCRUD: React.FC = () => {
                   catName2 = data.Categories[(entity2 as Type).categoryID].name
                 }
                 return catName1.localeCompare(catName2)
-              } catch (e) {
+              } catch {
                 return 0
               }
             })

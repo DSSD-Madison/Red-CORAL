@@ -42,7 +42,7 @@ const AutocompleteSearch: React.FC<HomeProps> = ({
   const [options, setOptions] = useState<PeliasGeoJSONFeature[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [localStrVal, setLocalStrVal] = useState<string>('')
-  const [queryDebounce, setQueryDebounce] = useState<NodeJS.Timeout | null>(null)
+  const [queryDebounce, setQueryDebounce] = useState<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   function getName(feat: PeliasGeoJSONFeature) {

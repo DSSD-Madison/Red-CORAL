@@ -142,17 +142,17 @@ export async function fetchData(isAdmin: boolean, storage: FirebaseStorage, fire
       const col = collectionNames[i]
       const snap = snaps[i]
       snap.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-        //@ts-ignore
+        // @ts-expect-error indexing weirdness
         db[col][doc.id] = doc.data()
       })
     }
   }
   for (let col of collectionNames) {
-    //@ts-ignore
+    // @ts-expect-error indexing weirdness
     for (let key in db[col]) {
-      //@ts-ignore
+      // @ts-expect-error indexing weirdness
       if (db[col][key].deleted) {
-        //@ts-ignore
+        // @ts-expect-error indexing weirdness
         delete db[col][key]
       }
     }

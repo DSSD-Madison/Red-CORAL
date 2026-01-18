@@ -1,6 +1,7 @@
 import { filterType, filterDispatchType } from '@/filters/filterReducer'
 import ResetFilters from './filters/ResetFilters'
 import StatisticsFilterBarContents from './StatisticsFilterBarContents'
+import React from 'react'
 
 type statsFilterProps = {
   filters: filterType[]

@@ -1,5 +1,6 @@
 import { useDB } from '@/context/DBContext'
 import { LucideTrash } from 'lucide-react'
+import React from 'react'
 
 interface ActivityTypeSelectorProps {
   categoryID: string | undefined

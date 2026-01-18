@@ -23,14 +23,15 @@ const NOTFilter = ({ id, dispatch, state }: NOTFilterState) => {
           payload: { id, state: { ...eState, filters: eState.filters.filter((filter) => filter.id !== action.payload.id) } },
         })
         break
-      case 'UPDATE_FILTER':
+      case 'UPDATE_FILTER': {
         const newState = {
           ...eState,
           filters: eState.filters.map((filter) => (filter.id === action.payload.id ? { ...filter, ...action.payload } : filter)),
         }
         dispatch({ type: 'UPDATE_FILTER', payload: { id, state: newState } })
         break
-      case 'ADD_FILTER':
+      }
+      case 'ADD_FILTER': {
         const newId = eState.index
         const newFilter = { id: newId, ...action.payload } as filterType
         dispatch({
@@ -38,6 +39,7 @@ const NOTFilter = ({ id, dispatch, state }: NOTFilterState) => {
           payload: { id, state: { index: newId + 1, filters: [...eState.filters, newFilter] } },
         })
         break
+      }
     }
   }
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useMap } from 'react-leaflet'
 import { LatLngBoundsExpression, LatLngTuple } from 'leaflet'
 
-const SearchControl: React.FC<{}> = () => {
+const SearchControl: React.FC = () => {
   const map = useMap()
   const [bounds, setBounds] = useState<number[] | undefined>(undefined)
   const [isDropdownVisible, setDropdownVisible] = useState(false)
