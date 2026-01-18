@@ -82,7 +82,7 @@ const Navigation = () => {
       )}
       <div className="flex-grow" />
       <ExternalLink href="https://redcoralmap.org/guia-metodologia" text="Guía de Metodología" />
-      {isAdmin && <NavLink to="/about" text="Acerca de" isActive={pathname === '/about'} />}
+      <NavLink to="/about" text="Acerca de" isActive={pathname === '/about'} />
       {isLoggedIn ? (
         <>
           <button
