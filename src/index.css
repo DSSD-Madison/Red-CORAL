@@ -75,3 +75,15 @@ body {
     transform: rotate(1turn);
   }
 }
+
+/* Mobile Navigation Popover */
+#mobile-nav-menu {
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+  }
+  &:popover-open::backdrop {
+    opacity: 1;
+  }
+}
