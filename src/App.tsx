@@ -11,6 +11,7 @@ import DBLoadingOverlay from './components/DBLoadingOverlay'
 const AdminCRUD = lazy(() => import('@/pages/AdminCRUD'))
 const StatsDashboard = lazy(() => import('@/pages/StatsDashboard'))
 const PublishAdmin = lazy(() => import('@/pages/PublishAdmin'))
+const Pricing = lazy(() => import('@/pages/Pricing'))
 
 function Layout() {
   return (
@@ -74,6 +75,14 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/about" element={<About />} />
+          <Route
+            path="/pricing"
+            element={
+              <Suspense fallback={<div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">Loading...</div>}>
+                <Pricing />
+              </Suspense>
+            }
+          />
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
