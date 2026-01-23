@@ -32,6 +32,9 @@ export interface Permission {
   countryCodes: string[]
   createdAt?: string
   updatedAt?: string
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
+  subscriptionStatus?: 'active' | 'trialing' | 'past_due' | 'canceled'
 }
 
 export type UserTier = 'public' | 'paid' | 'admin'
