@@ -14,6 +14,7 @@ import Control from 'react-leaflet-custom-control'
 import { INITIAL_BOUNDS, INITIAL_ZOOM } from '@/constants'
 import { useLocation } from 'react-router'
 import { useDB } from '../context/DBContext'
+import { getBytes, ref as storageRef } from 'firebase/storage'
 
 function SetInitialBounds() {
   const location = useLocation()
@@ -33,7 +34,7 @@ function SetInitialBounds() {
 }
 
 const Map: React.FC = () => {
-  const { addIncident, deleteIncident, editIncident, isAdmin, db } = useDB()
+  const { addIncident, deleteIncident, editIncident, isAdmin, db, storage } = useDB()
   const apiKey = import.meta.env.VITE_STADIA_KEY
   const maxBounds: LatLngBoundsLiteral = [
     // Southwest coordinate
@@ -57,6 +58,7 @@ const Map: React.FC = () => {
   const [markerDisplayType, setMarkerDisplayType] = useState<'single' | 'group' | 'groupPie'>('groupPie')
   const [location, setLocation] = useState<Incident['location'] | null>(null)
   const [editID, setEditID] = useState<string | null>(null)
+  const [isDownloadingCheckpoint, setIsDownloadingCheckpoint] = useState(false)
 
   async function submitIncident(
     dateString: Incident['dateString'],
@@ -110,6 +112,33 @@ const Map: React.FC = () => {
     setSelectedIncidentID(null)
     setTmpSelected(false)
     setLocation(null)
+  }
+
+  async function downloadAdminCheckpoint() {
+    if (isDownloadingCheckpoint) return
+
+    try {
+      setIsDownloadingCheckpoint(true)
+
+      const fileRef = storageRef(storage, 'adminCheckpointState.json')
+      const bytes = await getBytes(fileRef)
+      const blob = new Blob([bytes], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'adminCheckpointState.json'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('No se pudo descargar adminCheckpointState.json:', error)
+      alert('No se pudo descargar la copia de datos')
+    } finally {
+      setIsDownloadingCheckpoint(false)
+    }
   }
 
   return (
@@ -183,12 +212,13 @@ const Map: React.FC = () => {
             >
               Crear incidente
             </button>
-            <a
-              href="https://firebasestorage.googleapis.com/v0/b/redcoralmap.appspot.com/o/adminCheckpointState.json?alt=media"
-              className="block rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
+            <button
+              onClick={downloadAdminCheckpoint}
+              disabled={isDownloadingCheckpoint}
+              className="block rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Guardar copia de datos
-            </a>
+              {isDownloadingCheckpoint ? 'Descargando...' : 'Guardar copia de datos'}
+            </button>
           </div>
         )}
         <div>
