@@ -50,7 +50,7 @@ const ComingSoonModal = () => {
         {/* Logo */}
         <div className="mb-6 flex justify-center">
           <img
-            src="/dssd_logo.svg"
+            src="/banner.png"
             alt="RED-Coral Logo"
             className="h-24 w-auto"
           />
