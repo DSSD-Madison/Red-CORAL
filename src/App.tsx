@@ -7,6 +7,7 @@ import Login from 'pages/Login'
 import About from 'pages/About'
 import Navigation from 'components/Navigation'
 import DBLoadingOverlay from './components/DBLoadingOverlay'
+import ComingSoonModal from './components/ComingSoonModal'
 
 const AdminCRUD = lazy(() => import('@/pages/AdminCRUD'))
 const StatsDashboard = lazy(() => import('@/pages/StatsDashboard'))
@@ -68,6 +69,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      <ComingSoonModal />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Map />} />
