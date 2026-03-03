@@ -1,0 +1,15 @@
+# Compiled JavaScript files
+lib/
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Firebase service account (if used)
+*.json
+!package.json
+!tsconfig.json
+!package-lock.json

@@ -2,7 +2,7 @@ import { useDB } from '@/context/DBContext'
 import { signOut } from 'firebase/auth'
 import { Link, useLocation } from 'react-router'
 import React, { useState, useRef } from 'react'
-import { LucideBarChart3, LucideExternalLink, LucideMap, LucideUser, LucideChevronDown, LucideMenu, LucideX } from 'lucide-react'
+import { LucideBarChart3, LucideExternalLink, LucideMap, LucideUser, LucideChevronDown, LucideMenu, LucideX, LucideStar } from 'lucide-react'
 import {
   useFloating,
   offset,
@@ -89,7 +89,8 @@ const MobileExternalLink = ({ href, text, onClick }: { href: string; text: strin
 )
 
 const Navigation = () => {
-  const { isLoggedIn, isAdmin, auth } = useDB()
+  const { isLoggedIn, isAdmin, auth, userTier } = useDB()
+  const showSubscribeLink = userTier !== 'paid' && userTier !== 'admin'
   const { pathname } = useLocation()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
@@ -141,6 +142,9 @@ const Navigation = () => {
         <div className="flex-grow" />
         <ExternalLink href="https://redcoralmap.org/guia-metodologia" text="Guía de Metodología" />
         <NavLink to="/about" text="Acerca de" isActive={pathname === '/about'} />
+        {showSubscribeLink && (
+          <NavLink to="/pricing" text="Suscribirse" icon={<LucideStar height={15} width={15} />} isActive={pathname === '/pricing'} />
+        )}
         {isLoggedIn ? (
           <>
             <button
@@ -188,8 +192,7 @@ const Navigation = () => {
       {/* Mobile Menu Button */}
       <div className="flex flex-1 justify-end md:hidden">
         <button
-          // @ts-expect-error - popoverTarget is valid HTML but not yet in React types
-          popovertarget="mobile-nav-menu"
+          popoverTarget="mobile-nav-menu"
           className="flex items-center justify-center rounded-lg p-2 text-gray-700 transition hover:bg-gray-100"
           aria-label="Abrir menú"
         >
@@ -209,9 +212,8 @@ const Navigation = () => {
             <img src="/wordmark.png" alt="Red Coral" className="h-6 w-auto" />
           </Link>
           <button
-            // @ts-expect-error - popoverTarget is valid HTML but not yet in React types
-            popovertarget="mobile-nav-menu"
-            popovertargetaction="hide"
+            popoverTarget="mobile-nav-menu"
+            popoverTargetAction="hide"
             className="flex items-center justify-center rounded-lg p-2 text-gray-700 transition hover:bg-gray-100"
             aria-label="Cerrar menú"
           >
@@ -242,6 +244,15 @@ const Navigation = () => {
           <div className="my-2 border-t border-gray-200" />
           <MobileExternalLink href="https://redcoralmap.org/guia-metodologia" text="Guía de Metodología" onClick={closeMobileMenu} />
           <MobileNavLink to="/about" text="Acerca de" isActive={pathname === '/about'} onClick={closeMobileMenu} />
+          {showSubscribeLink && (
+            <MobileNavLink
+              to="/pricing"
+              text="Suscribirse"
+              icon={<LucideStar height={18} width={18} />}
+              isActive={pathname === '/pricing'}
+              onClick={closeMobileMenu}
+            />
+          )}
 
           <div className="my-2 border-t border-gray-200" />
           {isLoggedIn ? (
