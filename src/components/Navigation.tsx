@@ -2,7 +2,7 @@ import { useDB } from '@/context/DBContext'
 import { signOut } from 'firebase/auth'
 import { Link, useLocation } from 'react-router'
 import React, { useState, useRef } from 'react'
-import { LucideBarChart3, LucideExternalLink, LucideMap, LucideUser, LucideChevronDown, LucideMenu, LucideX } from 'lucide-react'
+import { LucideBarChart3, LucideExternalLink, LucideMap, LucideUser, LucideChevronDown, LucideMenu, LucideX, LucideMessageCircle } from 'lucide-react'
 import {
   useFloating,
   offset,
@@ -130,6 +130,14 @@ const Navigation = () => {
       <div className="hidden md:flex md:flex-1 md:items-center md:gap-1">
         <NavLink to="/" text="Mapa" icon={<LucideMap height={15} width={15} />} isActive={pathname === '/'} />
         <NavLink to="/stats" text="Estadísticas" icon={<LucideBarChart3 height={15} width={15} />} isActive={pathname === '/stats'} />
+        {isLoggedIn && (
+          <NavLink
+            to="/chat"
+            text="Asistente IA"
+            icon={<LucideMessageCircle height={15} width={15} />}
+            isActive={pathname === '/chat'}
+          />
+        )}
         {isAdmin && (
           <>
             <div className="mx-3 h-3 border-l-2 border-gray-400" />
@@ -228,6 +236,15 @@ const Navigation = () => {
             isActive={pathname === '/stats'}
             onClick={closeMobileMenu}
           />
+          {isLoggedIn && (
+            <MobileNavLink
+              to="/chat"
+              text="Asistente IA"
+              icon={<LucideMessageCircle height={18} width={18} />}
+              isActive={pathname === '/chat'}
+              onClick={closeMobileMenu}
+            />
+          )}
 
           {isAdmin && (
             <>

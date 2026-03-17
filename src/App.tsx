@@ -12,6 +12,7 @@ import ComingSoonModal from './components/ComingSoonModal'
 const AdminCRUD = lazy(() => import('@/pages/AdminCRUD'))
 const StatsDashboard = lazy(() => import('@/pages/StatsDashboard'))
 const PublishAdmin = lazy(() => import('@/pages/PublishAdmin'))
+const Chat = lazy(() => import('@/pages/Chat'))
 
 function Layout() {
   return (
@@ -67,6 +68,16 @@ const App: React.FC = () => {
     )
   }
 
+  function ChatPage() {
+    return isLoggedIn ? (
+      <Suspense fallback={<div className="flex min-h-full flex-col gap-2 bg-slate-200 p-4">Loading...</div>}>
+        <Chat />
+      </Suspense>
+    ) : (
+      <Login auth={auth} />
+    )
+  }
+
   return (
     <Router>
       <ComingSoonModal />
@@ -75,6 +86,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Map />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/stats" element={<StatsPage />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/admin" element={<Navigate to="/login" />} />
           <Route path="/admin/dash" element={<AdminDash />} />

@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export default [
   // Global ignores
   {
-    ignores: ['dist/**', 'dist-ssr/**', 'node_modules/**', '.vite/**', 'backend/**', '*.local'],
+    ignores: ['dist/**', 'dist-ssr/**', 'node_modules/**', '.vite/**', 'backend/**', 'functions/**', '*.local'],
   },
 
   // Base recommended config

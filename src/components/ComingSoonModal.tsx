@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, MouseEvent } from 'react'
 
 const ComingSoonModal = () => {
   const [isVisible, setIsVisible] = useState(true)
@@ -16,7 +16,7 @@ const ComingSoonModal = () => {
     sessionStorage.setItem('coming-soon-dismissed', 'true')
   }
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleOverlayClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       handleClose()
     }
