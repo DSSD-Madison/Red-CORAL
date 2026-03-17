@@ -13,7 +13,7 @@
     "@ai-sdk/openai": "^3.0.37",
     "ai": "^6.0.105",
     "firebase-admin": "^13.7.0",
-    "firebase-functions": "^7.0.6",
+    "firebase-functions": "^7.2.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
