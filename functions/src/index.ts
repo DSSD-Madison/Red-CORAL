@@ -13,109 +13,82 @@ const auth = getAuth()
 const firestore = getFirestore()
 const storage = getStorage()
 
-const dateFilterSchema = z.object({
-  date1: z.string().default(''),
-  date2: z.string().default(''),
-  selectedDateFilter: z.enum(['es', 'es anterior', 'es posterior', 'es entre', 'es entre años']).default('es entre años'),
+// Leaf filter schemas (non-recursive, one per filter type).
+// No .optional() or .default() — OpenAI structured outputs require every property in `required`.
+const leafFilterSchema = z.union([
+  z.object({
+    type: z.literal('category'),
+    state: z.object({ hiddenCategories: z.array(z.string()), hiddenTypes: z.array(z.string()) }),
+  }),
+  z.object({
+    type: z.literal('country'),
+    state: z.object({
+      hiddenCountries: z.array(z.string()),
+      hiddenDepartments: z.array(z.string()),
+      hiddenMunicipalities: z.array(z.string()),
+    }),
+  }),
+  z.object({
+    type: z.literal('date'),
+    state: z.object({
+      date1: z.string(),
+      date2: z.string(),
+      selectedDateFilter: z.enum(['es', 'es anterior', 'es posterior', 'es entre', 'es entre años']),
+    }),
+  }),
+  z.object({
+    type: z.literal('desc'),
+    state: z.object({ search: z.string() }),
+  }),
+  z.object({
+    type: z.literal('latlong'),
+    state: z.object({ latitude: z.string(), longitude: z.string(), radius: z.string() }),
+  }),
+])
+
+// not/or state contains only leaf filters (no recursion — OpenAI structured outputs don't support recursive schemas)
+const compositeFilterStateSchema = z.object({
+  filters: z.array(leafFilterSchema),
 })
 
-const filterSchema: z.ZodType<{
-  id?: number
-  type: 'category' | 'country' | 'date' | 'desc' | 'latlong' | 'not' | 'or'
-  state?: unknown
-}> = z.lazy(() =>
-  z
-    .object({
-      id: z.number().int().optional(),
-      type: z.enum(['category', 'country', 'date', 'desc', 'latlong', 'not', 'or']),
-      state: z.unknown().optional(),
-    })
-    .superRefine((value, ctx) => {
-      if (value.type === 'category') {
-        const parsed = z
-          .object({
-            hiddenCategories: z.array(z.string()).default([]),
-            hiddenTypes: z.array(z.string()).default([]),
-          })
-          .safeParse(value.state)
-        if (!parsed.success) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Estado inválido para filtro category' })
-        }
-      }
-
-      if (value.type === 'country') {
-        const parsed = z
-          .object({
-            hiddenCountries: z.array(z.string()).default([]),
-            hiddenDepartments: z.array(z.string()).default([]),
-            hiddenMunicipalities: z.array(z.string()).default([]),
-          })
-          .safeParse(value.state)
-        if (!parsed.success) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Estado inválido para filtro country' })
-        }
-      }
-
-      if (value.type === 'date') {
-        const parsed = dateFilterSchema.safeParse(value.state)
-        if (!parsed.success) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Estado inválido para filtro date' })
-        }
-      }
-
-      if (value.type === 'desc') {
-        const parsed = z.object({ search: z.string().default('') }).safeParse(value.state)
-        if (!parsed.success) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Estado inválido para filtro desc' })
-        }
-      }
-
-      if (value.type === 'latlong') {
-        const parsed = z
-          .object({
-            latitude: z.string().default(''),
-            longitude: z.string().default(''),
-            radius: z.string().default(''),
-          })
-          .safeParse(value.state)
-        if (!parsed.success) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Estado inválido para filtro latlong' })
-        }
-      }
-
-      if (value.type === 'not' || value.type === 'or') {
-        const parsed = z
-          .object({
-            index: z.number().int().optional(),
-            filters: z.array(filterSchema).default([]),
-          })
-          .safeParse(value.state)
-        if (!parsed.success) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Estado inválido para filtro ${value.type}` })
-        }
-      }
-    })
-)
+const filterSchema = z.union([
+  z.object({ type: z.literal('category'), state: z.object({ hiddenCategories: z.array(z.string()), hiddenTypes: z.array(z.string()) }) }),
+  z.object({
+    type: z.literal('country'),
+    state: z.object({ hiddenCountries: z.array(z.string()), hiddenDepartments: z.array(z.string()), hiddenMunicipalities: z.array(z.string()) }),
+  }),
+  z.object({
+    type: z.literal('date'),
+    state: z.object({
+      date1: z.string(),
+      date2: z.string(),
+      selectedDateFilter: z.enum(['es', 'es anterior', 'es posterior', 'es entre', 'es entre años']),
+    }),
+  }),
+  z.object({ type: z.literal('desc'), state: z.object({ search: z.string() }) }),
+  z.object({ type: z.literal('latlong'), state: z.object({ latitude: z.string(), longitude: z.string(), radius: z.string() }) }),
+  z.object({ type: z.literal('not'), state: compositeFilterStateSchema }),
+  z.object({ type: z.literal('or'), state: compositeFilterStateSchema }),
+])
 
 const filterStateSchema = z.object({
-  index: z.number().int().optional(),
   filters: z.array(filterSchema),
 })
 
 const incidentProposalSchema = z.object({
-  description: z.string().trim().max(4000).optional(),
-  dateString: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  typeID: z.union([z.string(), z.array(z.string()).min(1)]),
+  description: z.string().trim().max(4000).nullable(),
+  dateString: z.string(),
+  typeID: z.union([z.string(), z.array(z.string())]),
   location: z.object({
     lat: z.number(),
     lng: z.number(),
   }),
-  country: z.string().trim().min(1),
-  department: z.string().trim().min(1),
-  municipality: z.string().trim().min(1),
+  country: z.string(),
+  department: z.string(),
+  municipality: z.string(),
 })
 
-const actionSchema = z.discriminatedUnion('type', [
+const actionSchema = z.union([
   z.object({ type: z.literal('none') }),
   z.object({
     type: z.literal('apply_filters'),
@@ -123,9 +96,9 @@ const actionSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('query_incidents'),
-    mode: z.enum(['count', 'list', 'summary']).default('summary'),
-    filterState: filterStateSchema.optional(),
-    limit: z.number().int().min(1).max(50).optional(),
+    mode: z.enum(['count', 'list', 'summary']),
+    filterState: filterStateSchema.nullable(),
+    limit: z.number().int().nullable(),
   }),
   z.object({
     type: z.literal('propose_incident'),
@@ -165,7 +138,7 @@ type DbMeta = {
 
 async function fetchDbMeta(): Promise<DbMeta> {
   const bucket = storage.bucket()
-  const file = bucket.file('publicState.json')
+  const file = bucket.file('adminCheckpointState.json') //todo: admins get admin data, public gets public data
   const [contents] = await file.download()
   const data = JSON.parse(contents.toString('utf-8'))
 
@@ -219,7 +192,7 @@ function buildSystemPrompt(input: {
   const dbMetaJson = JSON.stringify(input.dbMeta, null, 2)
 
   return [
-    'Eres un asistente de Red-CORAL. Responde siempre en español.',
+    'Eres un asistente de Red-CORAL. Responde en español o inglés, según el idioma en que te pregunten.',
     'Objetivos:',
     '1) Ayudar a filtrar incidentes devolviendo JSON compatible con el motor de filtros.',
     '2) Pedir consultas sobre incidentes para que el cliente las ejecute localmente.',
@@ -248,11 +221,17 @@ function buildSystemPrompt(input: {
 
 export const chat = onRequest(
   {
-    cors: ['https://redcoralmap.web.app', 'https://red-coral-map.web.app', 'https://redcoralmap.firebaseapp.com', 'https://red-coral-map.firebaseapp.com'],
+    cors: [
+      'https://redcoralmap.web.app',
+      'https://red-coral-map.web.app',
+      'https://redcoralmap.firebaseapp.com',
+      'https://red-coral-map.firebaseapp.com',
+    ],
     secrets: ['OPENAI_API_KEY'],
     timeoutSeconds: 60,
     maxInstances: 10,
     region: 'us-central1',
+    invoker: 'public',
   },
   async (request, response) => {
     if (request.method !== 'POST') {
