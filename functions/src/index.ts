@@ -6,6 +6,7 @@ import { getStorage } from 'firebase-admin/storage'
 import { streamText, convertToModelMessages, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
+import { encode } from '@toon-format/toon'
 
 initializeApp()
 
@@ -408,7 +409,7 @@ export const chat = onRequest(
                 }))
                 .slice(0, limit)
 
-              return { ...aggs, records }
+              return encode({ ...aggs, records })
             },
           },
 
@@ -419,11 +420,13 @@ export const chat = onRequest(
               ids: z.array(z.string()).min(1).max(20),
             }),
             execute: async ({ ids }) => {
-              return ids.map((id: string) => ({
-                id,
-                description: db.incidents[id]?.description ?? null,
-                found: id in db.incidents,
-              }))
+              return encode(
+                ids.map((id: string) => ({
+                  id,
+                  description: db.incidents[id]?.description ?? null,
+                  found: id in db.incidents,
+                }))
+              )
             },
           },
 

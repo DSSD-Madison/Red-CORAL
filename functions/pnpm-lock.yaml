@@ -14,6 +14,9 @@ importers:
       '@google-cloud/functions-framework':
         specifier: ^5.0.2
         version: 5.0.2
+      '@toon-format/toon':
+        specifier: ^2.1.0
+        version: 2.1.0
       ai:
         specifier: ^6.0.105
         version: 6.0.116(zod@4.3.6)
@@ -176,6 +179,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@toon-format/toon@2.1.0':
+    resolution: {integrity: sha512-JwWptdF5eOA0HaQxbKAzkpQtR4wSWTEfDlEy/y3/4okmOAX1qwnpLZMmtEWr+ncAhTTY1raCKH0kteHhSXnQqg==}
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -1419,6 +1425,8 @@ snapshots:
   '@protobufjs/utf8@1.1.0': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@toon-format/toon@2.1.0': {}
 
   '@tootallnate/once@2.0.0':
     optional: true
