@@ -294,9 +294,7 @@ function ToolCard({ part, db, onProposalConfirm, onProposalCancel, isAdmin }: {
               </pre>
             )}
             {isDone && part.output !== undefined && (
-              <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-slate-100 p-2 text-slate-600">
-                {JSON.stringify(part.output, null, 2)}
-              </pre>
+              <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-slate-100 p-2 text-slate-600">part.output</pre>
             )}
           </div>
         )}
