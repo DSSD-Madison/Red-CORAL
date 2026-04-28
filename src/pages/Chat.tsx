@@ -1,17 +1,31 @@
-import React, { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
+import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
-import { LucideLoader2, LucideSend, LucideSparkles, LucideMessageCircle, LucideFilter, LucideMapPin, LucideBarChart3, LucideRotateCcw } from 'lucide-react'
+import {
+  LucideLoader2,
+  LucideSend,
+  LucideSparkles,
+  LucideMessageCircle,
+  LucideFilter,
+  LucideMapPin,
+  LucideBarChart3,
+  LucideRotateCcw,
+  LucideSquare,
+  LucideChevronDown,
+  LucideChevronRight,
+  LucideSearch,
+  LucideAlertCircle,
+  LucideCheck,
+  LucideX,
+} from 'lucide-react'
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport, UIMessage, lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
 import { useDB } from '@/context/DBContext'
-import { filterOperations, filterType, initialFilterState } from '@/filters/filterReducer'
+import { filterType, initialFilterState } from '@/filters/filterReducer'
 import { DB, Incident } from 'types'
 
-type ChatRole = 'user' | 'assistant'
-
-type ChatMessage = {
-  id: string
-  role: ChatRole
-  content: string
-}
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 type RawFilter = {
   id?: number
@@ -24,37 +38,7 @@ type RawFilterState = {
   filters: RawFilter[]
 }
 
-type ChatAction =
-  | { type: 'none' }
-  | { type: 'apply_filters'; filterState: RawFilterState }
-  | { type: 'query_incidents'; mode?: 'count' | 'list' | 'summary'; filterState?: RawFilterState; limit?: number }
-  | { type: 'propose_incident'; incident: IncidentProposal }
-
-type ChatResponse = {
-  reply: string
-  action: ChatAction
-}
-
-type IncidentProposal = {
-  description?: string
-  dateString: string
-  typeID: string | string[]
-  location: { lat: number; lng: number }
-  country: string
-  department: string
-  municipality: string
-}
-
-const CHAT_STORAGE_KEY = 'aiChatMessagesV1'
-
 const FILTER_TYPES: filterType['type'][] = ['category', 'country', 'date', 'desc', 'latlong', 'not', 'or']
-
-function createId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
-  return `${Date.now()}-${Math.random()}`
-}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -64,162 +48,78 @@ function isFilterType(value: unknown): value is filterType['type'] {
   return typeof value === 'string' && FILTER_TYPES.includes(value as filterType['type'])
 }
 
+// ---------------------------------------------------------------------------
+// Filter normalization (still needed for apply_filters onToolCall handling)
+// ---------------------------------------------------------------------------
+
 function parseRawFilterState(value: unknown): RawFilterState | undefined {
   if (!isObject(value) || !Array.isArray(value.filters)) return undefined
-
-  const filters: RawFilter[] = value.filters
+  const filters: RawFilter[] = (value.filters as unknown[])
     .map((item) => {
       if (!isObject(item) || !isFilterType(item.type)) return null
-      const rawFilter: RawFilter = {
-        type: item.type,
-      }
+      const rawFilter: RawFilter = { type: item.type }
       if (typeof item.id === 'number') rawFilter.id = item.id
       if ('state' in item) rawFilter.state = item.state
       return rawFilter
     })
     .filter((item): item is RawFilter => item !== null)
-
   if (filters.length === 0) return undefined
-
-  return {
-    index: typeof value.index === 'number' ? value.index : undefined,
-    filters,
-  }
+  return { index: typeof value.index === 'number' ? value.index : undefined, filters }
 }
 
 function hydrateFilterGroup(rawFilters: RawFilter[], startAt: number): { filters: filterType[]; nextId: number } {
   let nextId = startAt
   const filters: filterType[] = []
-
   for (const rawFilter of rawFilters) {
     const id = typeof rawFilter.id === 'number' ? rawFilter.id : nextId
     nextId = Math.max(nextId, id + 1)
-
     if (rawFilter.type === 'not' || rawFilter.type === 'or') {
       const nestedState = isObject(rawFilter.state) ? rawFilter.state : {}
       const nestedRawState = parseRawFilterState(nestedState)
       const hydratedNested = hydrateFilterGroup(nestedRawState?.filters ?? [], nextId)
       nextId = hydratedNested.nextId
-      filters.push({
-        id,
-        type: rawFilter.type,
-        state: {
-          ...nestedState,
-          index: hydratedNested.nextId,
-          filters: hydratedNested.filters,
-        },
-      })
+      filters.push({ id, type: rawFilter.type, state: { ...nestedState, index: hydratedNested.nextId, filters: hydratedNested.filters } })
       continue
     }
-
-    filters.push({
-      id,
-      type: rawFilter.type,
-      state: rawFilter.state,
-    })
+    filters.push({ id, type: rawFilter.type, state: rawFilter.state })
   }
-
   return { filters, nextId }
 }
 
-function normalizeFilterState(rawFilterState: RawFilterState | undefined): { index: number; filters: filterType[] } {
-  if (!rawFilterState || rawFilterState.filters.length === 0) {
-    return initialFilterState(0)
-  }
+function normalizeFilterState(rawFilterState: unknown): { index: number; filters: filterType[] } {
+  const parsed = parseRawFilterState(rawFilterState)
+  if (!parsed || parsed.filters.length === 0) return initialFilterState(0)
+  const startAt = typeof parsed.index === 'number' && parsed.index > 0 ? parsed.index : 0
+  const hydrated = hydrateFilterGroup(parsed.filters, startAt)
+  if (hydrated.filters.length === 0) return initialFilterState(0)
+  return { index: hydrated.nextId, filters: hydrated.filters }
+}
 
-  const startAt = typeof rawFilterState.index === 'number' && rawFilterState.index > 0 ? rawFilterState.index : 0
-  const hydrated = hydrateFilterGroup(rawFilterState.filters, startAt)
+// ---------------------------------------------------------------------------
+// Incident proposal helpers
+// ---------------------------------------------------------------------------
 
-  if (hydrated.filters.length === 0) {
-    return initialFilterState(0)
-  }
-
-  return {
-    index: hydrated.nextId,
-    filters: hydrated.filters,
-  }
+type IncidentProposal = {
+  description?: string | null
+  dateString: string
+  typeID: string | string[]
+  location: { lat: number; lng: number }
+  country: string
+  department: string
+  municipality: string
 }
 
 function extractTypeIDs(typeID: Incident['typeID']): string[] {
   return Array.isArray(typeID) ? typeID : [typeID]
 }
 
-function typeNamesForIncident(db: DB, incident: Incident): string {
-  return extractTypeIDs(incident.typeID)
-    .map((id) => db.Types[id]?.name)
-    .filter((name): name is string => Boolean(name))
-    .join(', ')
-}
-
-function applyFilterStateOnIncidents(db: DB, filterState: { index: number; filters: filterType[] }): [string, Incident][] {
-  return Object.entries(db.Incidents).filter(([, incident]) =>
-    filterState.filters.every((filter) => filterOperations[filter.type](incident, filter.state, db) !== false)
-  )
-}
-
-function summarizeQueryResult(db: DB, incidents: [string, Incident][], mode: 'count' | 'list' | 'summary', limit: number): string {
-  if (mode === 'count') {
-    return `Hay ${incidents.length} incidentes que cumplen los criterios.`
-  }
-
-  if (mode === 'list') {
-    if (incidents.length === 0) {
-      return 'No encontré incidentes con esos criterios.'
-    }
-
-    const lines = incidents.slice(0, limit).map(([id, incident], index) => {
-      const types = typeNamesForIncident(db, incident)
-      return `${index + 1}. ${incident.dateString} · ${incident.country} / ${incident.department} / ${incident.municipality} · ${types || 'Tipo no disponible'} · ID ${id}`
-    })
-
-    return `Lista de incidentes (${Math.min(limit, incidents.length)} de ${incidents.length}):\n${lines.join('\n')}`
-  }
-
-  if (incidents.length === 0) {
-    return 'No encontré incidentes para resumir con esos criterios.'
-  }
-
-  const countryCounts = new Map<string, number>()
-  const typeCounts = new Map<string, number>()
-
-  for (const [, incident] of incidents) {
-    countryCounts.set(incident.country, (countryCounts.get(incident.country) ?? 0) + 1)
-
-    for (const typeID of extractTypeIDs(incident.typeID)) {
-      const name = db.Types[typeID]?.name ?? typeID
-      typeCounts.set(name, (typeCounts.get(name) ?? 0) + 1)
-    }
-  }
-
-  const topCountries = Array.from(countryCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([country, count]) => `${country}: ${count}`)
-    .join(' · ')
-
-  const topTypes = Array.from(typeCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, count]) => `${name}: ${count}`)
-    .join(' · ')
-
-  return `Resumen de ${incidents.length} incidentes. Países principales: ${topCountries || 'sin datos'}. Tipos principales: ${topTypes || 'sin datos'}.`
-}
-
 function normalizeIncidentProposal(proposal: IncidentProposal, db: DB): Incident | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(proposal.dateString)) return null
-
-  const parsedTypeIDs = (Array.isArray(proposal.typeID) ? proposal.typeID : [proposal.typeID]).filter((typeID) => Boolean(db.Types[typeID]))
+  const parsedTypeIDs = (Array.isArray(proposal.typeID) ? proposal.typeID : [proposal.typeID]).filter((t) => Boolean(db.Types[t]))
   if (parsedTypeIDs.length === 0) return null
-
-  const lat = Number(proposal.location?.lat)
-  const lng = Number(proposal.location?.lng)
+  const lat = Number(proposal.location?.lat), lng = Number(proposal.location?.lng)
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
-
   if (!proposal.country?.trim() || !proposal.department?.trim() || !proposal.municipality?.trim()) return null
-
-  const description = proposal.description?.trim() || undefined
-
   return {
     dateString: proposal.dateString,
     typeID: parsedTypeIDs,
@@ -227,113 +127,189 @@ function normalizeIncidentProposal(proposal: IncidentProposal, db: DB): Incident
     country: proposal.country.trim(),
     department: proposal.department.trim(),
     municipality: proposal.municipality.trim(),
-    description,
+    description: proposal.description?.trim() || undefined,
   }
 }
 
-function parseChatResponse(value: unknown): ChatResponse | null {
-  if (!isObject(value) || typeof value.reply !== 'string' || !isObject(value.action) || typeof value.action.type !== 'string') {
-    return null
-  }
+// ---------------------------------------------------------------------------
+// Persistence
+// ---------------------------------------------------------------------------
 
-  if (value.action.type === 'none') {
-    return {
-      reply: value.reply,
-      action: { type: 'none' },
-    }
-  }
+const CHAT_STORAGE_KEY = 'aiChatMessagesV2'
 
-  if (value.action.type === 'apply_filters') {
-    const filterState = parseRawFilterState(value.action.filterState)
-    if (!filterState) return null
-    return {
-      reply: value.reply,
-      action: {
-        type: 'apply_filters',
-        filterState,
-      },
-    }
-  }
-
-  if (value.action.type === 'query_incidents') {
-    const mode = value.action.mode === 'count' || value.action.mode === 'list' || value.action.mode === 'summary' ? value.action.mode : 'summary'
-    const filterState = parseRawFilterState(value.action.filterState)
-    const limit = typeof value.action.limit === 'number' ? value.action.limit : undefined
-    return {
-      reply: value.reply,
-      action: {
-        type: 'query_incidents',
-        mode,
-        filterState,
-        limit,
-      },
-    }
-  }
-
-  if (value.action.type === 'propose_incident') {
-    const incident = value.action.incident
-    if (!isObject(incident)) return null
-    if (
-      typeof incident.dateString !== 'string' ||
-      !isObject(incident.location) ||
-      typeof incident.location.lat !== 'number' ||
-      typeof incident.location.lng !== 'number' ||
-      typeof incident.country !== 'string' ||
-      typeof incident.department !== 'string' ||
-      typeof incident.municipality !== 'string'
-    ) {
-      return null
-    }
-
-    const proposal: IncidentProposal = {
-      dateString: incident.dateString,
-      typeID: Array.isArray(incident.typeID) ? incident.typeID.map((entry) => String(entry)) : String(incident.typeID ?? ''),
-      location: {
-        lat: incident.location.lat,
-        lng: incident.location.lng,
-      },
-      country: incident.country,
-      department: incident.department,
-      municipality: incident.municipality,
-      description: typeof incident.description === 'string' ? incident.description : undefined,
-    }
-
-    return {
-      reply: value.reply,
-      action: {
-        type: 'propose_incident',
-        incident: proposal,
-      },
-    }
-  }
-
-  return null
-}
-
-function getStoredMessages(): ChatMessage[] {
+function getStoredMessages(): UIMessage[] {
   try {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed)) return []
-
     return parsed
-      .map((item) => {
-        if (!isObject(item) || typeof item.id !== 'string' || typeof item.content !== 'string') return null
-        if (item.role !== 'user' && item.role !== 'assistant') return null
-        return {
-          id: item.id,
-          role: item.role,
-          content: item.content,
-        } satisfies ChatMessage
-      })
-      .filter((item): item is ChatMessage => item !== null)
-      .slice(-80)
+      .filter((m) => isObject(m) && typeof (m as Record<string, unknown>).id === 'string' && Array.isArray((m as Record<string, unknown>).parts))
+      .map((m) => m as unknown as UIMessage)
   } catch {
     localStorage.removeItem(CHAT_STORAGE_KEY)
     return []
   }
 }
+
+// ---------------------------------------------------------------------------
+// Tool card component
+// ---------------------------------------------------------------------------
+
+type ToolPartLike = {
+  type: string
+  toolCallId: string
+  state: string
+  input?: unknown
+  output?: unknown
+  errorText?: string
+  toolName?: string
+}
+
+const TOOL_LABELS: Record<string, { label: string; icon: React.FC<{ className?: string }> }> = {
+  'tool-query_incidents': { label: 'Buscar incidentes', icon: LucideSearch },
+  'tool-get_incident_descriptions': { label: 'Obtener descripciones', icon: LucideBarChart3 },
+  'tool-apply_filters': { label: 'Aplicar filtros', icon: LucideFilter },
+  'tool-propose_incident': { label: 'Proponer incidente', icon: LucideMapPin },
+}
+
+function toolLabel(type: string, toolName?: string): { label: string; Icon: React.FC<{ className?: string }> } {
+  const meta = TOOL_LABELS[type] ?? TOOL_LABELS[`tool-${toolName}`]
+  return { label: meta?.label ?? (toolName ?? type), Icon: meta?.icon ?? LucideSearch }
+}
+
+function summarizeTool(type: string, input: unknown, output: unknown): string {
+  if (!isObject(input) && !isObject(output)) return ''
+
+  if (type === 'tool-query_incidents' || (type === 'dynamic-tool')) {
+    if (isObject(output) && typeof output.count === 'number') {
+      const agg = output as { count: number; dateRange?: { earliest?: string; latest?: string } }
+      const range = agg.dateRange ? ` · ${agg.dateRange.earliest?.slice(0,4)}–${agg.dateRange.latest?.slice(0,4)}` : ''
+      return `${agg.count} incidentes${range}`
+    }
+  }
+  if (type === 'tool-apply_filters') return 'Filtros aplicados'
+  if (type === 'tool-get_incident_descriptions') {
+    if (Array.isArray(output)) return `${output.length} descripción(es) obtenida(s)`
+  }
+  return ''
+}
+
+function ToolCard({ part, db, onProposalConfirm, onProposalCancel, isAdmin }: {
+  part: ToolPartLike
+  db: DB
+  onProposalConfirm: (callId: string, incident: Incident) => void
+  onProposalCancel: (callId: string) => void
+  isAdmin: boolean
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const { label, Icon } = toolLabel(part.type, part.toolName)
+  const isLoading = part.state === 'input-streaming' || part.state === 'input-available'
+  const isError = part.state === 'output-error'
+  const isDone = part.state === 'output-available'
+  const summary = isDone ? summarizeTool(part.type, part.input, part.output) : ''
+
+  // Inline proposal card for propose_incident
+  if (part.type === 'tool-propose_incident' || part.toolName === 'propose_incident') {
+    if (part.state === 'input-available' && isAdmin && isObject(part.input)) {
+      const proposal = part.input as IncidentProposal
+      const normalized = normalizeIncidentProposal(proposal, db)
+      if (!normalized) {
+        return (
+          <div className="my-1 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            Propuesta de incidente inválida — faltan campos requeridos.
+          </div>
+        )
+      }
+      return (
+        <div className="my-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs">
+          <p className="mb-2 font-semibold text-slate-700">Confirmar incidente propuesto</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-700">
+            <p><span className="font-medium">Fecha:</span> {normalized.dateString}</p>
+            <p><span className="font-medium">País:</span> {normalized.country}</p>
+            <p><span className="font-medium">Departamento:</span> {normalized.department}</p>
+            <p><span className="font-medium">Municipio:</span> {normalized.municipality}</p>
+            <p><span className="font-medium">Ubicación:</span> {normalized.location.lat.toFixed(4)}, {normalized.location.lng.toFixed(4)}</p>
+            <p><span className="font-medium">Tipos:</span> {extractTypeIDs(normalized.typeID).map((t) => db.Types[t]?.name ?? t).join(', ')}</p>
+            {normalized.description && <p className="col-span-2"><span className="font-medium">Descripción:</span> {normalized.description}</p>}
+          </div>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={() => onProposalConfirm(part.toolCallId, normalized)}
+              className="flex items-center gap-1 rounded-md bg-red-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-900"
+            >
+              <LucideCheck className="h-3 w-3" /> Confirmar
+            </button>
+            <button
+              onClick={() => onProposalCancel(part.toolCallId)}
+              className="flex items-center gap-1 rounded-md border border-stone-200 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <LucideX className="h-3 w-3" /> Cancelar
+            </button>
+          </div>
+        </div>
+      )
+    }
+    if (part.state === 'output-available' && isObject(part.output)) {
+      const out = part.output as { confirmed?: boolean; error?: string }
+      if (out.error === 'not_admin') return null
+      return (
+        <div className="my-1 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-800">
+          {out.confirmed ? 'Incidente guardado exitosamente.' : 'Propuesta de incidente cancelada.'}
+        </div>
+      )
+    }
+    if (part.state === 'input-streaming') return (
+      <div className="my-1 rounded-lg border border-stone-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-500 italic">Preparando propuesta de incidente...</div>
+    )
+    return null
+  }
+
+  return (
+    <button
+      onClick={() => setExpanded((e) => !e)}
+      className="my-1 flex w-full items-start gap-2 rounded-lg border border-stone-200/60 bg-slate-50/60 px-3 py-2 text-left text-xs transition-colors hover:bg-slate-100/70"
+    >
+      <div className="mt-0.5 shrink-0">
+        {isLoading ? (
+          <LucideLoader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
+        ) : isError ? (
+          <LucideAlertCircle className="h-3.5 w-3.5 text-red-500" />
+        ) : (
+          <Icon className="h-3.5 w-3.5 text-slate-400" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="font-medium text-slate-700">{label}</span>
+          {summary && <span className="text-slate-500">— {summary}</span>}
+          {isError && <span className="text-red-500">{part.errorText ?? 'Error'}</span>}
+        </div>
+        {expanded && (
+          <div className="mt-2 space-y-1">
+            {part.input !== undefined && (
+              <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-slate-100 p-2 text-slate-600">
+                {JSON.stringify(part.input, null, 2)}
+              </pre>
+            )}
+            {isDone && part.output !== undefined && (
+              <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded bg-slate-100 p-2 text-slate-600">
+                {JSON.stringify(part.output, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="mt-0.5 shrink-0 text-slate-400">
+        {expanded ? <LucideChevronDown className="h-3 w-3" /> : <LucideChevronRight className="h-3 w-3" />}
+      </div>
+    </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Suggestion prompts
+// ---------------------------------------------------------------------------
 
 const SUGGESTIONS = [
   { icon: LucideFilter, label: 'Filtrar por país', message: 'Quiero filtrar incidentes por país' },
@@ -341,20 +317,56 @@ const SUGGESTIONS = [
   { icon: LucideBarChart3, label: 'Resumen de datos', message: 'Dame un resumen de todos los incidentes' },
 ]
 
+// ---------------------------------------------------------------------------
+// Main Chat component
+// ---------------------------------------------------------------------------
+
 const Chat: React.FC = () => {
   const { auth, db, isAdmin, addIncident } = useDB()
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    const stored = getStoredMessages()
-    if (stored.length > 0) return stored
-    return []
-  })
   const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const [pendingIncident, setPendingIncident] = useState<Incident | null>(null)
-  const [isConfirmingIncident, setIsConfirmingIncident] = useState(false)
   const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
+  const [confirmingCallId, setConfirmingCallId] = useState<string | null>(null)
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: import.meta.env.VITE_CHAT_API_URL || '/api/chat',
+        headers: async () => {
+          if (!auth.currentUser) throw new Error('No autenticado')
+          const token = await auth.currentUser.getIdToken()
+          return { Authorization: `Bearer ${token}` }
+        },
+      }),
+    [auth]
+  )
+
+  const { messages, setMessages, sendMessage, status, stop, error, addToolOutput } = useChat({
+    transport,
+    messages: getStoredMessages(),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    onToolCall: ({ toolCall }) => {
+      if (toolCall.dynamic) return
+      if (toolCall.toolName === 'apply_filters') {
+        const normalized = normalizeFilterState(isObject(toolCall.input) ? toolCall.input.filterState : undefined)
+        localStorage.setItem('filterState', JSON.stringify(normalized))
+        setHasAppliedFilters(true)
+        addToolOutput({ tool: 'apply_filters', toolCallId: toolCall.toolCallId, output: { ok: true } })
+      }
+      if (toolCall.toolName === 'propose_incident' && !isAdmin) {
+        addToolOutput({ tool: 'propose_incident', toolCallId: toolCall.toolCallId, output: { error: 'not_admin' } })
+      }
+    },
+    onError: (err) => {
+      console.error('Chat error:', err)
+    },
+  })
+
+  // Persist messages
+  useEffect(() => {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages.slice(-60)))
+  }, [messages])
 
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
@@ -363,208 +375,103 @@ const Chat: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages.slice(-80)))
     scrollToBottom()
-  }, [messages, scrollToBottom])
+  }, [messages, status, scrollToBottom])
 
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
 
-  function appendAssistant(content: string) {
-    setMessages((previous) => [...previous, { id: createId(), role: 'assistant', content }])
-  }
-
-  async function handleAction(action: ChatAction) {
-    if (action.type === 'none') {
-      return
-    }
-
-    if (action.type === 'apply_filters') {
-      const normalized = normalizeFilterState(action.filterState)
-      localStorage.setItem('filterState', JSON.stringify(normalized))
-      setHasAppliedFilters(true)
-      appendAssistant('Apliqué los filtros al motor. Puedes revisarlos en la sección de Estadísticas.')
-      return
-    }
-
-    if (action.type === 'query_incidents') {
-      const normalized = normalizeFilterState(action.filterState)
-      const filtered = applyFilterStateOnIncidents(db, normalized)
-      const queryMode = action.mode ?? 'summary'
-      const queryLimit = action.limit && action.limit > 0 ? Math.min(action.limit, 50) : 10
-      const result = summarizeQueryResult(db, filtered, queryMode, queryLimit)
-      appendAssistant(result)
-      return
-    }
-
-    if (!isAdmin) {
-      appendAssistant('No tienes permisos de administrador para proponer incidentes nuevos.')
-      return
-    }
-
-    const normalizedIncident = normalizeIncidentProposal(action.incident, db)
-    if (!normalizedIncident) {
-      appendAssistant('No pude construir un incidente válido con esos datos. Intenta incluir fecha, tipo, ubicación y división territorial.')
-      return
-    }
-
-    setPendingIncident(normalizedIncident)
-    appendAssistant('Preparé una propuesta de incidente. Revísala y confirma si deseas guardarla.')
-  }
-
-  async function requestAssistant(conversation: ChatMessage[]) {
-    const currentUser = auth.currentUser
-
-    if (!currentUser) {
-      appendAssistant('Necesitas iniciar sesión para usar el asistente.')
-      return
-    }
-
-    setIsSending(true)
-
+  async function handleProposalConfirm(callId: string, incident: Incident) {
+    if (confirmingCallId) return
+    setConfirmingCallId(callId)
     try {
-      const token = await currentUser.getIdToken()
-      const apiUrl = import.meta.env.VITE_CHAT_API_URL || '/api/chat'
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          messages: conversation.slice(-30).map((message) => ({ role: message.role, content: message.content })),
-        }),
+      const result = await addIncident(incident)
+      addToolOutput({
+        tool: 'propose_incident',
+        toolCallId: callId,
+        output: { confirmed: Boolean(result) },
       })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(errorText || 'Error de red')
-      }
-
-      const payload = (await response.json()) as unknown
-      const parsed = parseChatResponse(payload)
-
-      if (!parsed) {
-        appendAssistant('La respuesta del asistente no tuvo un formato válido. Inténtalo nuevamente.')
-        return
-      }
-
-      appendAssistant(parsed.reply)
-      await handleAction(parsed.action)
-    } catch (error) {
-      console.error(error)
-      appendAssistant('No pude procesar tu solicitud ahora mismo. Inténtalo nuevamente en unos segundos.')
+    } catch {
+      addToolOutput({
+        tool: 'propose_incident',
+        toolCallId: callId,
+        state: 'output-error',
+        errorText: 'No se pudo guardar el incidente',
+      })
     } finally {
-      setIsSending(false)
+      setConfirmingCallId(null)
     }
+  }
+
+  function handleProposalCancel(callId: string) {
+    addToolOutput({ tool: 'propose_incident', toolCallId: callId, output: { confirmed: false } })
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
     const trimmed = input.trim()
-    if (!trimmed || isSending) return
-
-    const userMessage: ChatMessage = {
-      id: createId(),
-      role: 'user',
-      content: trimmed,
-    }
-
-    const nextConversation = [...messages, userMessage]
-    setMessages(nextConversation)
+    if (!trimmed || status === 'streaming' || status === 'submitted') return
     setInput('')
-    await requestAssistant(nextConversation)
-  }
-
-  async function confirmPendingIncident() {
-    if (!pendingIncident || isConfirmingIncident) return
-
-    setIsConfirmingIncident(true)
-    try {
-      const result = await addIncident(pendingIncident)
-      if (result) {
-        appendAssistant('Incidente creado con éxito.')
-        setPendingIncident(null)
-      } else {
-        appendAssistant('No se pudo crear el incidente. Verifica la información e intenta nuevamente.')
-      }
-    } catch (error) {
-      console.error(error)
-      appendAssistant('Ocurrió un error al guardar el incidente.')
-    } finally {
-      setIsConfirmingIncident(false)
-    }
-  }
-
-  function cancelPendingIncident() {
-    setPendingIncident(null)
-    appendAssistant('Cancelé la creación del incidente propuesto.')
+    sendMessage({ text: trimmed })
   }
 
   function handleSuggestion(message: string) {
-    if (isSending) return
-    const userMessage: ChatMessage = { id: createId(), role: 'user', content: message }
-    const nextConversation = [...messages, userMessage]
-    setMessages(nextConversation)
-    requestAssistant(nextConversation)
+    if (status === 'streaming' || status === 'submitted') return
+    sendMessage({ text: message })
   }
 
+  const isBusy = status === 'streaming' || status === 'submitted'
   const isEmptyState = messages.length === 0
 
   return (
     <div className="flex h-full flex-col bg-slate-200 font-proxima-nova">
       <div className="flex min-h-0 flex-1 flex-col">
         {/* Header */}
-          <div className="flex items-center justify-between border-b border-stone-200/60 bg-white/80 px-5 py-3 backdrop-blur-sm">
-            {hasAppliedFilters ? (
-              <Link
-                to="/stats"
-                className="flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-200/30 px-3 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-rose-200/50"
-              >
-                <LucideFilter className="h-3 w-3" />
-                Ver filtros aplicados
-              </Link>
-            ) : (
-              <div />
-            )}
-            <button
-              onClick={() => {
-                setMessages([])
-                setInput('')
-                localStorage.removeItem(CHAT_STORAGE_KEY)
-                setHasAppliedFilters(false)
-              }}
-              className="flex items-center gap-1.5 rounded-full border border-stone-200/60 bg-slate-50/50 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-100"
-              title="Limpiar historial de chat"
+        <div className="flex items-center justify-between border-b border-stone-200/60 bg-white/80 px-5 py-3 backdrop-blur-sm">
+          {hasAppliedFilters ? (
+            <Link
+              to="/stats"
+              className="flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-200/30 px-3 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-rose-200/50"
             >
-              <LucideRotateCcw className="h-3 w-3" />
-              Limpiar
-            </button>
-          </div>
+              <LucideFilter className="h-3 w-3" />
+              Ver filtros aplicados
+            </Link>
+          ) : (
+            <div />
+          )}
+          <button
+            onClick={() => {
+              setMessages([])
+              setInput('')
+              localStorage.removeItem(CHAT_STORAGE_KEY)
+              setHasAppliedFilters(false)
+            }}
+            className="flex items-center gap-1.5 rounded-full border border-stone-200/60 bg-slate-50/50 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-100"
+            title="Limpiar historial de chat"
+          >
+            <LucideRotateCcw className="h-3 w-3" />
+            Limpiar
+          </button>
+        </div>
 
         {/* Messages area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isEmptyState ? (
-            /* Empty / welcome state */
             <div className="flex h-full flex-col items-center justify-center px-6 py-12">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-200/60 to-stone-200/40 shadow-sm">
                 <LucideMessageCircle className="h-8 w-8 text-red-700" />
               </div>
               <h2 className="mb-2 font-merriweather text-xl font-bold text-slate-900">Bienvenido al Asistente</h2>
               <p className="mb-8 max-w-sm text-center text-sm leading-relaxed text-slate-600">
-                Puedo ayudarte a crear filtros, consultar incidentes
-                {isAdmin ? ', y proponer nuevos registros' : ''} en la base de datos de Red-CORAL.
+                Puedo ayudarte a consultar incidentes, crear filtros{isAdmin ? ' y proponer nuevos registros' : ''} en la base de datos de Red-CORAL.
               </p>
-
               <div className="grid w-full max-w-md gap-2">
                 {SUGGESTIONS.map((suggestion) => (
                   <button
                     key={suggestion.message}
                     onClick={() => handleSuggestion(suggestion.message)}
-                    disabled={isSending}
+                    disabled={isBusy}
                     className="group flex items-center gap-3 rounded-xl border border-stone-200/70 bg-white px-4 py-3 text-left text-sm text-slate-800 shadow-sm transition-all hover:border-red-600/40 hover:bg-rose-200/10 hover:shadow-md disabled:opacity-50"
                   >
                     <suggestion.icon className="h-4 w-4 shrink-0 text-slate-400 transition-colors group-hover:text-red-700" />
@@ -574,11 +481,10 @@ const Chat: React.FC = () => {
               </div>
             </div>
           ) : (
-            /* Conversation */
             <div className="mx-auto max-w-2xl space-y-1 px-4 py-4">
-              {messages.map((message, index) => {
+              {messages.map((message, msgIndex) => {
                 const isUser = message.role === 'user'
-                const isFirst = index === 0 || messages[index - 1].role !== message.role
+                const isFirst = msgIndex === 0 || messages[msgIndex - 1].role !== message.role
                 return (
                   <div
                     key={message.id}
@@ -590,20 +496,56 @@ const Chat: React.FC = () => {
                       </div>
                     )}
                     {!isUser && !isFirst && <div className="mr-2 w-7 shrink-0" />}
-                    <div
-                      className={`max-w-[80%] whitespace-pre-wrap px-4 py-2.5 text-sm leading-relaxed ${
-                        isUser
-                          ? 'rounded-2xl rounded-br-md bg-red-700 text-white shadow-sm'
-                          : 'rounded-2xl rounded-bl-md bg-white text-slate-900 shadow-sm ring-1 ring-stone-200/40'
-                      }`}
-                    >
-                      {message.content}
+                    <div className={`min-w-0 max-w-[85%] ${isUser ? '' : 'flex-1'}`}>
+                      {isUser ? (
+                        <div className="max-w-fit whitespace-pre-wrap rounded-2xl rounded-br-md bg-red-700 px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm">
+                          {message.parts.map((part, i) =>
+                            part.type === 'text' ? <span key={i}>{part.text}</span> : null
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          {message.parts.map((part, partIndex) => {
+                            if (part.type === 'text' && part.text) {
+                              return (
+                                <div
+                                  key={partIndex}
+                                  className="whitespace-pre-wrap rounded-2xl rounded-bl-md bg-white px-4 py-2.5 text-sm leading-relaxed text-slate-900 shadow-sm ring-1 ring-stone-200/40"
+                                >
+                                  {part.text}
+                                </div>
+                              )
+                            }
+                            if (part.type === 'step-start') {
+                              return partIndex > 0 ? (
+                                <hr key={partIndex} className="my-1.5 border-stone-200/60" />
+                              ) : null
+                            }
+                            // tool parts: typed (tool-${name}) or dynamic
+                            const asPart = part as ToolPartLike
+                            if (asPart.type?.startsWith('tool-') || asPart.type === 'dynamic-tool') {
+                              return (
+                                <ToolCard
+                                  key={partIndex}
+                                  part={asPart}
+                                  db={db}
+                                  onProposalConfirm={handleProposalConfirm}
+                                  onProposalCancel={handleProposalCancel}
+                                  isAdmin={isAdmin}
+                                />
+                              )
+                            }
+                            return null
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
               })}
 
-              {isSending && (
+              {/* Loading indicator */}
+              {status === 'submitted' && (
                 <div className="flex animate-[fadeSlideIn_0.2s_ease-out_both] items-start gap-2 pt-3">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-600/10">
                     <LucideSparkles className="h-3.5 w-3.5 text-red-700" />
@@ -617,70 +559,21 @@ const Chat: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Error */}
+              {error && (
+                <div className="flex animate-[fadeSlideIn_0.2s_ease-out_both] items-start gap-2 pt-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-100">
+                    <LucideAlertCircle className="h-3.5 w-3.5 text-red-600" />
+                  </div>
+                  <div className="rounded-2xl rounded-bl-md bg-red-50 px-4 py-2.5 text-sm text-red-700 shadow-sm ring-1 ring-red-200/60">
+                    No pude procesar la solicitud. Inténtalo nuevamente.
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
-
-        {/* Pending incident confirmation */}
-        {pendingIncident && (
-          <div className="border-t border-stone-200/40 bg-white px-5 py-4">
-            <div className="mx-auto max-w-2xl">
-              <p className="mb-2.5 font-merriweather text-sm font-bold text-slate-900">Confirmar incidente propuesto</p>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 rounded-lg border border-stone-200/50 bg-slate-50/60 p-3 text-sm">
-                <p>
-                  <span className="font-semibold text-slate-600">Fecha:</span> <span className="text-slate-900">{pendingIncident.dateString}</span>
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-600">País:</span> <span className="text-slate-900">{pendingIncident.country}</span>
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-600">Departamento:</span>{' '}
-                  <span className="text-slate-900">{pendingIncident.department}</span>
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-600">Municipio:</span>{' '}
-                  <span className="text-slate-900">{pendingIncident.municipality}</span>
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-600">Ubicación:</span>{' '}
-                  <span className="text-slate-900">
-                    {pendingIncident.location.lat}, {pendingIncident.location.lng}
-                  </span>
-                </p>
-                <p>
-                  <span className="font-semibold text-slate-600">Tipos:</span>{' '}
-                  <span className="text-slate-900">
-                    {extractTypeIDs(pendingIncident.typeID)
-                      .map((typeID) => db.Types[typeID]?.name ?? typeID)
-                      .join(', ')}
-                  </span>
-                </p>
-                {pendingIncident.description && (
-                  <p className="col-span-2">
-                    <span className="font-semibold text-slate-600">Descripción:</span>{' '}
-                    <span className="text-slate-900">{pendingIncident.description}</span>
-                  </p>
-                )}
-              </div>
-              <div className="mt-3 flex gap-2">
-                <button
-                  onClick={confirmPendingIncident}
-                  disabled={isConfirmingIncident}
-                  className="flex items-center gap-1.5 rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isConfirmingIncident && <LucideLoader2 className="h-3.5 w-3.5 animate-spin" />}
-                  {isConfirmingIncident ? 'Guardando...' : 'Confirmar'}
-                </button>
-                <button
-                  onClick={cancelPendingIncident}
-                  className="rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Input bar */}
         <div className="border-t border-stone-200/40 bg-white px-4 py-3">
@@ -689,16 +582,35 @@ const Chat: React.FC = () => {
               ref={inputRef}
               value={input}
               onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault()
+                  if (input.trim() && !isBusy) {
+                    handleSubmit(event as unknown as FormEvent<HTMLFormElement>)
+                  }
+                }
+              }}
               placeholder="Escribe un mensaje..."
               className="flex-1 resize-none rounded-xl border border-stone-200/60 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400/70 transition-colors [field-sizing:content] focus:border-red-600/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-200/50"
             />
-            <button
-              type="submit"
-              disabled={isSending || input.trim().length === 0}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-700 text-white shadow-sm transition-all hover:bg-slate-900 hover:shadow-md disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-slate-400 disabled:shadow-none"
-            >
-              {isSending ? <LucideLoader2 className="h-4 w-4 animate-spin" /> : <LucideSend className="h-4 w-4" />}
-            </button>
+            {isBusy ? (
+              <button
+                type="button"
+                onClick={stop}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-700 text-white shadow-sm transition-all hover:bg-slate-900 hover:shadow-md"
+                title="Detener"
+              >
+                <LucideSquare className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={input.trim().length === 0}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-700 text-white shadow-sm transition-all hover:bg-slate-900 hover:shadow-md disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-slate-400 disabled:shadow-none"
+              >
+                <LucideSend className="h-4 w-4" />
+              </button>
+            )}
           </form>
         </div>
       </div>
