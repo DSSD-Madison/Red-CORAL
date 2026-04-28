@@ -285,16 +285,24 @@ function buildSystemPrompt(input: { isAdmin: boolean; dbMeta: DbMeta }): string 
     '',
     'Capacidades:',
     '- query_incidents: SIEMPRE llama esta herramienta antes de responder preguntas sobre datos de incidentes. Nunca inventes cifras.',
-    '- get_incident_descriptions: Para obtener texto de descripción de IDs específicos que ya devolvió query_incidents.',
-    '- apply_filters: Cuando el usuario pida filtrar el mapa. No llames esta herramienta para consultas, solo para actualizar la vista del mapa.',
+    '- get_incident_descriptions: Para obtener el texto de descripción de incidentes específicos. DEBES llamar primero a query_incidents para obtener IDs válidos, luego llamar a get_incident_descriptions con esos IDs. Si el usuario pide la descripción de "algún incidente" sin especificar, usa query_incidents con limit=3 para obtener unos pocos IDs y luego pide sus descripciones.',
+    '- apply_filters: Cuando el usuario pida filtrar el mapa. No llames esta herramienta para consultas.',
     input.isAdmin
-      ? '- propose_incident: Propón incidentes nuevos cuando el usuario lo solicite y tengas suficientes campos (fecha YYYY-MM-DD, tipo, ubicación, país, departamento, municipio).'
+      ? '- propose_incident: Propón incidentes nuevos cuando el usuario lo solicite y tengas suficientes campos.'
       : '- propose_incident: No disponible — el usuario no es administrador.',
     '',
-    'Reglas:',
-    '- Nunca inventes IDs de tipos/categorías que no estén en los metadatos.',
-    '- Cuando el recuento supere el límite, usa los agregados para responder; no pidas más registros a menos que el usuario los necesite.',
-    '- Si faltan datos para una acción, haz preguntas de aclaración primero.',
+    'Reglas para filtros de fecha (IMPORTANTE):',
+    '- Para un año exacto (e.g. 2018): { type: "date", state: { date1: "2018-01-01", date2: "2018-12-31", selectedDateFilter: "es entre" } }',
+    '- Para antes de un año (e.g. antes de 2020): { type: "date", state: { date1: "2019-12-31", date2: "", selectedDateFilter: "es anterior" } }',
+    '- Para después de un año: { type: "date", state: { date1: "2020-01-01", date2: "", selectedDateFilter: "es posterior" } }',
+    '- "es entre años" compara strings; date1/date2 deben ser strings de año ("2018"), NO fechas completas.',
+    '- "es entre" compara strings; date1/date2 deben ser fechas completas ("YYYY-MM-DD").',
+    '- NUNCA uses "es" (fecha exacta) para filtrar por año — solo coincide la cadena exacta.',
+    '',
+    'Otras reglas:',
+    '- Nunca inventes IDs de tipos/categorías fuera de los metadatos.',
+    '- Cuando el recuento supere el límite, usa los agregados para responder.',
+    '- Si faltan datos, pide aclaración primero.',
     '',
     'Metadatos de la base de datos:',
     JSON.stringify(input.dbMeta, null, 2),
@@ -369,38 +377,44 @@ export const chat = onRequest(
         abortSignal: request.socket?.destroyed ? AbortSignal.abort() : undefined,
         tools: {
           query_incidents: {
-            description:
-              'Filter incidents and return aggregations. When the result count is within the limit, full records (without descriptions) are included inline. Use this for ANY question about incident data.',
+            description: `Filter incidents and return aggregations. $LIMIT full records are included inline. Use this for ANY question about incident data.`,
             inputSchema: z.object({
               filterState: filterStateSchema.nullable().describe('Filter spec. null = all incidents.'),
-              limit: z.number().int().min(1).max(50).default(50).describe('Max records to return inline. Aggregations are always returned.'),
+              limit: z.number().int().min(0).default(50).describe('Max records to return inline. Aggregations are always returned.'),
+              includeDescriptions: z
+                .boolean()
+                .default(false)
+                .describe(
+                  'Whether to include description texts for the returned records. Only set to true when the user explicitly asks for descriptions of the incidents in the query results, as descriptions can be long and may cause token limits. You can always get descriptions later with get_incident_descriptions tool.'
+                ),
             }),
-            execute: async ({ filterState, limit }) => {
+            execute: async ({ filterState, limit, includeDescriptions }) => {
               const fs: FilterState = filterState ?? { filters: [] }
               const matched = applyFilterState(db.incidents, db, fs)
               const aggs = computeAggregations(matched, db)
 
-              const records =
-                matched.length <= limit
-                  ? matched.map(([id, inc]) => ({
-                      id,
-                      dateString: inc.dateString,
-                      country: inc.country,
-                      department: inc.department,
-                      municipality: inc.municipality,
-                      location: inc.location,
-                      typeNames: (Array.isArray(inc.typeID) ? inc.typeID : [inc.typeID])
-                        .map((t) => db.types[t]?.name)
-                        .filter((n): n is string => Boolean(n)),
-                    }))
-                  : null
+              const records = matched
+                .map(([id, inc]) => ({
+                  id,
+                  dateString: inc.dateString,
+                  country: inc.country,
+                  department: inc.department,
+                  municipality: inc.municipality,
+                  location: inc.location,
+                  typeNames: (Array.isArray(inc.typeID) ? inc.typeID : [inc.typeID])
+                    .map((t) => db.types[t]?.name)
+                    .filter((n): n is string => Boolean(n)),
+                  description: includeDescriptions ? inc.description : undefined,
+                }))
+                .slice(0, limit)
 
-              return { ...aggs, records, truncated: matched.length > limit }
+              return { ...aggs, records }
             },
           },
 
           get_incident_descriptions: {
-            description: 'Fetch description text for specific incident IDs previously returned by query_incidents. Only use when the user asks for details on specific incidents.',
+            description:
+              'Fetch description text for specific incident IDs previously returned by query_incidents. Only use when the user asks for details on specific incidents.',
             inputSchema: z.object({
               ids: z.array(z.string()).min(1).max(20),
             }),

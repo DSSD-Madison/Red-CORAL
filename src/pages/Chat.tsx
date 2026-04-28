@@ -1,4 +1,5 @@
 import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Markdown from 'react-markdown'
 import { Link } from 'react-router'
 import {
   LucideLoader2,
@@ -510,9 +511,9 @@ const Chat: React.FC = () => {
                               return (
                                 <div
                                   key={partIndex}
-                                  className="whitespace-pre-wrap rounded-2xl rounded-bl-md bg-white px-4 py-2.5 text-sm leading-relaxed text-slate-900 shadow-sm ring-1 ring-stone-200/40"
+                                  className="rounded-2xl rounded-bl-md bg-white px-4 py-2.5 text-sm leading-relaxed text-slate-900 shadow-sm ring-1 ring-stone-200/40 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_p]:my-1 first:[&_p]:mt-0 last:[&_p]:mb-0 [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs"
                                 >
-                                  {part.text}
+                                  <Markdown>{part.text}</Markdown>
                                 </div>
                               )
                             }
