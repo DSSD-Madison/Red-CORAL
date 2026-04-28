@@ -381,7 +381,7 @@ export const chat = onRequest(
             description: `Filter incidents and return aggregations. $LIMIT full records are included inline. Use this for ANY question about incident data.`,
             inputSchema: z.object({
               filterState: filterStateSchema.nullable().describe('Filter spec. null = all incidents.'),
-              limit: z.number().int().min(0).default(50).describe('Max records to return inline. Aggregations are always returned.'),
+              limit: z.number().int().min(0).default(20).describe('Max records to return inline. Aggregations are always returned.'),
               includeDescriptions: z
                 .boolean()
                 .default(false)
