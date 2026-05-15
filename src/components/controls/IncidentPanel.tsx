@@ -7,6 +7,18 @@ import { formatDateString, typeIDtoCategory, typeIDtoTypeName } from '@/utils'
 import { useDB } from '@/context/DBContext'
 import ActivityTypeSelector from './ActivityTypeSelector'
 import { LucidePlus, LucideTrash, LucideZoomIn } from 'lucide-react'
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+const markdownComponents = {
+  a: ({ ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a {...props} target="_blank" rel="noreferrer noopener" className="text-blue-700 underline hover:text-blue-900" />
+  ),
+  p: ({ ...props }: React.HTMLAttributes<HTMLParagraphElement>) => <p {...props} className="mb-2 whitespace-pre-wrap" />,
+  ul: ({ ...props }: React.HTMLAttributes<HTMLUListElement>) => <ul {...props} className="mb-2 list-disc pl-5" />,
+  ol: ({ ...props }: React.OlHTMLAttributes<HTMLOListElement>) => <ol {...props} className="mb-2 list-decimal pl-5" />,
+  code: ({ ...props }: React.HTMLAttributes<HTMLElement>) => <code {...props} className="rounded bg-neutral-200 px-1 py-0.5 text-xs" />,
+}
 
 interface InfoPanelControlProps {
   incidentID: string | null
@@ -215,7 +227,11 @@ const InfoPanelControl: React.FC<InfoPanelControlProps> = ({
                 </ul>
               </div>
               <span className="font-bold">Descripción:</span>
-              <div className="mb-6 break-words text-shade-01">{incident.description}</div>
+              <div className="mb-6 break-words text-shade-01">
+                <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                  {incident.description}
+                </Markdown>
+              </div>
               <div className="mb-6 text-shade-01"></div>
               {isAdmin && (
                 <>
