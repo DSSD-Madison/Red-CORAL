@@ -362,7 +362,7 @@ export const chat = onRequest(
 
       const { db, dbMeta } = await getCachedData()
 
-      const model = openai(process.env.OPENAI_MODEL ?? 'gpt-4o-mini')
+      const model = openai(process.env.OPENAI_MODEL ?? 'gpt-5.6-luna')
       const systemPrompt = buildSystemPrompt({ isAdmin, dbMeta })
 
       // Convert UIMessage[] → ModelMessage[] for the AI SDK
