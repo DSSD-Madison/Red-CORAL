@@ -34,14 +34,5 @@ jobs:
             functions/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_RED_CORAL_MAP }}'
-          channelId: live
-          projectId: red-coral-map
       - run: pnpm --dir functions install --frozen-lockfile
-      - uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_RED_CORAL_MAP }}'
-      - run: pnpm firebase deploy --only functions --project red-coral-map --non-interactive
+      - run: pnpm firebase deploy --only hosting,functions --project red-coral-map --non-interactive --token "${{ secrets.FIREBASE_TOKEN_RED_CORAL_MAP }}" --force
