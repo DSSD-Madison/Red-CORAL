@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            functions/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
@@ -37,3 +40,8 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_REDCORALMAP }}'
           channelId: live
           projectId: redcoralmap
+      - run: pnpm --dir functions install --frozen-lockfile
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_REDCORALMAP }}'
+      - run: pnpm firebase deploy --only functions --project redcoralmap --non-interactive

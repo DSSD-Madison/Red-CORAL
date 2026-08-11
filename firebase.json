@@ -1,6 +1,7 @@
 {
   "functions": {
-    "source": "functions"
+    "source": "functions",
+    "predeploy": ["pnpm --dir functions run build"]
   },
   "hosting": {
     "public": "dist",
